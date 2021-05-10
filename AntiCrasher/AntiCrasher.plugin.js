@@ -3,6 +3,8 @@
  * @description Removes all malicious GIFs that can crash your Discord app.
  * @author arg0NNY
  * @version 1.0.0
+ * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/AntiCrasher/AntiCrasher.plugin.js
+ * @source https://github.com/arg0NNY/DiscordPlugins/tree/master/AntiCrasher
  */
 
 class AntiCrasher {
