@@ -2,7 +2,7 @@
  * @name AntiCrasher
  * @description Removes all malicious GIFs that can crash your Discord app.
  * @author arg0NNY
- * @version 1.0.2
+ * @version 1.0.3
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/AntiCrasher/AntiCrasher.plugin.js
  * @source https://github.com/arg0NNY/DiscordPlugins/tree/master/AntiCrasher
  */
@@ -88,7 +88,6 @@ class AntiCrasher {
         video.autoplay = false;
         video.pause();
 
-        console.log(video, url);
         if (url === '') {
             video.classList.remove('checking');
         }
