@@ -2,6 +2,9 @@
  * @name ChannelsPreview
  * @displayName ChannelsPreview
  * @author arg0NNY
+ * @authorId 224538553944637440
+ * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
+ * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
  */
 
 var ChannelsPreview = (() => {
