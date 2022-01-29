@@ -81,17 +81,6 @@ module.exports = (() => {
                 }
             };
 
-            const Texts = {
-                VOICE: 'Voice',
-                IN_VOICE: 'In voice',
-                IN_VOICE_WITH_YOU: 'In voice with you',
-                VOICE_WITH_YOU: 'Voice with you',
-                WITH_YOU: 'With you',
-                TALKING: 'Talking',
-                SPEAKING: 'Speaking',
-
-            }
-
             const UNIQUE_TAG = 'InMyVoiceTag';
 
             const {getVoiceChannelId} = WebpackModules.getByProps("getVoiceChannelId");
