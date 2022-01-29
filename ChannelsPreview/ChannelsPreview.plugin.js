@@ -6,6 +6,7 @@
  * @description Allows you to view recent messages in guild's channel without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
+ * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
 */
 
 module.exports = (() => {
