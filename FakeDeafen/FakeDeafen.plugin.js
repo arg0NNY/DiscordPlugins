@@ -6,6 +6,7 @@
  * @description Listen or even talk in a voice chat while being self-deafened.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/FakeDeafen
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/FakeDeafen/FakeDeafen.plugin.js
+ * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/FakeDeafen/FakeDeafen.plugin.js
 */
 
 module.exports = (() => {
