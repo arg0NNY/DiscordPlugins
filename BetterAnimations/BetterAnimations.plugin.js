@@ -24,7 +24,14 @@ module.exports = (() => {
             "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
   			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
-        }
+        },
+        "changelog": [{
+    		"type": "fixed",
+    		"title": "Fixed",
+    		"items": [
+    			"Fixed strange Discord behavior when accesing settings css selectors."
+    		]
+    	}]
     };
 
     return !global.ZeresPluginLibrary ? class {
