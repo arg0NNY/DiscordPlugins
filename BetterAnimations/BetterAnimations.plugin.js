@@ -267,7 +267,39 @@ module.exports = (() => {
                 }),
                 Sizes: WebpackModules.getByProps('size10', 'size12'),
                 Colors: WebpackModules.getByProps('colorHeaderPrimary', 'colorWhite'),
-                VideoOptions: WebpackModules.getByProps('backgroundOptionRing')
+                VideoOptions: WebpackModules.getByProps('backgroundOptionRing') ?? ({
+                    backgroundCustomInlineUpsell: "backgroundCustomInlineUpsell-1w8YSU",
+                    backgroundCustomInlineUpsellBackground: "backgroundCustomInlineUpsellBackground-3cC-UQ backgroundImageOption-1LRgQ8",
+                    backgroundCustomInlineUpsellBackgroundDarkener: "backgroundCustomInlineUpsellBackgroundDarkener-1iIAY_",
+                    backgroundCustomInlineUpsellIcon: "backgroundCustomInlineUpsellIcon-1ib01k",
+                    backgroundIconOptionIcon: "backgroundIconOptionIcon-1Hkxs4",
+                    backgroundImageOption: "backgroundImageOption-1LRgQ8",
+                    backgroundOption: "backgroundOption-2mIYjm",
+                    backgroundOptionBackgroundBlurred: "backgroundOptionBackgroundBlurred-1hfiHO backgroundImageOption-1LRgQ8",
+                    backgroundOptionBlurBackground: "backgroundOptionBlurBackground-3gjWTI backgroundOptionBackgroundBlurred-1hfiHO backgroundImageOption-1LRgQ8",
+                    backgroundOptionContent: "backgroundOptionContent-2-UepH",
+                    backgroundOptionDisabled: "backgroundOptionDisabled-19G9PD",
+                    backgroundOptionInner: "backgroundOptionInner-SSz19O",
+                    backgroundOptionRing: "backgroundOptionRing-1vvQ0C",
+                    backgroundOptionSelected: "backgroundOptionSelected-3J38oq",
+                    backgroundOptionText: "backgroundOptionText-2WM_QN overflowEllipsis-PUx4fJ",
+                    backgroundOptions: "backgroundOptions-3OjbsL",
+                    backgroundOptionsLarge: "backgroundOptionsLarge-3AnNpy backgroundOptions-3OjbsL",
+                    backgroundOptionsSmall: "backgroundOptionsSmall-25A75j backgroundOptions-3OjbsL",
+                    blurOptionIcon: "blurOptionIcon-1V1IQM",
+                    cameraPreviewTitle: "cameraPreviewTitle-3OtGHa",
+                    customBackgroundTooltip: "customBackgroundTooltip-2889Y5",
+                    customBackgroundTooltipIcon: "customBackgroundTooltipIcon-2HDjkm",
+                    imageInput: "imageInput-296N9D",
+                    noneOptionIcon: "noneOptionIcon-DZMuxj",
+                    overflowEllipsis: "overflowEllipsis-PUx4fJ",
+                    permissionWarning: "permissionWarning-2leVQN",
+                    previewToggle: "previewToggle-3WqSbn",
+                    selector: "selector-3driEC",
+                    selectorNoHeader: "selectorNoHeader-3ewg-2",
+                    spacingTop24: "spacingTop24-3-CM_Q",
+                    uploadIconOption: "uploadIconOption-3HeiVP"
+                })
             };
 
             const CLONED_NODE_CLASSNAME = 'BetterAnimations-clonedNode';
