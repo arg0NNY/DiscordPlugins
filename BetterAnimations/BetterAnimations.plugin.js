@@ -2,7 +2,7 @@
  * @name BetterAnimations
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.0.0
+ * @version 1.0.1
  * @description Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js
@@ -20,7 +20,7 @@ module.exports = (() => {
   					"github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
   			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -105,17 +105,124 @@ module.exports = (() => {
                 PageContainer: WebpackModules.getByProps('headerBar', 'homeWrapper'),
                 Pages: WebpackModules.getByProps('pageWrapper', 'searchPage'),
                 Content: WebpackModules.getByProps('content', 'fade'),
-                Sidebar: WebpackModules.getByProps('contentRegion', 'sidebar'),
+                Sidebar: WebpackModules.getByProps('contentRegion', 'sidebar') ?? ({
+                    contentColumn: "contentColumn-1C7as6",
+                    contentColumnDefault: "contentColumnDefault-3eyv5o",
+                    contentColumnMinimal: "contentColumnMinimal-32PuDO",
+                    contentRegion: "contentRegion-3HkfJJ",
+                    contentRegionHiddenSidebar: "contentRegionHiddenSidebar-GvtLIC",
+                    contentRegionScroller: "contentRegionScroller-2_GT_N",
+                    contentRegionShownSidebar: "contentRegionShownSidebar-fHXkEg",
+                    contentTransitionWrap: "contentTransitionWrap-1YD530",
+                    customColumn: "customColumn-2n-oKU",
+                    customContainer: "customContainer-dK1ozq",
+                    customHeader: "customHeader-1Ic9GL",
+                    customScroller: "customScroller-m1-jZn",
+                    noticeRegion: "noticeRegion-qjyUVg",
+                    noticeRegionHiddenSidebar: "noticeRegionHiddenSidebar-10PEPB",
+                    sidebar: "sidebar-nqHbhN",
+                    sidebarContentScrollbarPadding: "6px",
+                    sidebarContentWidth: "192px",
+                    sidebarRegion: "sidebarRegion-1VBisG",
+                    sidebarRegionScroller: "sidebarRegionScroller-FXiQOh",
+                    sidebarTotalWidth: "calc(192px + 20px + 6px)",
+                    standardPadding: "20px",
+                    standardSidebarView: "standardSidebarView-E9Pc3j",
+                    tools: "tools-kIrEGr",
+                    toolsContainer: "toolsContainer-25FL6V"
+                }),
                 Settings: {
-                    ...WebpackModules.getByProps('contentContainer', 'optionContainer'),
-                    ...WebpackModules.getByProps('messageContainer', 'colorPicker'),
-                    ...WebpackModules.getByProps('contentWidth', 'stickyHeader'),
-                    Sidebar: WebpackModules.getByProps('addRole', 'sidebar')
+                    ...(WebpackModules.getByProps('contentContainer', 'optionContainer') ?? ({
+                        container: "container-rtcD4G",
+                        contentContainer: "contentContainer-3hXFtK",
+                        optionContainer: "optionContainer-qndr4A",
+                        page: "page-15bX59",
+                        sidebar: "sidebar-TpGdn9"
+                    })),
+                    ...(WebpackModules.getByProps('messageContainer', 'colorPicker') ?? ({
+                        colorDescription: "colorDescription-2_VpwN",
+                        colorPicker: "colorPicker-1a1lPd",
+                        divider: "divider-5Xhahz",
+                        messageContainer: "messageContainer-3a6gLR",
+                        previewContainer: "previewContainer-1xQAsw",
+                        scroller: "scroller-39BnzZ"
+                    })),
+                    ...(WebpackModules.getByProps('contentWidth', 'stickyHeader') ?? ({
+                        contentWidth: "contentWidth-3aWel5",
+                        header: "header-JUTO-g",
+                        sidebarWidth: "232px",
+                        stickyHeader: "stickyHeader-1Sunlx",
+                        stickyHeaderElevated: "stickyHeaderElevated-dNSSrJ"
+                    })),
+                    Sidebar: WebpackModules.getByProps('addRole', 'sidebar') ?? ({
+                        addRole: "addRole-viKZpC",
+                        container: "container-JyRf62",
+                        desaturateUserColors: "desaturateUserColors-1O-G89",
+                        disabledTitleText: "disabledTitleText-33sEnX",
+                        dragAfter: "dragAfter-J5iS55",
+                        dragBefore: "dragBefore-1OyVoX",
+                        helpSeparator: "helpSeparator-IwYBxQ",
+                        helpText: "helpText-1VyX4Y",
+                        list: "list-1AJFv_",
+                        lock: "lock-4DarK4",
+                        roleDot: "roleDot-2a4Pv7 desaturateUserColors-1O-G89",
+                        roleName: "roleName-3910zV",
+                        row: "row-LoqnA5",
+                        sidebar: "sidebar-3K3Z4C",
+                        title: "title-JU0E7C",
+                        titleContainer: "titleContainer-3fPic2",
+                        titleElevated: "titleElevated-eN3exl",
+                        titleText: "titleText-3LapIU",
+                        tooltip: "tooltip-cYYuLr"
+                    })
                 },
                 Animations: WebpackModules.getByProps('translate', 'fade'),
                 User: {
-                    ...WebpackModules.getByProps('avatar', 'details'),
-                    Settings: WebpackModules.getByProps('profileBannerPreview', 'banner')
+                    ...(WebpackModules.getByProps('avatar', 'details') ?? ({
+                        accountProfileCard: "accountProfileCard-lbN7n-",
+                        avatar: "avatar-3mTjvZ",
+                        avatarError: "avatarError-3z_NiG",
+                        avatarUploaderInner: "avatarUploaderInner-2euNNs",
+                        background: "background-3d_SjE",
+                        badgeList: "badgeList-b3Ajmk",
+                        constrainedRow: "constrainedRow-3y91Xf",
+                        details: "details-3K5sBD",
+                        detailsInner: "detailsInner-2IFSJC",
+                        discriminator: "discriminator-2m-MqL",
+                        field: "field-21XZwa",
+                        fieldButton: "fieldButton-14lHvK",
+                        fieldButtonList: "fieldButtonList-28BYbB",
+                        fieldList: "fieldList-in8WkP",
+                        fieldSpacer: "fieldSpacer-cxjVL1",
+                        fieldTitle: "fieldTitle-2g5r_V",
+                        menu: "menu-3A7xxX",
+                        overflowMenuButton: "overflowMenuButton-1I3Jz1",
+                        overflowMenuIcon: "overflowMenuIcon-2Bjb5_",
+                        profile: "profile-1o7I_1",
+                        profileCardUsernameRow: "profileCardUsernameRow-1bb6fi",
+                        removeButton: "removeButton-v6eolJ",
+                        uploadButton: "uploadButton-1zWjTG",
+                        userInfo: "userInfo-regn9W",
+                        userTag: "userTag-2qPxEZ",
+                        username: "username-1G1p7c",
+                        usernameInnerRow: "usernameInnerRow-1-STdK",
+                        usernameRow: "usernameRow-1x50RR"
+                    })),
+                    Settings: WebpackModules.getByProps('profileBannerPreview', 'banner') ?? ({
+                        avatarUploader: "avatarUploader-qEFQS2",
+                        avatarUploaderInner: "avatarUploaderInner-p38nm2",
+                        avatarUploaderNormal: "avatarUploaderNormal-2m2hFm avatarUploader-qEFQS2",
+                        avatarUploaderPremium: "avatarUploaderPremium-2urJVq avatarUploader-qEFQS2",
+                        banner: "banner-3D8GgT",
+                        bannerNitroUpsell: "bannerNitroUpsell-2iP18z",
+                        bannerNitroUpsellText: "bannerNitroUpsellText-Ll6vKY",
+                        bannerNormal: "bannerNormal-2jf-df banner-3D8GgT",
+                        bannerUploader: "bannerUploader-2hBvKz",
+                        bannerUploaderInnerSquare: "bannerUploaderInnerSquare-2c2J8_ banner-3D8GgT",
+                        gifTag: "gifTag-TF1Coa",
+                        popoutInfo: "popoutInfo-16MuYF",
+                        profileBannerPreview: "profileBannerPreview-3mLIdO"
+                    })
                 },
                 Members: WebpackModules.getByProps('members', 'hiddenMembers'),
                 EmojiPicker: WebpackModules.getByProps('emojiPickerInExpressionPicker', 'searchBar'),
@@ -123,8 +230,34 @@ module.exports = (() => {
                 GifPicker: WebpackModules.getByProps('backButton', 'gutterSize'),
                 Popout: WebpackModules.getByProps('disabledPointerEvents', 'layer'),
                 ThreadSidebar: WebpackModules.getByProps('container', 'resizeHandle'),
-                Stickers: WebpackModules.getByProps('tierCardSubheading', 'uploadCard'),
-                Sticker: WebpackModules.getByProps('stickerName', 'sticker'),
+                Stickers: WebpackModules.getByProps('tierCardSubheading', 'uploadCard') ?? ({
+                    emptyTierImage: "emptyTierImage-2bJjxU",
+                    emptyTierWrapper: "emptyTierWrapper-V5c-R7",
+                    grid: "grid-5BH14o",
+                    icon: "icon-8udJUP",
+                    iconWrapper: "iconWrapper-3mOhDI",
+                    tierCardSubheading: "tierCardSubheading-14rFEu",
+                    unlockTierCtaHeading: "unlockTierCtaHeading-18Nq1u",
+                    unusedTierWrapper: "unusedTierWrapper-2279dK",
+                    uploadCard: "uploadCard-36s2wI",
+                    uploadCardLabel: "uploadCardLabel-OzMish"
+                }),
+                Sticker: WebpackModules.getByProps('stickerName', 'sticker') ?? ({
+                    action: "action-2YPPom",
+                    actionRemove: "actionRemove-3T3Nw3",
+                    actions: "actions-1aMD1r",
+                    content: "content-1YNCKm",
+                    contentRemoving: "contentRemoving-tuliAd",
+                    icon: "icon-1GbPE7",
+                    relatedEmoji: "relatedEmoji-3oYDS-",
+                    spinner: "spinner-1NogOd",
+                    sticker: "sticker-pNm_z_",
+                    stickerName: "stickerName-z8Tk0I",
+                    user: "user-1YiZLc",
+                    userAvatar: "userAvatar-36EnEA",
+                    wrapper: "wrapper-24fR1R",
+                    wrapperDisabled: "wrapperDisabled-3r6fsz"
+                }),
                 Sizes: WebpackModules.getByProps('size10', 'size12'),
                 Colors: WebpackModules.getByProps('colorHeaderPrimary', 'colorWhite'),
                 VideoOptions: WebpackModules.getByProps('backgroundOptionRing')
