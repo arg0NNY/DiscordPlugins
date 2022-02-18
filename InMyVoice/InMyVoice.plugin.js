@@ -2,7 +2,7 @@
  * @name InMyVoice
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.0.0
+ * @version 1.0.1
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js
@@ -20,11 +20,18 @@ module.exports = (() => {
   					"github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
   			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
         },
+        "changelog": [{
+    		"type": "fixed",
+    		"title": "Fixed",
+    		"items": [
+    			"Plugin should now be working."
+    		]
+    	}],
         "defaultConfig": [
             {
                 type: 'textbox',
@@ -102,15 +109,15 @@ module.exports = (() => {
 
                 patchMessages() {
                     Patcher.after(MessageTimestamp, 'default', (self, _, value) => {
-                        const Username = Utilities.findInReactTree(value, e => e.author && e.message);
-                        const Header = Utilities.findInReactTree(value, e => Array.isArray(e?.props?.children) && e.props.children.find(c => c?.props?.message));
+                        const Header = Utilities.findInTree(value, e => Array.isArray(e?.props?.children) && e.props.children.find(c => c?.props?.message));
 
-                        const author = Username.message.author;
+                        const author = value.props.message.author;
                         if (!this.isInMyVoice(author)) return;
 
                         Header.props.children.push(React.createElement(BotTag.default, {
                             className: `${Selectors.BotTag.botTagCozy} ${UNIQUE_TAG}`,
-                            useRemSizes: true
+                            useRemSizes: true,
+                            type: 'IN_VOICE'
                         }));
                     });
                 }
