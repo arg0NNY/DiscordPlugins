@@ -2,7 +2,7 @@
  * @name BetterAnimations
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.0.1
+ * @version 1.0.2
  * @description Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js
@@ -20,7 +20,7 @@ module.exports = (() => {
   					"github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.1",
+            "version": "1.0.2",
             "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
   			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -29,7 +29,7 @@ module.exports = (() => {
     		"type": "fixed",
     		"title": "Fixed",
     		"items": [
-    			"Fixed strange Discord behavior when accesing settings css selectors."
+    			"Fixed double reveal animation bug when sending message."
     		]
     	}]
     };
@@ -88,7 +88,8 @@ module.exports = (() => {
             } = DiscordModules;
 
             const {
-                ActionTypes
+                ActionTypes,
+                MessageStates
             } = DiscordConstants;
 
             const ChannelIntegrationsSettingsWindow = WebpackModules.getByProps('setSection', 'saveWebhook');
@@ -1126,7 +1127,7 @@ module.exports = (() => {
 
                         if (!e.message.id) return;
 
-                        if (e.message.author.id === UserInfoStore.getId() && !e.optimistic) return;
+                        if (e.message.author.id === UserInfoStore.getId() && e.message.state !== MessageStates.SENDING) return;
 
                         const messageNode = document.getElementById(`chat-messages-${e.message.id}`);
                         if (!messageNode) return;
