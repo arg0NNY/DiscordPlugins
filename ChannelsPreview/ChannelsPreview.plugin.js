@@ -29,7 +29,7 @@ module.exports = (() => {
     		"type": "improved",
     		"title": "Improvements",
     		"items": [
-    			"Switched to more reliable popout manager. Thx to Pu, Strencher and Stern for pointing out this flaw."
+    			"Switched to more reliable popout manager. Thx to Pu and Strencher for pointing out this flaw."
     		]
     	}],
         "defaultConfig": [
