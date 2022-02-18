@@ -2,7 +2,7 @@
  * @name BetterAnimations
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.0.2
+ * @version 1.0.3
  * @description Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js
@@ -20,7 +20,7 @@ module.exports = (() => {
   					"github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.2",
+            "version": "1.0.3",
             "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
   			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -29,7 +29,7 @@ module.exports = (() => {
     		"type": "fixed",
     		"title": "Fixed",
     		"items": [
-    			"Fixed double reveal animation bug when sending message."
+    			"Fixed false animation execution on Custom CSS editor."
     		]
     	}]
     };
@@ -1160,6 +1160,8 @@ module.exports = (() => {
                     Patcher.before(ReferencePositionLayer.default.prototype, 'componentDidMount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
 
+                        if (document.getElementById('bd-editor-panel')) return; // prevent customcss from freaking out
+
                         const node = document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`) ?? self.elementRef.current;
                         if (!node) return;
 
@@ -1174,6 +1176,8 @@ module.exports = (() => {
                     });
                     Patcher.before(ReferencePositionLayer.default.prototype, 'componentWillUnmount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
+
+                        if (document.getElementById('bd-editor-panel')) return; // prevent customcss from freaking out
 
                         const node = document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`) ?? self.elementRef.current;
                         if (!node) return;
