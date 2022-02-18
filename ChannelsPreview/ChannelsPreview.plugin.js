@@ -2,7 +2,7 @@
  * @name ChannelsPreview
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.0.0
+ * @version 1.0.1
  * @description Allows you to view recent messages in guild's channel without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -20,11 +20,18 @@ module.exports = (() => {
           					"github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Allows you to view recent messages in guild's channel without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
       			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
+        "changelog": [{
+    		"type": "improved",
+    		"title": "Improvements",
+    		"items": [
+    			"Switched to more reliable popout manager. Thx to Pu, Strencher and Stern for pointing out this flaw."
+    		]
+    	}],
         "defaultConfig": [
             {
               type: 'category',
@@ -152,7 +159,8 @@ module.exports = (() => {
             Logger,
             DiscordModules,
             PluginUtilities,
-            DiscordSelectors
+            DiscordSelectors,
+            Popouts
         } = Api;
         const {
             React,
@@ -168,7 +176,8 @@ module.exports = (() => {
             Messages: WebpackModules.getByProps('message', 'cozyMessage'),
             MessageDividers: WebpackModules.getByProps('divider', 'unreadPill'),
             Chat: WebpackModules.getByProps('chat', 'channelName'),
-            Popout: WebpackModules.getByProps('messagesPopoutWrap')
+            Popout: WebpackModules.getByProps('messagesPopoutWrap'),
+            Channel: WebpackModules.getByProps('userLimit', 'containerDefault')
         };
 
         let settings = {};
@@ -244,28 +253,32 @@ module.exports = (() => {
                         channel
                     }));
 
+                const globalState = WebpackModules.getByProps('get', 'set', 'stringify').get('AccessibilityStore')._state;
+                const messageGroupSpacing = settings.appearance.groupSpacingSync ? (globalState.messageGroupSpacing ?? 16) : settings.appearance.groupSpacing;
+
                 return React.createElement(
                     'div',
                     {
-                        id: 'ChannelsPreview-container'
+                        id: 'ChannelsPreview',
+                        className: `group-spacing-${messageGroupSpacing} ${Selectors.Popout.messagesPopoutWrap} show`
                     },
-                    messagesElements
+                    React.createElement(
+                        'div',
+                        {
+                            id: 'ChannelsPreview-container'
+                        },
+                        messagesElements
+                    )
                 );
             }
         }
 
         const PopoutManager = new class {
             constructor() {
-                this.ANIMATION_DURATION = 400;
                 this.ELEMENT_ID = 'ChannelsPreview';
-
-                this.animating = false;
-                this.animatingTimeout = null;
-
                 this.hoverTimeout = null;
-
                 this.current = null;
-                this.next = null;
+                this.popouts = [];
             }
 
             darken() {
@@ -278,87 +291,54 @@ module.exports = (() => {
             }
 
             open(event, channel) {
-                if (this.current) {
-                    this.next = {event, channel};
-                    this.close();
-                }
-                else {
-                    this.current = {event, channel};
-                    this.display();
-                }
+                if (this.current && this.current.channel.id === channel.id) return;
+
+                this.close();
+                this.current = {event, channel};
+                this.display();
             }
 
             close(all = false) {
                 if (!this.current) return;
+                this.current = null;
 
-                this.elem.classList.remove('show');
+                this.popouts.forEach(id => Popouts.closePopout(id));
+                this.popouts = [];
                 this.undarken();
-
-                this.timeout(() => {
-                    document.querySelectorAll(`#${this.ELEMENT_ID}`).forEach(e => e.remove());
-
-                    if (all) this.next = null;
-                    this.current = this.next ?? null;
-                    this.next = null;
-                    if (this.current) this.display();
-                });
             }
 
             forceClose() {
-                document.querySelectorAll(`#${this.ELEMENT_ID}`).forEach(e => e.remove());
-                this.undarken();
-                this.current = null;
-                this.next = null;
-                clearTimeout(this.hoverTimeout);
-                clearTimeout(this.animatingTimeout);
-                this.animating = false;
+                this.close();
             }
 
             async display() {
                 const {channel, event} = this.current;
 
                 await MessageActions.fetchMessages({channelId: channel.id, limit: MESSAGES_FETCHING_LIMIT});
-                if (this.animating || (!this.current && !this.next)) return;
+                if (this.current.channel !== channel) return;
 
                 const messages = MessageStore.getMessages(channel.id).toArray().slice(0, MESSAGES_FETCHING_LIMIT);
                 const storedChannel = ChannelStore.getChannel(channel.id);
 
-                this.elem = document.createElement('div');
-                const elem = this.elem;
+                const parentChannelElem = event.target.closest(`.${Selectors.Channel.containerDefault}`);
 
-                const globalState = WebpackModules.getByProps('get', 'set', 'stringify').get('AccessibilityStore')._state;
+                const popoutId = Popouts.openPopout(parentChannelElem, {
+                    position: "left",
+                    align: "center",
+                    spacing: 20,
+                    animation: Popouts.AnimationTypes.TRANSLATE,
+                    autoInvert: true,
+                    nudgeAlignIntoViewport: true,
+                    render: () => {
+                        return React.createElement(ChannelsPreviewPopout, {
+                            messages,
+                            channel: storedChannel
+                        });
+                    }
+                });
+                this.popouts.push(popoutId);
 
-                const messageGroupSpacing = settings.appearance.groupSpacingSync ? (globalState.messageGroupSpacing ?? 16) : settings.appearance.groupSpacing;
-
-                elem.id = this.ELEMENT_ID;
-                elem.className = `group-spacing-${messageGroupSpacing} ${Selectors.Popout.messagesPopoutWrap}`; // themedPopout-1TrfdI
-                document.body.appendChild(elem);
-
-                ReactDOM.render(
-                    React.createElement(ChannelsPreviewPopout, {
-                        messages,
-                        channel: storedChannel
-                    }),
-                    elem
-                );
-
-                const parentChannelElem = event.target;
-                const sidebar = document.querySelector(DiscordSelectors.ChannelList.sidebar.value);
-                elem.style.left = (sidebar.getBoundingClientRect().x + sidebar.clientWidth + 15) + 'px';
-                elem.style.top = (parentChannelElem.getBoundingClientRect().y + parentChannelElem.clientHeight/2 - elem.clientHeight/2) + 'px';
-                if(parseInt(elem.style.top) < 30) elem.style.top = 30 + 'px'; else if (parseInt(elem.style.top) + elem.clientHeight > window.innerHeight - 30) elem.style.top = (window.innerHeight - elem.clientHeight - 30) + 'px';
-
-                elem.classList.add('show');
                 this.darken();
-            }
-
-            timeout(handler, delay = this.ANIMATION_DURATION) {
-                clearTimeout(this.animatingTimeout);
-                this.animating = true;
-                this.animatingTimeout = setTimeout(() => {
-                    this.animating = false;
-                    handler();
-                }, delay);
             }
 
             hover(...params) {
@@ -459,7 +439,6 @@ module.exports = (() => {
                 css() {
                   PluginUtilities.addStyle('ChannelsPreviewStyles', `
 #ChannelsPreview {
-  position: absolute;
   pointer-events: none;
   background: var(--background-primary);
   border-radius: 10px;
@@ -468,20 +447,9 @@ module.exports = (() => {
   width: 50vw;
   min-width: 350px;
   overflow: hidden;
-  z-index: 2004;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: .4s opacity, .4s transform;
-
-  top: 200px;
-  left: 200px;
 }
 #ChannelsPreview * {
   pointer-events: none !important;
-}
-#ChannelsPreview.show {
-  opacity: 1;
-  transform: translateX(0);
 }
 #ChannelsPreview::before {
   content: '';
@@ -515,8 +483,8 @@ module.exports = (() => {
   background: #000;
   pointer-events: none;
   opacity: var(--preview-darken-opacity);
-  transition: .4s opacity;
-  z-index: 2000;
+  transition: .3s opacity;
+  z-index: 1000;
 }
         `);
                 }
