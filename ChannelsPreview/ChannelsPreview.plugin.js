@@ -2,7 +2,7 @@
  * @name ChannelsPreview
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.1.0
+ * @version 1.2.0
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -20,7 +20,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.0",
+            "version": "1.2.0",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -30,23 +30,21 @@ module.exports = (() => {
                 "type": "added",
                 "title": "What's new",
                 "items": [
-                    "Plugin now works with DMs too!",
-                    "All new messages are now displaying in real time when previewing channel.",
-                    "Added the ability to view who's typing right now in previewed channel."
+                    "Added the ability to change preview window height and messages fetching limit."
                 ]
             },
             {
                 "type": "improved",
                 "title": "Improvements",
                 "items": [
-                    "Redesigned event handlers showing popout to more reliable state."
+                    "Hover delay available limit raised to 5 seconds."
                 ]
             },
             {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed wrongly attached popout position."
+                    "Fixed bug where preview opens on hover when you already switched to this channel."
                 ]
             }
         ],
@@ -76,9 +74,9 @@ module.exports = (() => {
                         value: .2,
                         initialValue: .2,
                         defaultValue: .2,
-                        markers: [.1, .2, .3, .4, .5, .6, .7, .8, .9, 1],
+                        markers: [...Array(50).keys()].map(n => (n + 1) / 10),
                         stickToMarkers: true,
-                        onMarkerRender: m => m + 's'
+                        onMarkerRender: m => m%.5 === 0 || m === .2 ? m + 's' : ''
                     },
                 ]
             },
@@ -136,17 +134,40 @@ module.exports = (() => {
                     },
                     {
                         type: 'switch',
+                        id: 'dateDividers',
+                        name: 'Show date dividers',
+                        note: 'Shows date dividers between messages in preview popout.',
+                        value: true
+                    },
+                    {
+                        type: 'switch',
                         id: 'typingUsers',
                         name: 'Show typing users',
                         note: 'Shows who\'s typing in previewed channel.',
                         value: true
                     },
                     {
-                        type: 'switch',
-                        id: 'dateDividers',
-                        name: 'Show date dividers',
-                        note: 'Shows date dividers between messages in preview popout.',
-                        value: true
+                        type: 'slider',
+                        id: 'popoutHeight',
+                        name: 'Popout height',
+                        note: 'Sets popouts\'s window height in percentages relative to Discord\'s window height.',
+                        value: 30,
+                        initialValue: 30,
+                        defaultValue: 30,
+                        markers: [...Array(20).keys()].map(n => (n + 1) * 5).slice(1),
+                        stickToMarkers: true,
+                        onMarkerRender: m => m % 10 === 0 ? m + '%' : ''
+                    },
+                    {
+                        type: 'slider',
+                        id: 'messagesCount',
+                        name: 'Messages count limit',
+                        note: 'Sets the number of messages to fetch and display in preview (the more messages, the more fetching time, the longer popout takes to open).',
+                        value: 20,
+                        initialValue: 20,
+                        defaultValue: 20,
+                        markers: [...Array(10).keys()].map(n => (n + 1) * 10),
+                        stickToMarkers: true
                     },
                 ]
             }
@@ -229,7 +250,7 @@ module.exports = (() => {
             };
 
             let settings = {};
-            const MESSAGES_FETCHING_LIMIT = 20;
+            let MESSAGES_FETCHING_LIMIT = 20;
             let displayedSettingsNotice = false;
 
             const ChannelItem = WebpackModules.getModule(m => m.default?.displayName === "ChannelItem");
@@ -389,11 +410,14 @@ module.exports = (() => {
                 }
 
                 forceClose() {
+                    clearTimeout(this.hoverTimeout);
                     this.close();
                 }
 
                 async display() {
                     const {channel, event} = this.current;
+
+                    MESSAGES_FETCHING_LIMIT = settings.appearance.messagesCount ?? 20;
 
                     await MessageActions.fetchMessages({channelId: channel.id, limit: MESSAGES_FETCHING_LIMIT});
                     if (this.current?.channel !== channel) return;
@@ -424,7 +448,7 @@ module.exports = (() => {
                 }
 
                 hover(...params) {
-                    clearTimeout(this.hoverTimeout);
+                    this.forceClose();
                     this.hoverTimeout = setTimeout(() => {
                         this.open(...params);
                     }, settings.trigger.hoverDelay * 1000);
@@ -440,6 +464,7 @@ module.exports = (() => {
                 onStart() {
                     this.css();
                     settings = this.settings;
+                    displayedSettingsNotice = false;
 
                     this.patchChannelItems();
                 }
@@ -531,7 +556,7 @@ module.exports = (() => {
   pointer-events: none;
   background: var(--background-primary);
   border-radius: 10px;
-  height: 30vh;
+  height: ${this.settings.appearance.popoutHeight ?? 30}vh;
   min-height: 150px;
   width: 50vw;
   min-width: 350px;
@@ -577,6 +602,11 @@ module.exports = (() => {
   transition: .3s opacity;
   z-index: 1000;
 }
+
+#${this.getSettingsPanelId()} .plugin-inputs {
+    box-sizing: border-box;
+    padding: 0 10px;
+}
         `);
                 }
 
@@ -589,15 +619,28 @@ module.exports = (() => {
                     Patcher.unpatchAll();
                 }
 
+                getSettingsPanelId() {
+                    return `${this.getName()}-settings`;
+                }
+
                 getSettingsPanel() {
                     const panel = this.buildSettingsPanel();
-                    panel.addListener(() => {
+                    panel.addListener((section, id, value) => {
                         if (!displayedSettingsNotice) {
                             Toasts.info('Switch guild for settings to apply!');
                             displayedSettingsNotice = true;
                         }
+
+                        if (id === 'popoutHeight') {
+                            this.clearCss();
+                            this.css();
+                        }
                     });
-                    return panel.getElement();
+
+                    const element = panel.getElement();
+                    element.id = this.getSettingsPanelId();
+
+                    return element;
                 }
             }
         }
