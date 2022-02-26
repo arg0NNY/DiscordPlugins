@@ -2,7 +2,7 @@
  * @name ChannelsPreview
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.2.0
+ * @version 1.2.1
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -20,31 +20,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.0",
+            "version": "1.2.1",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
         "changelog": [
             {
-                "type": "added",
-                "title": "What's new",
-                "items": [
-                    "Added the ability to change preview window height and messages fetching limit."
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Hover delay available limit raised to 5 seconds."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed bug where preview opens on hover when you already switched to this channel."
+                    "Fixed plugin not working after the recent Discord update."
                 ]
             }
         ],
@@ -243,7 +229,7 @@ module.exports = (() => {
                 MessageDividers: WebpackModules.getByProps('divider', 'unreadPill'),
                 Chat: WebpackModules.getByProps('chat', 'channelName'),
                 Popout: WebpackModules.getByProps('messagesPopoutWrap'),
-                ChannelItem: WebpackModules.getByProps('userLimit', 'containerDefault'),
+                ChannelItem: WebpackModules.getByProps('containerDefault', 'channelInfo'),
                 Channel: WebpackModules.getByProps('channel', 'interactive'),
                 Typing: WebpackModules.getByProps('typing', 'ellipsis'),
                 Sidebar: WebpackModules.getByProps('sidebar', 'guilds')
