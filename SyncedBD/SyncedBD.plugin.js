@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.0.0
+ * @version 1.0.1
  * @description Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/SyncedBD/SyncedBD.plugin.js
@@ -21,11 +21,18 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/SyncedBD/SyncedBD.plugin.js"
         },
+        "changelog": [{
+            "type": "fixed",
+            "title": "Fixed",
+            "items": [
+                "Fixed random crashes."
+            ]
+        }]
     };
 
     const request = require("request");
@@ -161,13 +168,17 @@ module.exports = (() => {
                 }
 
                 get(token) {
-                    return new Promise(res => {
-                        request.get(`${DPASTE_API_BASE_URL}/${token}.txt`, (error, response, body) => {
-                            if (error) return res(Logger.err('Failed to get config from the cloud.'));
+                    return new Promise(res => request.get(`${DPASTE_API_BASE_URL}/${token}.txt`, (error, response, body) => {
+                        const fail = () => res(Logger.err('Failed to get config from the cloud.'));
 
+                        try {
+                            if (error) return fail();
                             res(body);
-                        });
-                    });
+                        }
+                        catch (e) {
+                            return fail();
+                        }
+                    }));
                 }
 
             }();
@@ -194,17 +205,27 @@ module.exports = (() => {
                 }
 
                 async fetchAddons() {
-                    return new Promise(res => request.get(`${SITE_API_BASE_URL}/store/addons`, (error, response, body) => res(this._cached.addons = JSON.parse(body))));
+                    return new Promise(res => request.get(`${SITE_API_BASE_URL}/store/addons`, (error, response, body) => {
+                        const fail = () => res(Logger.err('Failed to get official addons.'));
+
+                        try {
+                            if (error) return fail();
+                            res(this._cached.addons = JSON.parse(body));
+                            this._fetchedAt = Date.now();
+                        }
+                        catch (e) {
+                            return fail();
+                        }
+                    }));
                 }
 
                 async fetchAll() {
                     await this.fetchAddons();
-                    this._fetchedAt = Date.now();
                     return this._cached;
                 }
 
                 async get() {
-                    if (Math.abs(Date.now() - this._fetchedAt) > 5 * 60 * 1000) await this.fetchAll();
+                    if (Math.abs(Date.now() - this._fetchedAt) > 30 * 60 * 1000) await this.fetchAll();
 
                     return this._cached;
                 }
@@ -348,10 +369,15 @@ module.exports = (() => {
                             const result = await new Promise(res => {
                                 const url = rawGithubURL(officialAddon.latest_source_url);
                                 request.get(url, async (error, response, body) => {
-                                    if (error) return res();
+                                    try {
+                                        if (error) return res();
 
-                                    await new Promise(res => fs.writeFile(path.join(Addons.folder, url.split('/').pop().trim()), body, res));
-                                    res(true);
+                                        await new Promise(res => fs.writeFile(path.join(Addons.folder, url.split('/').pop().trim()), body, res));
+                                        res(true);
+                                    }
+                                    catch (e) {
+                                        return res();
+                                    }
                                 });
                             });
                             if (!result) { Logger.err(`Failed to download "${name}" ${type.slice(0, -1)}.`); continue; }
@@ -598,6 +624,7 @@ or to **load remote config** (override local)`
                 async apply(remoteConfig) {
                     try {
                         this.closeModal();
+                        if (Object.keys(remoteConfig.plugins).length === 0) return UserNote.set("!");
 
                         Logger.info('Applying config from the cloud...');
                         await Config.apply(remoteConfig);
