@@ -2,7 +2,8 @@
  * @name ChannelsPreview
  * @author arg0NNY
  * @authorId 224538553944637440
- * @version 1.2.1
+ * @invite M8DBtcZjXD
+ * @version 1.2.2
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -20,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.1",
+            "version": "1.2.2",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -30,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed plugin not working after the recent Discord update."
+                    "Fixed plugin breaking BD toasts displaying."
                 ]
             }
         ],
@@ -375,7 +376,7 @@ module.exports = (() => {
                 }
 
                 undarken() {
-                    document.querySelector(`.${Selectors.Sidebar.sidebar} + div`).style.setProperty('--preview-darken-opacity', 0);
+                    document.querySelector(`.${Selectors.Sidebar.sidebar} + div`).removeAttribute('style');
                 }
 
                 open(event, channel) {
