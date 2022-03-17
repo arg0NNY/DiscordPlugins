@@ -1,5 +1,5 @@
 # [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
-Shows if a person in the text chat is also in a voice chat you're in.
+Allows you to view recent messages in channels without switching to it.
 
 ![Example](https://user-images.githubusercontent.com/52377180/151410251-d8625b33-e011-4acf-a200-e050c9a6dd55.gif)
 
