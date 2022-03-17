@@ -17,4 +17,4 @@ Syncs your BetterDiscord settings, official themes and plugins with their config
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [syncedbd-download-link]: https://arg0nny.github.io/bd/download/?id=SyncedBD
-[syncedbd-version-badge]: https://img.shields.io/badge/version-1.1.0-blue
+[syncedbd-version-badge]: https://img.shields.io/badge/version-1.2.0-blue
