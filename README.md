@@ -84,7 +84,7 @@ SOFTWARE.
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [syncedbd-download-link]: https://arg0nny.github.io/bd/download/?id=SyncedBD
-[syncedbd-version-badge]: https://img.shields.io/badge/version-1.1.0-blue
+[syncedbd-version-badge]: https://img.shields.io/badge/version-1.2.0-blue
 
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
