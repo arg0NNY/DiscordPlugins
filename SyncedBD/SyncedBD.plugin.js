@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.2.0
+ * @version 1.3.0
  * @description Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/SyncedBD/SyncedBD.plugin.js
@@ -21,24 +21,26 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.0",
+            "version": "1.3.0",
             "description": "Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/SyncedBD/SyncedBD.plugin.js"
         },
         "changelog": [
             {
-                "type": "added",
-                "title": "What's new",
-                "items": [
-                    "Added the ability to view the exported config before applying."
-                ]
-            },
-            {
                 "type": "improved",
                 "title": "Improvements",
                 "items": [
-                    "Compressed loader icon to reduce plugin file size."
+                    "Added icons to buttons in plugin settings.",
+                    "Redesigned the configuration preview. Now you can view the exported config in a much more understandable form."
+                ]
+            },
+            {
+                "type": "fixed",
+                "title": "Fixed",
+                "items": [
+                    "Fixed inconsistent requests to cloud service api.",
+                    "Fixed config conflicts after import."
                 ]
             }
         ]
@@ -90,6 +92,7 @@ module.exports = (() => {
                 UserNoteActions,
                 UserInfoStore,
                 React,
+                ReactDOM,
                 ModalActions,
                 DiscordConstants,
                 ConfirmationModal
@@ -100,7 +103,9 @@ module.exports = (() => {
             } = DiscordConstants;
 
             const Selectors = {
-                Modals: WebpackModules.getByProps('root', 'small')
+                Modals: WebpackModules.getByProps('root', 'small'),
+                Forms: WebpackModules.getByProps('formText', 'modeDisabled'),
+                FormInput: WebpackModules.getByProps('disabled', 'note')
             };
 
             const Markdown = WebpackModules.getModule(m => m.displayName === "Markdown" && m.rules);
@@ -172,37 +177,28 @@ module.exports = (() => {
 
                 save(content) {
                     return new Promise(res => {
-                        request.post({
-                            url: `${DPASTE_API_BASE_URL}/api/v2/`,
+                        fetch(`${DPASTE_API_BASE_URL}/api/v2/`, {
+                            method: 'POST',
                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
                             body: "expiry_days=365&content=" + encodeURIComponent(content)
-                        }, (error, response, body) => {
-                            const fail = () => res(Logger.err('Failed to save config to the cloud.'));
-
-                            try {
-                                if (error) return fail();
-
+                        })
+                            .then(response => response.text())
+                            .then(body => {
                                 res(body.split('/').pop().trim());
-                            }
-                            catch (e) {
-                                return fail();
-                            }
-                        });
+                            })
+                            .catch(error => {
+                                res(Logger.err('Failed to save config to the cloud.'));
+                            });
                     });
                 }
 
                 get(token) {
-                    return new Promise(res => request.get(`${DPASTE_API_BASE_URL}/${token}.txt`, (error, response, body) => {
-                        const fail = () => res(Logger.err('Failed to get config from the cloud.'));
-
-                        try {
-                            if (error) return fail();
-                            res(body);
-                        }
-                        catch (e) {
-                            return fail();
-                        }
-                    }));
+                    return new Promise(res => {
+                        fetch(`${DPASTE_API_BASE_URL}/${token}.txt`)
+                            .then(response => response.text())
+                            .then(body => res(body))
+                            .catch(error => res(Logger.err('Failed to get config from the cloud.')));
+                    });
                 }
 
             }();
@@ -679,8 +675,8 @@ or to **load remote config** (override local)`
                             )
                         ],
                         {
-                            confirmText: 'Save local',
-                            cancelText: 'Load remote',
+                            confirmText: 'Save Local',
+                            cancelText: 'Load Remote',
                             onConfirm: () => this.push(config),
                             onCancel: () => this.apply(remoteConfig)
                         }
@@ -792,6 +788,7 @@ or to **load remote config** (override local)`
 
                         Logger.info('Config successfully applied!');
                         Toasts.success('Config successfully applied!');
+                        this.appliedConfig(config);
                         this.performingAction = false;
                     }
                     catch (e) {
@@ -802,7 +799,7 @@ or to **load remote config** (override local)`
 
                 async openConfig(withImport = false) {
                     if (withImport && this.performingAction) return this.taskConflictToast();
-                    
+
                     try {
                         const { canceled, filePaths } = await BdApi.openDialog({
                             mode: "open",
@@ -834,28 +831,104 @@ or to **load remote config** (override local)`
                 }
 
                 viewConfig(config, withImport = false) {
-                    ModalActions.openModal(props => {
-                        return React.createElement(ConfirmationModal, Object.assign({
-                            header: `${this.getName()} Config Preview`,
-                            confirmButtonColor: Button.ButtonColors.BRAND,
-                            className: Selectors.Modals.large,
-                            ...(withImport ? ({
-                                confirmText: 'Apply config',
-                                cancelText: 'Cancel',
-                                onConfirm: () => this.import(config)
-                            }) : ({
-                                confirmText: 'Done',
-                                cancelText: null
-                            }))
-                        }, props), [
-                            React.createElement(
-                                Markdown,
-                                null,
-                                `\`\`\`json
+                    const that = this;
+                    class Modal extends React.Component {
+                        componentDidMount() {
+                            const node = ReactDOM.findDOMNode(this).querySelector(`.${Selectors.Modals.content}`);
+                            const rawNode = node.children[0];
+                            rawNode.remove();
+
+                            const style = document.createElement('style');
+                            style.textContent = `.${that.getName()}--configPreview .${Selectors.Forms.modeDisabled}, .${that.getName()}--configPreview .${Selectors.FormInput.disabled} { opacity: 1 !important; cursor: unset !important; }`;
+
+                            const element = new Settings.SettingPanel(
+                                () => {},
+
+                                ...BdApi.settings.map(collection => {
+                                    return new Settings.SettingGroup(collection.name).append(
+                                        ...collection.settings.map(category => {
+                                            return new Settings.SettingGroup(category.name).append(
+                                                ...category.settings.filter(s => s.type === 'switch' && config[collection.id][category.id][s.id] !== undefined).map(setting => {
+                                                    return new Settings.Switch(setting.name, setting.note, config[collection.id][category.id][setting.id], () => {}, { disabled: true });
+                                                })
+                                            )
+                                        })
+                                    )
+                                }),
+
+                                new Settings.SettingGroup('Plugins').append(
+                                    ...Object.keys(config.plugins).map(name => {
+                                        const plugin = config.plugins[name];
+
+                                        return new Settings.Switch(
+                                            name,
+                                            plugin.config && Object.keys(plugin.config).length > 0 ? React.createElement(
+                                                Markdown,
+                                                null,
+                                                `\`\`\`json
+${JSON.stringify(plugin.config, null, '\t')}
+\`\`\``
+                                            ) : null,
+                                            plugin.enabled,
+                                            () => {},
+                                            { disabled: true })
+                                    })
+                                ),
+
+                                new Settings.SettingGroup('Themes').append(
+                                    ...Object.keys(config.themes).map(name => {
+                                        const theme = config.themes[name];
+
+                                        return new Settings.Switch(
+                                            name,
+                                            null,
+                                            theme,
+                                            () => {},
+                                            { disabled: true })
+                                    })
+                                ),
+
+                                new Settings.SettingGroup('Raw Config').append(rawNode)
+
+                            )
+                                .getElement();
+
+                            element.className = `${that.getName()}--configPreview`;
+                            node.prepend(
+                                style,
+                                element
+                            );
+                        }
+
+                        render() {
+                            return React.createElement(ConfirmationModal, Object.assign({
+                                    header: `${that.getName()} Config Preview`,
+                                    confirmButtonColor: Button.ButtonColors.BRAND,
+                                    className: Selectors.Modals.large,
+                                    ...(withImport ? ({
+                                        confirmText: 'Apply Config',
+                                        cancelText: 'Cancel',
+                                        onConfirm: () => that.import(config)
+                                    }) : ({
+                                        confirmText: 'Done',
+                                        cancelText: null
+                                    }))
+                                }, this.props),
+                                [
+                                    React.createElement(
+                                        Markdown,
+                                        null,
+                                        `\`\`\`json
 ${JSON.stringify(config, null, '\t')}
 \`\`\``
-                            )
-                        ])
+                                    )
+                                ]
+                            );
+                        }
+                    }
+
+                    ModalActions.openModal(props => {
+                        return React.createElement(Modal, props)
                     });
                 }
 
@@ -882,7 +955,11 @@ ${JSON.stringify(config, null, '\t')}
                                         React.createElement(Button.default, {
                                             style: {
                                                 display: 'inline-flex',
-                                                marginRight: '10px'
+                                                marginRight: '10px',
+                                                ...(p.icon ? {
+                                                    paddingLeft: '10px',
+                                                    paddingRight: '12px',
+                                                } : {})
                                             },
                                             ...p
                                         })
@@ -900,6 +977,40 @@ ${JSON.stringify(config, null, '\t')}
                         return Panel;
                     }
 
+                    const ButtonIcon = (name, text) => {
+                        const icon = {
+                            sync: `M12 4V2.21c0-.45-.54-.67-.85-.35l-2.8 2.79c-.2.2-.2.51 0 .71l2.79 2.79c.32.31.86.09.86-.36V6c3.31 0 6 2.69 6 6 0 .79-.15 1.56-.44 2.25-.15.36-.04.77.23 1.04.51.51 1.37.33 1.64-.34.37-.91.57-1.91.57-2.95 0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-.79.15-1.56.44-2.25.15-.36.04-.77-.23-1.04-.51-.51-1.37-.33-1.64.34C4.2 9.96 4 10.96 4 12c0 4.42 3.58 8 8 8v1.79c0 .45.54.67.85.35l2.79-2.79c.2-.2.2-.51 0-.71l-2.79-2.79c-.31-.31-.85-.09-.85.36V18z`,
+                            save: `M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l4.65-4.65c.2-.2.51-.2.71 0L17 13h-3z`,
+                            load: `M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-4.65 4.65c-.2.2-.51.2-.71 0L7 13h3V9h4v4h3z`,
+                            import: `M16.59,9H15V4c0-0.55-0.45-1-1-1h-4C9.45,3,9,3.45,9,4v5H7.41c-0.89,0-1.34,1.08-0.71,1.71l4.59,4.59 c0.39,0.39,1.02,0.39,1.41,0l4.59-4.59C17.92,10.08,17.48,9,16.59,9z M5,19c0,0.55,0.45,1,1,1h12c0.55,0,1-0.45,1-1s-0.45-1-1-1H6 C5.45,18,5,18.45,5,19z`,
+                            export: `M7.4,10h1.59v5c0,0.55,0.45,1,1,1h4c0.55,0,1-0.45,1-1v-5h1.59c0.89,0,1.34-1.08,0.71-1.71L12.7,3.7 c-0.39-0.39-1.02-0.39-1.41,0L6.7,8.29C6.07,8.92,6.51,10,7.4,10z M5,19c0,0.55,0.45,1,1,1h12c0.55,0,1-0.45,1-1s-0.45-1-1-1H6 C5.45,18,5,18.45,5,19z`,
+                            preview: `M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z`
+                        }[name];
+
+                        return React.createElement(
+                            'div',
+                            {
+                                style: {
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }
+                            },
+                            [
+                                React.createElement(
+                                    'svg',
+                                    {
+                                        xmlns: 'http://www.w3.org/2000/svg',
+                                        height: '20',
+                                        viewBox: '0 0 24 24',
+                                        width: '20'
+                                    },
+                                    React.createElement('path', { d: icon, fill: 'white' })
+                                ),
+                                React.createElement('span', { style: { marginLeft: '5px' } }, text)
+                            ]
+                        );
+                    };
+
                     return Settings.SettingPanel.build(
                         () => {
                             this.saveSettings.bind(this);
@@ -907,19 +1018,22 @@ ${JSON.stringify(config, null, '\t')}
 
                         new Settings.SettingField("Share config", null, () => {}, Buttons(
                             {
-                                children: 'Import',
+                                children: ButtonIcon('import', 'Import'),
+                                icon: true,
                                 color: Button.ButtonColors.BRAND,
                                 size: Button.ButtonSizes.SMALL,
                                 onClick: () => this.openConfig(true)
                             },
                             {
-                                children: 'Export',
+                                children: ButtonIcon('export', 'Export'),
+                                icon: true,
                                 color: Button.ButtonColors.BRAND,
                                 size: Button.ButtonSizes.SMALL,
                                 onClick: () => this.export()
                             },
                             {
-                                children: 'Preview',
+                                children: ButtonIcon('preview', 'Preview'),
+                                icon: true,
                                 color: Button.ButtonColors.GREY,
                                 size: Button.ButtonSizes.SMALL,
                                 onClick: () => this.openConfig()
@@ -928,19 +1042,22 @@ ${JSON.stringify(config, null, '\t')}
 
                         new Settings.SettingField("Force actions", null, () => {}, Buttons(
                             {
-                                children: 'Sync',
+                                children: ButtonIcon('sync', 'Sync'),
+                                icon: true,
                                 color: Button.ButtonColors.BRAND,
                                 size: Button.ButtonSizes.SMALL,
                                 onClick: () => this.forceAction("sync")
                             },
                             {
-                                children: 'Save local config',
+                                children: ButtonIcon('save', 'Save Local Config'),
+                                icon: true,
                                 color: Button.ButtonColors.GREY,
                                 size: Button.ButtonSizes.SMALL,
                                 onClick: () => this.forceAction("save")
                             },
                             {
-                                children: 'Load remote config',
+                                children: ButtonIcon('load', 'Load Remote Config'),
+                                icon: true,
                                 color: Button.ButtonColors.GREY,
                                 size: Button.ButtonSizes.SMALL,
                                 onClick: () => this.forceAction("load")
