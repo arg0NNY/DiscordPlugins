@@ -7,6 +7,12 @@
  
 ```
 
+## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-review-badge] ![Version][passcodelock-version-badge]
+Protect your Discord with 4-digit passcode.
+
+[![Download][download-badge]][passcodelock-download-link] ![View][unavailable-badge]
+
+
 ## [SyncedBD](https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD) ![Status][status-review-badge] ![Version][syncedbd-version-badge]
 Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!
 
@@ -82,6 +88,9 @@ SOFTWARE.
 [status-unofficial-badge]: https://img.shields.io/badge/status-unofficial-red
 [status-review-badge]: https://img.shields.io/badge/status-review-yellow
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
+
+[passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
+[passcodelock-version-badge]: https://img.shields.io/badge/version-1.0.0-blue
 
 [syncedbd-download-link]: https://arg0nny.github.io/bd/download/?id=SyncedBD
 [syncedbd-version-badge]: https://img.shields.io/badge/version-1.3.0-blue
