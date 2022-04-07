@@ -1,13 +1,14 @@
 /**
  * @name InMyVoice
  * @author arg0NNY
- * @authorId 224538553944637440
- * @version 1.0.1
+ * @authorLink https://github.com/arg0NNY/DiscordPlugins
+ * @invite M8DBtcZjXD
+ * @version 1.0.2
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
- * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js
+ * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js
-*/
+ */
 
 module.exports = (() => {
     const config = {
@@ -17,21 +18,21 @@ module.exports = (() => {
                 {
                     "name": "arg0NNY",
                     "discord_id": '224538553944637440',
-  					"github_username": 'arg0NNY'
+                    "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.1",
+            "version": "1.0.2",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
-  			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
+            github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
         },
         "changelog": [{
-    		"type": "fixed",
-    		"title": "Fixed",
-    		"items": [
-    			"Plugin should now be working."
-    		]
-    	}],
+            "type": "fixed",
+            "title": "Fixed",
+            "items": [
+                "Fixed tag wasn't displaying after Discord update."
+            ]
+        }],
         "defaultConfig": [
             {
                 type: 'textbox',
@@ -93,9 +94,8 @@ module.exports = (() => {
             const {getVoiceChannelId} = WebpackModules.getByProps("getVoiceChannelId");
             const VoiceChannelStore = WebpackModules.getByProps("getVoiceStatesForChannel");
 
-            const Message = WebpackModules.getModule(m => m.default && m.ThreadStarterChatMessage && m.getElementFromMessageId);
             const MessageTimestamp = WebpackModules.find(m => typeof m.default === "function" && m.default.toString().includes("showTimestampOnHover"));
-            const BotTag = WebpackModules.getModule(m => m.default?.displayName === 'BotTag');
+            const BotTag = WebpackModules.getByProps('BotTagTypes');
 
             return class InMyVoice extends Plugin {
                 onStart() {
