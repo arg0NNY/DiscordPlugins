@@ -24,4 +24,4 @@ Listen or even talk in a voice chat while being self-deafened.
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [fakedeafen-download-link]: https://arg0nny.github.io/bd/download/?id=FakeDeafen
-[fakedeafen-version-badge]: https://img.shields.io/badge/version-1.0.0-blue
+[fakedeafen-version-badge]: https://img.shields.io/badge/version-1.0.1-blue

@@ -1,13 +1,14 @@
 /**
  * @name FakeDeafen
  * @author arg0NNY
- * @authorId 224538553944637440
- * @version 1.0.0
+ * @authorLink https://github.com/arg0NNY/DiscordPlugins
+ * @invite M8DBtcZjXD
+ * @version 1.0.1
  * @description Listen or even talk in a voice chat while being self-deafened.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/FakeDeafen
- * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/FakeDeafen/FakeDeafen.plugin.js
+ * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/FakeDeafen/FakeDeafen.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/FakeDeafen/FakeDeafen.plugin.js
-*/
+ */
 
 module.exports = (() => {
     const config = {
@@ -17,14 +18,21 @@ module.exports = (() => {
                 {
                     "name": "arg0NNY",
                     "discord_id": '224538553944637440',
-  					"github_username": 'arg0NNY'
+                    "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Listen or even talk in a voice chat while being self-deafened.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/FakeDeafen",
-  			github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/FakeDeafen/FakeDeafen.plugin.js"
+            github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/FakeDeafen/FakeDeafen.plugin.js"
         },
+        "changelog": [{
+            "type": "fixed",
+            "title": "Fixed",
+            "items": [
+                "Fixed toggle button wasn't displaying."
+            ]
+        }],
         "defaultConfig": [
             {
                 type: 'switch',
@@ -59,7 +67,7 @@ module.exports = (() => {
                 cancelText: "Cancel",
                 onConfirm: () => {
                     require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
-                        if (error) return require("electron").shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
+                        if (error) return require("electron").shell.openExternal("https://betterdiscord.app/Download?id=9");
                         await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
                     });
                 }
@@ -72,8 +80,6 @@ module.exports = (() => {
             const {
                 Patcher,
                 WebpackModules,
-                ReactComponents,
-                Utilities,
                 ContextMenu,
                 Toasts,
                 DiscordModules,
@@ -145,10 +151,10 @@ module.exports = (() => {
                 async panelButton() {
                     const Account = await ZLibrary.ReactComponents.getComponentByName('Account', DiscordSelectors.AccountDetails.container.value);
 
-                    Patcher.after(Account.component.prototype, 'render', (self, _, value) => {
+                    Patcher.after(Account.component.prototype, 'render', (self, _, { props }) => {
                         if (!this.settings.accountButton) return;
 
-                        Utilities.getNestedProp(value, 'props.children.2.props.children').unshift(this.buildPanelButton())
+                        props.children.find(e => e.type.displayName === 'Flex')?.props.children.unshift(this.buildPanelButton());
                     });
                 }
 
@@ -169,7 +175,7 @@ module.exports = (() => {
                         if (!this.fixated) return;
 
                         this.toggleFixate(false);
-                        BdApi.showToast('Fake Mute/Deafen has been automatically disabled', {type: 'warn'});
+                        Toasts.warning('Fake Mute/Deafen has been automatically disabled');
                     }
 
                     Patcher.before(ChannelManager, 'disconnect', (self, _) => {preventStop()});
@@ -184,21 +190,21 @@ module.exports = (() => {
 
                 buildContextMenuOptions() {
                     return ContextMenu.buildMenuChildren([{
-                         type: "group",
-                         items: [
-                             {
-                                 type: "toggle",
-                                 label: "Fake Mute/Deafen",
-                                 active: this.fixated,
-                                 disabled: !this.fixated && !this.allowed(),
-                                 action: () => {this.toggleFixate()}
-                             },
+                        type: "group",
+                        items: [
+                            {
+                                type: "toggle",
+                                label: "Fake Mute/Deafen",
+                                active: this.fixated,
+                                disabled: !this.fixated && !this.allowed(),
+                                action: () => {this.toggleFixate()}
+                            },
                         ]
-                    }]);;
+                    }]);
                 }
 
                 toggleFixate(status = null) {
-                    if ((!this.fixated || status === true) && !this.allowed()) return BdApi.showToast('Mute or Deaf yourself first', {type: 'danger'});
+                    if ((!this.fixated || status === true) && !this.allowed()) return Toasts.error('Mute or Deaf yourself first');
 
                     this.fixated = status === null ? !this.fixated : status;
                     if (this.settings.sounds) SoundModule.playSound(this.fixated ? Sounds.ENABLE : Sounds.DISABLE, .4);
