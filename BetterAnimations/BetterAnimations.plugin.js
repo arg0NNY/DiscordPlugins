@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.0
+ * @version 1.1.1
  * @description Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,26 +21,18 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.0",
+            "version": "1.1.1",
             "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
         },
         "changelog": [
             {
-                "type": "added",
-                "title": "What's new",
-                "items": [
-                    "Added animations to guild discovery sections (Channel animations in the plugin settings)."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed popout animations executing on the wrong elements.",
-                    "Fixed plugin change background color in the expression picker with some themes.",
-                    "Fixed an issue that caused the video to play at full volume while the animation was running."
+                    "Fixed animations flickering with transparent themes enabled.",
+                    "Fixed content jumping while animating with the top bar displayed."
                 ]
             }
         ]
@@ -317,6 +309,7 @@ module.exports = (() => {
                 StudentHubs: WebpackModules.getByProps('footerDescription', 'scroller')
             };
 
+            const PARENT_NODE_CLASSNAME = 'BetterAnimations-parentNode';
             const CLONED_NODE_CLASSNAME = 'BetterAnimations-clonedNode';
             const SETTINGS_CLASSNAME = 'BetterAnimations-settings';
 
@@ -705,10 +698,11 @@ module.exports = (() => {
                         height: this.node.clientHeight
                     };
 
-                    this.node.parentNode.style.position = getComputedStyle(this.node.parentNode).position === 'static' ? 'relative' : '';
+                    if (getComputedStyle(this.node.parentNode).position === 'static') this.node.parentNode.classList.add(PARENT_NODE_CLASSNAME);
 
                     this.clonedNode = this.node.cloneNode(true);
                     this.node.after(this.clonedNode);
+                    this.node.style.opacity = 0;
 
                     this.clonedNode.querySelectorAll('video').forEach(v => v.volume = 0);
                     this.clonedNode.style.position = getComputedStyle(this.node).position === 'fixed' ? 'fixed' : 'absolute';
@@ -726,6 +720,7 @@ module.exports = (() => {
                     const getNode = e => typeof e === 'string' ? document.querySelector(e) : e;
 
                     const exec = () => {
+                        this.node.removeAttribute('style');
                         params.duration = params.duration ?? 500;
                         params.easing = params.easing ?? Easing.easeInOut;
                         params.zIndex = this.zIndex;
@@ -755,6 +750,7 @@ module.exports = (() => {
 
                     this.clonedNode.remove();
                     this.clonedNode = null;
+                    this.node.parentNode.classList.remove(PARENT_NODE_CLASSNAME);
                 }
             }
 
@@ -1412,6 +1408,10 @@ module.exports = (() => {
                 injectCss() {
                     this.PLUGIN_STYLE_ID = `${this.getName()}-style`;
                     PluginUtilities.addStyle(this.PLUGIN_STYLE_ID, `
+                            .${PARENT_NODE_CLASSNAME} {
+                                position: relative !important;
+                            }
+                    
                             /* Settings View Fix */
                             /* .${Selectors.Sidebar.standardSidebarView}, .${Selectors.Sidebar.contentRegionScroller} {
                                 background: var(--background-tertiary) !important;
