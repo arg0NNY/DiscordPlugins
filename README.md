@@ -90,7 +90,7 @@ SOFTWARE.
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
-[passcodelock-version-badge]: https://img.shields.io/badge/version-1.0.0-blue
+[passcodelock-version-badge]: https://img.shields.io/badge/version-1.0.1-blue
 
 [syncedbd-download-link]: https://arg0nny.github.io/bd/download/?id=SyncedBD
 [syncedbd-version-badge]: https://img.shields.io/badge/version-1.3.0-blue

@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.0
+ * @version 1.0.1
  * @description Protect your Discord with 4-digit passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,11 +21,21 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Protect your Discord with 4-digit passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
-        }
+        },
+        "changelog": [
+            {
+                "type": "fixed",
+                "title": "Fixed",
+                "items": [
+                    "Fixed error while displaying lock panel.",
+                    "Fixed restart bypass to unlock Discord."
+                ]
+            }
+        ]
     };
 
     const electron = require("electron");
@@ -130,7 +140,17 @@ module.exports = (() => {
             const BG_TRANSITION = 350;
             const CODE_LENGTH = 4;
 
-            const container = document.querySelector(`.${Selectors.App.app}`);
+            const getContainer = () => document.querySelector(`.${Selectors.App.app}`);
+            const getContainerAsync = async () => {
+                return getContainer() ?? await new Promise(res => {
+                    let container;
+                    const intId = setInterval(() => {
+                        if (!(container = getContainer())) return;
+                        clearInterval(intId);
+                        res(container);
+                    });
+                })
+            };
 
             class PasscodeBtn extends React.Component {
                 render() {
@@ -168,7 +188,7 @@ module.exports = (() => {
                 get bg() { return this.e.querySelector('.PCL--layout-bg'); }
                 get button() { return this.props.button ?? document.getElementById('PCLButton'); }
                 get buttonPos() { return this.button && document.body.contains(this.button) ? this.button.getBoundingClientRect() : { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }; }
-                get containerPos() { return container.getBoundingClientRect() }
+                get containerPos() { return getContainer().getBoundingClientRect() }
 
                 buildCancelButton() {
                     return ![PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)
@@ -274,7 +294,7 @@ module.exports = (() => {
                             this.bg.removeEventListener('webkitTransitionEnd', listener);
 
                             setTimeout(() => {
-                                this.props.plugin.unlock();
+                                this.props.plugin.unlock(true);
                                 if (success && this.props.onSuccess) return this.props.onSuccess(this);
                                 if (success && this.props.type === PasscodeLocker.Types.EDITOR) return this.props.plugin.updateCode(this.newCode);
                             }, 50);
@@ -537,24 +557,27 @@ module.exports = (() => {
                     );
                 }
 
-                lock({ button, type, onSuccess } = {}) {
-                    if (this.locked) return;
+                async lock({ button, type, onSuccess } = {}) {
+                    type = type ?? PasscodeLocker.Types.DEFAULT;
 
-                    if (this.settings.code === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error('Please first set up the passcode in plugin settings.');
+                    if (this.locked) return;
+                    if (this.settings.code === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error('Please first set up the passcode in the plugin settings.');
 
                     this.unlock();
 
                     this.element = document.createElement('div');
-                    document.querySelector(`.${Selectors.App.app}`).appendChild(this.element);
-                    ReactDOM.render(React.createElement(PasscodeLocker, { plugin: this, button, type: type ?? PasscodeLocker.Types.DEFAULT, onSuccess }), this.element);
+                    (await getContainerAsync()).appendChild(this.element);
+                    ReactDOM.render(React.createElement(PasscodeLocker, { plugin: this, button, type, onSuccess }), this.element);
                     this.disableInteractions();
 
                     this.locked = true;
+                    if (type === PasscodeLocker.Types.DEFAULT) BdApi.setData(this.getName(), 'locked', true);
                 }
 
-                unlock() {
+                unlock(safeUnlock = false) {
                     this.enableInteractions();
                     this.locked = false;
+                    if (safeUnlock) BdApi.setData(this.getName(), 'locked', false);
 
                     if (!this.element) return;
 
@@ -583,6 +606,8 @@ module.exports = (() => {
 
                     KeybindListener.start();
                     if (Array.isArray(this.settings.keybind)) KeybindListener.listen(this.settings.keybind, () => this.onLockKeybind());
+
+                    if (BdApi.getData(this.getName(), 'locked')) this.lock();
                 }
 
                 async patchHeaderBar() {
