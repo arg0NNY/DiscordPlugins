@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.1
+ * @version 1.1.2
  * @description Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.1",
+            "version": "1.1.2",
             "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,8 +31,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed animations flickering with transparent themes enabled.",
-                    "Fixed content jumping while animating with the top bar displayed."
+                    "Fixed animations flickering with transparent themes enabled when switching between Friends and Nitro tabs. Flickering can still be observed when switching between pages too quickly (to be fixed in further updates).",
+                    "Most likely fixed problem when animation element is not removed at the end."
                 ]
             }
         ]
@@ -680,6 +680,7 @@ module.exports = (() => {
 
                     this.animation = ContainerAnimator.TYPES[type];
                     this.node = typeof element === 'string' ? document.querySelector(element) : element;
+                    this.parentNode = this.node.parentNode;
                     this.scrollSelectors = scrollSelectors;
                     if (elementToAppear) this.elementToAppear = elementToAppear;
                     this.zIndex = zIndex ?? 10;
@@ -698,11 +699,16 @@ module.exports = (() => {
                         height: this.node.clientHeight
                     };
 
-                    if (getComputedStyle(this.node.parentNode).position === 'static') this.node.parentNode.classList.add(PARENT_NODE_CLASSNAME);
+                    if (getComputedStyle(this.parentNode).position === 'static') this.parentNode.classList.add(PARENT_NODE_CLASSNAME);
 
                     this.clonedNode = this.node.cloneNode(true);
                     this.node.after(this.clonedNode);
                     this.node.style.opacity = 0;
+                    if (document.querySelector(this.elementToAppear) === null) {
+                        this.tempStyle = document.createElement('style');
+                        this.tempStyle.innerHTML = `${this.elementToAppear} { opacity: 0 !important; }`;
+                        this.node.after(this.tempStyle);
+                    }
 
                     this.clonedNode.querySelectorAll('video').forEach(v => v.volume = 0);
                     this.clonedNode.style.position = getComputedStyle(this.node).position === 'fixed' ? 'fixed' : 'absolute';
@@ -721,6 +727,7 @@ module.exports = (() => {
 
                     const exec = () => {
                         this.node.removeAttribute('style');
+                        this.tempStyle?.remove();
                         params.duration = params.duration ?? 500;
                         params.easing = params.easing ?? Easing.easeInOut;
                         params.zIndex = this.zIndex;
@@ -746,11 +753,12 @@ module.exports = (() => {
                 }
 
                 end() {
-                    if (!this.clonedNode) return;
+                    this.tempStyle?.remove();
+                    this.parentNode.classList.remove(PARENT_NODE_CLASSNAME);
 
+                    if (!this.clonedNode) return;
                     this.clonedNode.remove();
                     this.clonedNode = null;
-                    this.node.parentNode.classList.remove(PARENT_NODE_CLASSNAME);
                 }
             }
 
