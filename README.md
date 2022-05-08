@@ -36,12 +36,6 @@ Allows you to view recent messages in channels without switching to it.
 
 [![Download][download-badge]][channelspreview-download-link] [![View][view-badge]][channelspreview-view-link]
 
-
-## [FakeDeafen](https://github.com/arg0NNY/DiscordPlugins/tree/master/FakeDeafen) ![Status][status-unofficial-badge] ![Version][fakedeafen-version-badge]
-Listen or even talk in a voice chat while being self-deafened.
-
-[![Download][download-badge]][fakedeafen-download-link] ![View][unavailable-badge]
-
 ```
  
 ```
@@ -112,6 +106,3 @@ SOFTWARE.
 [channelspreview-version-badge]: https://img.shields.io/badge/version-1.2.2-blue
 [channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27ChannelsPreview%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27ChannelsPreview%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
-
-[fakedeafen-download-link]: https://arg0nny.github.io/bd/download/?id=FakeDeafen
-[fakedeafen-version-badge]: https://img.shields.io/badge/version-1.0.1-blue
