@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.1
+ * @version 1.0.2
  * @description Protect your Discord with 4-digit passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.1",
+            "version": "1.0.2",
             "description": "Protect your Discord with 4-digit passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,8 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed error while displaying lock panel.",
-                    "Fixed restart bypass to unlock Discord."
+                    "Fixed lock button stopped displaying (it seems to me that they change things on purpose to break plugins, because I don’t see the point of change that broke the button 😑)."
                 ]
             }
         ]
@@ -130,7 +129,7 @@ module.exports = (() => {
 
             const hashCheck = (string, hashed) => hashCode(string) === hashed;
 
-            const HeaderBarContainer = WebpackModules.getModule(m => m.default?.displayName === 'HeaderBarContainer');
+            const HeaderBar = WebpackModules.getModule(m => m.default?.displayName === 'HeaderBar');
             const Button = WebpackModules.getByProps("BorderColors", "Colors");
             const Tooltip = WebpackModules.getModule(m => m.default?.displayName === 'Tooltip');
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
@@ -611,8 +610,9 @@ module.exports = (() => {
                 }
 
                 async patchHeaderBar() {
-                    Patcher.after(HeaderBarContainer.default.prototype, "render", (self, _, value) => {
-                        const toolbar = value.props?.toolbar?.props?.children;
+                    Patcher.after(HeaderBar, "default", (self, _, value) => {
+                        const children = value.props?.children?.props?.children;
+                        const toolbar = children ? children[children.length - 1].props?.children?.props?.children : null;
                         if (!Array.isArray(toolbar) || toolbar.some((e => e?.key === this.getName()))) return;
 
                         toolbar.splice(-2, 0, React.createElement(
