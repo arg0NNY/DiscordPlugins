@@ -158,6 +158,7 @@ module.exports = (() => {
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
 
             const BG_TRANSITION = 350;
+            const MAX_CODE_LENGTH = 15;
             var CODE_LENGTH = 4;
 
             const getContainer = () => document.querySelector(`.${Selectors.App.app}`);
@@ -210,10 +211,26 @@ module.exports = (() => {
                 get buttonPos() { return this.button && document.body.contains(this.button) ? this.button.getBoundingClientRect() : { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }; }
                 get containerPos() { return getContainer().getBoundingClientRect() }
 
+                backspaceButton() {
+                    return React.createElement(PasscodeBtn, {
+                        click: this.codeBackspace,
+                        code: 'Backspace',
+                        children: React.createElement(
+                            'svg',
+                            {
+                                xmlns: 'http://www.w3.org/2000/svg',
+                                viewBox: '0 0 24 24',
+                                height: '20',
+                                width: '20'
+                            },
+                            React.createElement('path', { fill: 'currentColor', d: 'M22 3H7c-.69 0-1.23.35-1.59.88L.37 11.45c-.22.34-.22.77 0 1.11l5.04 7.56c.36.52.9.88 1.59.88h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.7 13.3c-.39.39-1.02.39-1.41 0L14 13.41l-2.89 2.89c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41L12.59 12 9.7 9.11c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0L14 10.59l2.89-2.89c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41L15.41 12l2.89 2.89c.38.38.38 1.02 0 1.41z' })
+                        )
+                    })
+                }
+
                 buildCancelButton() {
-                    return ![PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)
-                        ? React.createElement('div')
-                        : React.createElement(PasscodeBtn, {
+                    if([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)) {
+                        return React.createElement(PasscodeBtn, {
                             click: () => this.unlock(false),
                             code: 'Escape',
                             children: React.createElement(
@@ -227,6 +244,35 @@ module.exports = (() => {
                                 React.createElement('path', { fill: 'currentColor', d: 'M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z' })
                             )
                         });
+                    } else {
+                        return this.backspaceButton();
+                    }
+                }
+
+                buildBackspaceButton() {
+                    if([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)) {
+                        return this.backspaceButton();
+                    } else {
+                        return this.buildEnterButton();
+                    }
+                }
+
+                buildEnterButton() {
+                    return React.createElement(PasscodeBtn, {
+                        click: () => this.codeAccept(),
+                        code: 'Enter',
+                        children: React.createElement(
+                            'svg',
+                            {
+                                xmlns: 'http://www.w3.org/2000/svg',
+                                viewBox: '0 0 24 24',
+                                height: '26',
+                                width: '26'
+                            },
+                            React.createElement('path', { fill: 'none', d: 'M0 0h24v24H0V0z' }),
+                            React.createElement('path', { fill: 'currentColor', d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z' })
+                        )
+                    })
                 }
 
                 calculatePosition() {
@@ -252,29 +298,24 @@ module.exports = (() => {
                     };
 
                     this.codeAppend = (num) => {
+                        if(this.state.code.length >= MAX_CODE_LENGTH) {
+                            const dots = document.querySelector(".PCL--dots");
+                            if(!dots.classList.contains("PCL--dots--limit")) {
+                                dots.classList.add("PCL--dots--limit");
+                                setTimeout(() => {
+                                    dots?.classList.remove("PCL--dots--limit");
+                                }, 250);
+                            }
+                            return;
+                        };
                         this.setState({
                             code: this.state.code + num.toString()
                         });
 
                         setTimeout(() => {
-                            this.codeOk();
                             if(CODE_LENGTH === this.state.code.length)
                                 this.codeAccept();
                         });
-                    }
-
-                    this.codeOk = () => {
-                        if(CODE_LENGTH !== -1)return;
-                        const ok = document.querySelector(".PCL--ok");
-                        const active = ok.classList.contains("PCL--ok--active");
-                        const newActive = this.state.code.length > 0;
-                        if(active != newActive) {
-                            if(newActive) {
-                                ok.classList.add("PCL--ok--active");
-                            } else {
-                                ok.classList.remove("PCL--ok--active");
-                            }
-                        }
                     }
 
                     this.codeAccept = () => {
@@ -298,9 +339,6 @@ module.exports = (() => {
                     this.codeBackspace = () => {
                         this.setState({
                             code: this.state.code.slice(0, -1)
-                        });
-                        setTimeout(() => {
-                            this.codeOk();
                         });
                     } 
                 }
@@ -409,6 +447,7 @@ module.exports = (() => {
                         else if (e.key === "Enter") {
                             e.preventDefault();
                             e.stopPropagation();
+                            if (this.props.plugin.settings.highlightButtons) document.getElementById('PCLBtn-Enter')?.classList.add('PCL--btn-active');
                             this.codeAccept();
                             return false;
                         }
@@ -511,12 +550,7 @@ module.exports = (() => {
                                                         { className: `PCL--dot PCL--dot-active` }
                                                     );
                                                 })
-                                            ),
-                                            (CODE_LENGTH === -1 ? React.createElement(
-                                                'div',
-                                                { className: 'PCL--ok PCL--animate', onClick: this.codeAccept },
-                                                "OK"
-                                            ) : ()=>{})
+                                            )
                                         ]
                                     ),
                                     React.createElement(
@@ -527,20 +561,11 @@ module.exports = (() => {
                                             ...btns,
                                             this.buildCancelButton(),
                                             React.createElement(PasscodeBtn, { number: 0, dec: '+', click: this.codeAppend }),
-                                            React.createElement(PasscodeBtn, {
-                                                click: this.codeBackspace,
-                                                code: 'Backspace',
-                                                children: React.createElement(
-                                                    'svg',
-                                                    {
-                                                        xmlns: 'http://www.w3.org/2000/svg',
-                                                        viewBox: '0 0 24 24',
-                                                        height: '20',
-                                                        width: '20'
-                                                    },
-                                                    React.createElement('path', { fill: 'currentColor', d: 'M22 3H7c-.69 0-1.23.35-1.59.88L.37 11.45c-.22.34-.22.77 0 1.11l5.04 7.56c.36.52.9.88 1.59.88h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.7 13.3c-.39.39-1.02.39-1.41 0L14 13.41l-2.89 2.89c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41L12.59 12 9.7 9.11c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0L14 10.59l2.89-2.89c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41L15.41 12l2.89 2.89c.38.38.38 1.02 0 1.41z' })
-                                                )
-                                            })
+                                            this.buildBackspaceButton(),
+                                            React.createElement('div'),
+                                            ([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) ? 
+                                                this.buildEnterButton()    
+                                            : () => {})
                                         ]
                                     ),
                                 ]
@@ -763,7 +788,6 @@ module.exports = (() => {
     flex-direction: column;
     align-items: center;
     padding-bottom: 22px;
-    max-height: 138px;
 }
 
 .PCL--icon {
@@ -775,23 +799,34 @@ module.exports = (() => {
     margin: 25px 0 25px;
 }
 
-.PCL--ok {
-    display: none;
-}
-
-.PCL--ok.PCL--ok--active {
-    display: block;
-    position: relative;
-    cursor: pointer;
-    transform: translateY(-50%);
-    left: 102.5%;
-}
-
 .PCL--dots {
     display: flex;
     height: 8px;
     width: 100%;
     justify-content: center;
+}
+
+@keyframes PCL--limit {
+    0% {transform: translateX(10px);}
+    25% {transform: translateX(0px);}
+    50% {transform: translateX(-10px);}
+    100% {transform: translateX(0px);}
+}
+
+.PCL--dots.PCL--dots--limit {
+    animation-name: PCL--limit;
+    animation-duration: 250ms;
+}
+
+@keyframes PCL--dot--anim {
+    0% {
+        opacity: 0;
+        transform: scale(.5) translateX(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateX(0);
+    }
 }
 
 .PCL--dot {
@@ -800,20 +835,14 @@ module.exports = (() => {
     border-radius: 50%;
     background: var(--main-color);
     margin: 0 5px;
-    transition: .25s opacity, .25s transform;
-    opacity: 0;
-    transform: scale(.5) translateX(5px);
-}
-
-.PCL--dot-active {
-    opacity: 1;
-    transform: scale(1) translateX(0);
+    animation-name: PCL--dot--anim;
+    animation-duration: 250ms;
 }
 
 .PCL--buttons {
     display: grid;
     grid-template-columns: repeat(3, 60px);
-    grid-template-rows: repeat(4, 60px);
+    grid-template-rows: repeat(5, 60px);
     gap: 30px;
     padding: 40px 20px;
     position: relative;
