@@ -403,7 +403,8 @@ module.exports = (() => {
 
                     // Props to https://github.com/253ping
                     this.disableKeys = e => {
-                        if(e.ctrlKey && e.shiftKey && e.key === "I") {e.preventDefault(); e.stopPropagation();}
+                        // Didn't know that there is more than one shortcut.
+                        if(e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" )) {e.preventDefault(); e.stopPropagation();}
                         else if(e.ctrlKey) {e.preventDefault(); e.stopPropagation(); return false;} // Prevent all sorts of shortcuts like bold, italic, underline, strikethrough, ...
                         else if (e.key === "Enter") {
                             e.preventDefault();
