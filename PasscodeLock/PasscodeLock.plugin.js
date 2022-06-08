@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.2
+ * @version 1.0.3
  * @description Protect your Discord with 4-digit passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,17 +21,25 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.2",
+            "version": "1.0.3",
             "description": "Protect your Discord with 4-digit passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
         },
         "changelog": [
             {
+                "type": "improved",
+                "title": "Improved",
+                "items": [
+                    "Ability to disable numpad animation if keyboard is used.",
+                ]
+            },
+            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed lock button stopped displaying (it seems to me that they change things on purpose to break plugins, because I don’t see the point of change that broke the button 😑)."
+                    "Disabled DevTools hotkey while locked.",
+                    "No longer sends a message while locked."
                 ]
             }
         ]
@@ -328,13 +336,15 @@ module.exports = (() => {
                 }
 
                 componentWillUnmount() {
+                    window.removeEventListener('keydown', this.disableKeys, true);
                     window.removeEventListener('keyup', this.keyUpListener);
                 }
 
                 componentDidMount() {
+                    const keyboardAnimation = BdApi.getData(this.props.plugin.getName(), 'keyboardAnimation');
                     document.onkeydown = e => {
-                        document.getElementById(`PCLBtn-${e.key}`)?.classList.add('PCL--btn-active');
-
+                        if(keyboardAnimation) document.getElementById(`PCLBtn-${e.key}`)?.classList.add('PCL--btn-active');
+                        
                         e.preventDefault();
                         e.stopPropagation();
                         return false;
@@ -347,6 +357,13 @@ module.exports = (() => {
                         if (e.key === 'Backspace') this.codeBackspace();
                         if (e.key === 'Escape' && this.props.type !== PasscodeLocker.Types.DEFAULT) this.unlock(false);
                     };
+
+                    this.disableKeys = e => {
+                        if(e.ctrlKey && e.shiftKey && e.key == "I") {e.preventDefault(); e.stopPropagation();}
+                        if (e.key == "Enter") {e.preventDefault(); e.stopPropagation(); return false;}
+                    }
+
+                    window.addEventListener('keydown', this.disableKeys, true);
                     window.addEventListener('keyup', this.keyUpListener);
 
                     setTimeout(() => {
@@ -989,6 +1006,12 @@ module.exports = (() => {
 
                             this.settings.keybind = e;
                             this.saveSettings();
+                        }),
+
+                        new Settings.Switch('Keyboard Animation', 'En/Disables the keydown animation while using keyboard.', this.settings.keyboardAnimation, e => {
+                            this.settings.keyboardAnimation = e;
+                            this.saveSettings();
+                            BdApi.setData(this.getName(), 'keyboardAnimation', e);
                         })
                     );
 
@@ -1004,10 +1027,12 @@ module.exports = (() => {
                     this.defaultSettings = {
                         code: -1,
                         autolock: false,
-                        keybind: [162, 76]
+                        keybind: [162, 76],
+                        keyboardAnimation: false
                     };
 
                     this.settings = this.loadSettings(this.defaultSettings);
+                    BdApi.setData(this.getName(), 'keyboardAnimation', this.settings.keyboardAnimation);
                 }
             }
         }
