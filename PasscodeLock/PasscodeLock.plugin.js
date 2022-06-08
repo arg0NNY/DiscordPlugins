@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.2
+ * @version 1.1.0
  * @description Protect your Discord with 4-digit passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.2",
+            "version": "1.1.0",
             "description": "Protect your Discord with 4-digit passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,9 +31,27 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed lock button stopped displaying (it seems to me that they change things on purpose to break plugins, because I don’t see the point of change that broke the button 😑)."
+                    "Disabled DevTools hotkey while locked.",
+                    "No longer sends a message while locked.",
+                    "Disabled Discord notifications while locked.",
+                    "Temporarily changed dropdown to radio group in the settings due to broken BD dropdowns."
                 ]
-            }
+            },
+            {
+                "type": "improved",
+                "title": "Improvements",
+                "items": [
+                    "Improved passcode storage security.",
+                    "Revised keybind recorder. Should now be working on any non-Windows OS."
+                ]
+            },
+            {
+                "type": "added",
+                "title": "What's new",
+                "items": [
+                    "Added switch that disables button highlighting when typing passcode from the keyboard."
+                ]
+            },
         ]
     };
 
@@ -41,6 +59,7 @@ module.exports = (() => {
     const request = require("request");
     const fs = require("fs");
     const path = require("path");
+    const crypto = require("crypto")
 
     return !global.ZeresPluginLibrary ? class {
         constructor() {
@@ -81,13 +100,16 @@ module.exports = (() => {
 
             const {
                 React,
-                ReactDOM
+                ReactDOM,
+                ModalActions,
+                ConfirmationModal
             } = DiscordModules;
 
             const Selectors = {
                 Chat: WebpackModules.getByProps("title", "chat"),
                 HeaderBar: WebpackModules.getByProps("iconWrapper", "clickable"),
-                App: WebpackModules.getByProps('mobileApp')
+                App: WebpackModules.getByProps('mobileApp'),
+                Modals: WebpackModules.getByProps('root', 'small')
             };
 
             const Gifs = {
@@ -117,22 +139,21 @@ module.exports = (() => {
             };
 
             const hashCode = string => {
-                let hash = 0, i, chr;
-                if (string.length === 0) return hash;
-                for (i = 0; i < string.length; i++) {
-                    chr = string.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + chr;
-                    hash |= 0;
-                }
-                return hash;
+                let salt = crypto.randomBytes(128).toString('base64');
+                let iterations = 10000;
+                let hash = crypto.pbkdf2Sync(string, salt, iterations, 512, 'sha512').toString('hex');
+
+                return { hash, salt, iterations };
             };
 
-            const hashCheck = (string, hashed) => hashCode(string) === hashed;
+            const hashCheck = ({ string, salt, iterations }, hashed) => crypto.pbkdf2Sync(string, salt, iterations, 512, 'sha512').toString('hex') === hashed;
 
             const HeaderBar = WebpackModules.getModule(m => m.default?.displayName === 'HeaderBar');
             const Button = WebpackModules.getByProps("BorderColors", "Colors");
+            const ButtonColors = WebpackModules.getByProps('ButtonLink').ButtonColors;
             const Tooltip = WebpackModules.getModule(m => m.default?.displayName === 'Tooltip');
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
+            const Markdown = WebpackModules.getModule(m => m.displayName === "Markdown" && m.rules);
 
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
 
@@ -263,7 +284,11 @@ module.exports = (() => {
                 }
 
                 codeSubmit() {
-                    if (hashCheck(this.state.code, this.props.plugin.settings.code))
+                    if (hashCheck({
+                        string: this.state.code,
+                        salt: this.props.plugin.settings.salt,
+                        iterations: this.props.plugin.settings.iterations
+                    }, this.props.plugin.settings.hash))
                         this.unlock();
                     else
                         this.fail();
@@ -329,11 +354,13 @@ module.exports = (() => {
 
                 componentWillUnmount() {
                     window.removeEventListener('keyup', this.keyUpListener);
+                    window.removeEventListener('keydown', this.disableKeys, true);
+                    if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications();
                 }
 
                 componentDidMount() {
                     document.onkeydown = e => {
-                        document.getElementById(`PCLBtn-${e.key}`)?.classList.add('PCL--btn-active');
+                        if (this.props.plugin.settings.highlightButtons) document.getElementById(`PCLBtn-${e.key}`)?.classList.add('PCL--btn-active');
 
                         e.preventDefault();
                         e.stopPropagation();
@@ -341,13 +368,23 @@ module.exports = (() => {
                     };
 
                     this.keyUpListener = e => {
-                        document.getElementById(`PCLBtn-${e.key}`)?.classList.remove('PCL--btn-active');
+                        if (this.props.plugin.settings.highlightButtons) document.getElementById(`PCLBtn-${e.key}`)?.classList.remove('PCL--btn-active');
 
                         if (!isNaN(+e.key) && e.key !== ' ') this.codeAppend(+e.key);
                         if (e.key === 'Backspace') this.codeBackspace();
                         if (e.key === 'Escape' && this.props.type !== PasscodeLocker.Types.DEFAULT) this.unlock(false);
                     };
                     window.addEventListener('keyup', this.keyUpListener);
+
+                    // Disable notifications
+                    if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications = Patcher.instead(DiscordModules.NotificationModule, 'showNotification', () => false);
+
+                    // Props to https://github.com/253ping
+                    this.disableKeys = e => {
+                        if(e.ctrlKey && e.shiftKey && e.key === "I") {e.preventDefault(); e.stopPropagation();}
+                        if (e.key === "Enter") {e.preventDefault(); e.stopPropagation(); return false;}
+                    }
+                    window.addEventListener('keydown', this.disableKeys, true);
 
                     setTimeout(() => {
                         this.bgCircle();
@@ -487,17 +524,15 @@ module.exports = (() => {
                     this.listeners = [];
                 }
 
-                formatKeys(keys) { return keys.map((k => 162 === k ? 17 : 160 === k ? 16 : 164 === k ? 18 : k)); }
-
                 start() {
                     this.pressedKeys = [];
 
                     this.keyDownListener = e => {
                         if (e.repeat) return;
-                        if (!this.pressedKeys.includes(e.keyCode)) this.pressedKeys.push(e.keyCode);
+                        if (!this.pressedKeys.includes(e.key)) this.pressedKeys.push(e.key);
                         this.processPressedKeys();
                     }
-                    this.keyUpListener = e => this.pressedKeys = this.pressedKeys.filter(key => key !== e.keyCode)
+                    this.keyUpListener = e => this.pressedKeys = this.pressedKeys.filter(key => key !== e.key)
                     window.addEventListener('keydown', this.keyDownListener);
                     window.addEventListener('keyup', this.keyUpListener);
 
@@ -515,7 +550,7 @@ module.exports = (() => {
 
                 processPressedKeys() {
                     this.listeners.forEach(({ keybind, handler }) => {
-                        if (this.formatKeys(keybind).sort().join('|') === this.pressedKeys.sort().join('|')) handler(keybind);
+                        if (keybind.sort().join('|').toLowerCase() === this.pressedKeys.sort().join('|').toLowerCase()) handler(keybind);
                     });
                 }
 
@@ -524,7 +559,7 @@ module.exports = (() => {
                 }
 
                 unlisten(keybind, handler = null) {
-                    this.listeners.splice(this.listeners.findIndex(l => l.keybind.join('|') === keybind.join('|') && (handler === null || l.handler === handler)), 1);
+                    this.listeners.splice(this.listeners.findIndex(l => l.keybind.join('|').toLowerCase() === keybind.join('|').toLowerCase() && (handler === null || l.handler === handler)), 1);
                 }
 
                 unlistenAll() {
@@ -532,7 +567,7 @@ module.exports = (() => {
                 }
 
                 updateKeybinds(currentKeybind, newKeybind) {
-                    this.listeners.forEach(l => { if (l.keybind.join('|') === currentKeybind.join('|')) l.keybind = newKeybind; });
+                    this.listeners.forEach(l => { if (l.keybind.join('|').toLowerCase() === currentKeybind.join('|').toLowerCase()) l.keybind = newKeybind; });
                 }
 
             }();
@@ -560,7 +595,7 @@ module.exports = (() => {
                     type = type ?? PasscodeLocker.Types.DEFAULT;
 
                     if (this.locked) return;
-                    if (this.settings.code === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error('Please first set up the passcode in the plugin settings.');
+                    if (this.settings.hash === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error('Please first set up the passcode in the plugin settings.');
 
                     this.unlock();
 
@@ -604,9 +639,11 @@ module.exports = (() => {
                     this.enableAutolock();
 
                     KeybindListener.start();
-                    if (Array.isArray(this.settings.keybind)) KeybindListener.listen(this.settings.keybind, () => this.onLockKeybind());
+                    this.keybindSetting = this.checkKeybindLoad(this.settings.keybind);
+                    this.keybind = this.keybindSetting.split('+');
+                    KeybindListener.listen(this.keybind, () => this.onLockKeybind());
 
-                    if (BdApi.getData(this.getName(), 'locked')) this.lock();
+                    if (this.settings.lockOnStartup || BdApi.getData(this.getName(), 'locked')) this.lock();
                 }
 
                 async patchHeaderBar() {
@@ -806,7 +843,7 @@ module.exports = (() => {
                             patchedNode.onclick = () => {
                                 if (!BdApi.Plugins.isEnabled(this.getName())) return;
 
-                                if (this.settings.code === -1) return node.click();
+                                if (this.settings.hash === -1) return node.click();
 
                                 this.lock({
                                     button: patchedNode,
@@ -838,7 +875,10 @@ module.exports = (() => {
                 }
 
                 updateCode(code) {
-                    this.settings.code = hashCode(code);
+                    const hashed = hashCode(code)
+                    this.settings.hash = hashed.hash;
+                    this.settings.salt = hashed.salt;
+                    this.settings.iterations = hashed.iterations;
                     this.saveSettings();
 
                     Toasts.success('Passcode has been updated!');
@@ -867,6 +907,11 @@ module.exports = (() => {
                 }
 
                 getSettingsPanel() {
+                    if (!this.KeybindRecorder) {
+                        this.KeybindRecorder = BdApi.findModuleByDisplayName("KeybindRecorder");
+                        this.KeybindStore = BdApi.findModuleByProps("toCombo");
+                    }
+
                     const Buttons = (...props) => {
                         class Panel extends React.Component {
                             render() {
@@ -957,25 +1002,25 @@ module.exports = (() => {
                             },
                         )),
 
-                        new Settings.Dropdown('Auto-lock', 'Require passcode if away for a time.', this.settings.autolock, [
+                        new Settings.RadioGroup('Auto-lock', 'Require passcode if away for a time.', this.settings.autolock, [
                             {
-                                label: 'Disabled',
+                                name: 'Disabled',
                                 value: false
                             },
                             {
-                                label: 'in 1 minute',
+                                name: 'in 1 minute',
                                 value: 60
                             },
                             {
-                                label: 'in 5 minutes',
+                                name: 'in 5 minutes',
                                 value: 60 * 5
                             },
                             {
-                                label: 'in 1 hour',
+                                name: 'in 1 hour',
                                 value: 60 * 60
                             },
                             {
-                                label: 'in 5 hours',
+                                name: 'in 5 hours',
                                 value: 60 * 60 * 5
                             },
                         ], e => {
@@ -983,13 +1028,33 @@ module.exports = (() => {
                             this.saveSettings();
                         }),
 
-                        new Settings.Keybind('Lock Keybind', null, this.settings.keybind, e => {
-                            KeybindListener.unlisten(this.settings.keybind);
-                            KeybindListener.listen(e, () => this.onLockKeybind());
+                        new Settings.SettingField('Lock Keybind', null, () => {}, props => {
+                            return React.createElement(this.KeybindRecorder, {
+                                defaultValue: this.KeybindStore.toCombo(this.keybindSetting.replace("control", "ctrl")),
+                                onChange: (e) => {
+                                    const keybindString = this.KeybindStore.toString(e).toLowerCase().replace("ctrl", "control");
 
-                            this.settings.keybind = e;
+                                    KeybindListener.unlisten(this.keybind);
+                                    this.keybindSetting = keybindString;
+                                    this.keybind = keybindString.split('+');
+                                    KeybindListener.listen(this.keybind, () => this.onLockKeybind());
+
+                                    this.settings.keybind = this.keybindSetting;
+                                    this.saveSettings();
+                                }
+                            })
+                        }),
+
+                        new Settings.Switch('Always lock on startup', 'Locks Discord at startup, even if it wasn\'t locked before Discord shut down', this.settings.lockOnStartup, e => {
+                            this.settings.lockOnStartup = e;
+                            this.saveSettings();
+                        }),
+
+                        new Settings.Switch('Highlight keyboard typing', 'Highlights buttons on screen when typing passcode from the keyboard', this.settings.highlightButtons, e => {
+                            this.settings.highlightButtons = e;
                             this.saveSettings();
                         })
+
                     );
 
                     DOMTools.onMountChange(settingsNode, () => KeybindListener.stop(), true);
@@ -998,16 +1063,104 @@ module.exports = (() => {
                     return settingsNode;
                 }
 
+                // Props to https://github.com/Farcrada (https://github.com/Farcrada/DiscordPlugins/blob/ed87e32c0e25960b3c76428b8929a9c6f5a1c20d/Hide-Channels/HideChannels.plugin.js)
+                checkKeybindLoad(keybindToLoad, defaultKeybind = "control+l") {
+                    defaultKeybind = defaultKeybind.toLowerCase().replace("ctrl", "control");
+
+                    //If no keybind
+                    if (!keybindToLoad)
+                        return defaultKeybind;
+
+                    //Error sensitive, so just plump it into a try-catch
+                    try {
+                        //If it's already a string, double check it
+                        if (typeof (keybindToLoad) === typeof (defaultKeybind)) {
+                            keybindToLoad = keybindToLoad.toLowerCase().replace("control", "ctrl");
+                            //Does it go into a combo? (i.e.: is it the correct format?)
+                            if (this.KeybindStore.toCombo(keybindToLoad))
+                                return keybindToLoad.replace("ctrl", "control");
+                            else
+                                return defaultKeybind;
+                        }
+                        else
+                            //If it's not a string, check if it's a combo.
+                        if (this.KeybindStore.toString(keybindToLoad))
+                            return this.KeybindStore.toString(keybindToLoad).toLowerCase().replace("ctrl", "control");
+                    }
+                    catch (e) { return defaultKeybind; }
+                }
+
                 constructor() {
                     super();
 
                     this.defaultSettings = {
-                        code: -1,
+                        hash: -1,
+                        salt: null,
+                        iterations: null,
                         autolock: false,
-                        keybind: [162, 76]
+                        keybind: "control+l",
+                        highlightButtons: false,
+                        lockOnStartup: true
                     };
 
                     this.settings = this.loadSettings(this.defaultSettings);
+
+                    if (this.settings.code) {
+                        delete this.settings.code;
+                        ['hash', 'salt', 'iterations'].forEach(k => this.settings[k] = this.defaultSettings[k]);
+                        this.saveSettings();
+
+                        Toasts.warning('Your passcode has been reset due to security update. Set it up again in the settings.');
+                    }
+                    if (typeof this.settings.keybind !== 'string') {
+                        this.settings.keybind = this.defaultSettings.keybind;
+                        this.saveSettings();
+                    }
+
+                    if (!BdApi.getData(this.getName(), 'hasShownAttention')) this.showAttentionModal();
+                }
+
+                showAttentionModal() {
+                    const that = this;
+                    class Modal extends React.Component {
+                        render() {
+                            return React.createElement(ConfirmationModal, Object.assign({
+                                    header: `${that.getName()}`,
+                                    confirmButtonColor: ButtonColors.BRAND,
+                                    className: Selectors.Modals.small,
+                                    confirmText: 'Got it',
+                                    cancelText: null,
+                                    style: {
+                                        lineHeight: '1.4em',
+                                    }
+                                }, this.props),
+                                [
+                                    React.createElement(
+                                        'div',
+                                        {
+                                            style: {
+                                                lineHeight: '1.4em',
+                                            }
+                                        },
+                                        React.createElement(
+                                            Markdown,
+                                            null,
+                                            `### ATTENTION PLEASE!  
+  
+This plugin **DOES** prevent people who are casually snooping, **BUT** if anyone has access to the computer with Discord logged in and is actually determined to get access to it, **there's nothing PasscodeLock can do** within the scope of a BD plugin to prevent them.
+\nThe real solution from a security perspective is just... lock or log out of your computer when you're not at it. *(c) Qwerasd*`
+                                        )
+                                    )
+                                ]
+                            );
+                        }
+                    }
+
+                    ModalActions.openModal(props => {
+                        return React.createElement(Modal, props)
+                    });
+
+                    BdApi.setData(this.getName(), 'hasShownAttention', true);
                 }
             }
         }

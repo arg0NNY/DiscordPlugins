@@ -7,10 +7,10 @@
  
 ```
 
-## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-review-badge] ![Version][passcodelock-version-badge]
+## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
 Protect your Discord with 4-digit passcode.
 
-[![Download][download-badge]][passcodelock-download-link] ![View][unavailable-badge]
+[![Download][download-badge]][passcodelock-download-link] [![View][view-badge]][passcodelock-view-link]
 
 
 ## [SyncedBD](https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD) ![Status][status-review-badge] ![Version][syncedbd-version-badge]
@@ -84,7 +84,10 @@ SOFTWARE.
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
-[passcodelock-version-badge]: https://img.shields.io/badge/version-1.0.2-blue
+[passcodelock-view-link]: https://betterdiscord.app/plugin/PasscodeLock
+[passcodelock-version-badge]: https://img.shields.io/badge/version-1.1.0-blue
+[passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
+[passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 
 [syncedbd-download-link]: https://arg0nny.github.io/bd/download/?id=SyncedBD
 [syncedbd-version-badge]: https://img.shields.io/badge/version-1.3.0-blue

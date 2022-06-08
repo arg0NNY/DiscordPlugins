@@ -1,9 +1,12 @@
 ![SyncedBD](https://user-images.githubusercontent.com/52377180/162033207-118f11ff-27f5-4aca-9a27-584b94c0bc07.gif)
 
-# [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-review-badge] ![Version][passcodelock-version-badge]
+## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
 Protect your Discord with 4-digit passcode.
 
-[![Download][download-badge]][passcodelock-download-link] ![View][unavailable-badge] [![Support][support-badge]][support-link]
+> This plugin **DOES** prevent people who are casually snooping, **BUT** if anyone has access to the computer with Discord logged in and is actually determined to get access to it, **there's nothing PasscodeLock can do** within the scope of a BD plugin to prevent them.
+The real solution from a security perspective is just... lock or log out of your computer when you're not at it. *(c) Qwerasd*
+
+[![Download][download-badge]][passcodelock-download-link] [![View][view-badge]][passcodelock-view-link] [![Support][support-badge]][support-link]
 
 [support-badge]: https://img.shields.io/badge/Support-%2343b581.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAC4UlEQVRYR8WXS4jNcRTHP195bEgWkoVsCAspNcVoLGblsaAoFCalBqU8BhuPPDZeQ5LBRmHBYsok7KYor5TyKDI2UiQLZWwojs6d351+85977+93J7q/uqt7Hp/fOed3zvmLzGNm44BWYAUwB5gafm7hc/i9AXqAXkk/c0wrJWRmU4BDwHpgQko+/N8PXAcOS/pSS6cqgJmNBfYBe4HxmY6LYj+AE8BxSb8q2agIEG7dDSwaoeOi2kNgVaVoDAMws7nAHWDaP3JeNvMRWC7pVWx3CEC4+bMM533AE+B5MDYfWADMTEA7RFMciUGAkPPeRNi9svcDnZL+xM7MbBSwCzgG+IupdjwdreWaiAEOAEdqKLrzZknlW1cUNTOPxqMExEFJR91ACSCE/n2i2vdIOpVTF2bWAZysIeuvY4anogxwAdhaQ8FzPjsOu5lNAjYFnSuSvpX1QzreJmqiS9I2hQ73NdFkrknaGDlw5x8iHW880wsQV4ENNS7lOpMdYClwNxHanZLORgBebKcLOrsldUYyO4AzCbvLHOAi0J4QbJd0OTJ+D1iSANgOnEvYveQA94HFCcHvgDv1M7GC80op6AK2JOw+cIB3GQ2kmh1/Oe6oWISjgdfArARAnwM4fb3D5jew0lu2JCs6MbOc8Lvaj5EC9EhygGHHzFqA2yFVqbZRAhhJCtok+TMbPGY2BmgDzie6YKxWSkFOERZvsk7SjehVbA4zwJeXek6pCHOeYdHoWkk3IwCHWVOP5yBbeoY5jahoO6cv5PCUGpGPzlQrLhpL9YUc5wOt2CXNLDWMKhn0ifYSWFieqjleI5mBYRQAvHhS4zi2/wJokdRvZk3A0zohho7jAJFaSGKADkmDw8jMfMtpriMCQxeSAOBreGolK/volrQ66Pm3wqc6umnllSxKRc5S6q34FvA4zPx5mbevvpRGb7pxa3kE4UXZmA+TCKJxn2ZxPhv2cVosqv/1ef4XvUY7+DQzteEAAAAASUVORK5CYII=
 [support-link]: https://discord.gg/M8DBtcZjXD
@@ -17,4 +20,7 @@ Protect your Discord with 4-digit passcode.
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
-[passcodelock-version-badge]: https://img.shields.io/badge/version-1.0.2-blue
+[passcodelock-view-link]: https://betterdiscord.app/plugin/PasscodeLock
+[passcodelock-version-badge]: https://img.shields.io/badge/version-1.1.0-blue
+[passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
+[passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
