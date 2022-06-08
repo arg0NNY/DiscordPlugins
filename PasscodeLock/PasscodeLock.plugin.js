@@ -158,7 +158,7 @@ module.exports = (() => {
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
 
             const BG_TRANSITION = 350;
-            const CODE_LENGTH = 4;
+            var CODE_LENGTH = 4;
 
             const getContainer = () => document.querySelector(`.${Selectors.App.app}`);
             const getContainerAsync = async () => {
@@ -257,30 +257,52 @@ module.exports = (() => {
                         });
 
                         setTimeout(() => {
-                            if (this.state.code.length >= CODE_LENGTH) {
-
-                                if (this.props.type === PasscodeLocker.Types.EDITOR) {
-                                    if (!this.state.confirm) {
-                                        this.newCode = this.state.code;
-                                        this.setState({
-                                            code: '',
-                                            confirm: true
-                                        });
-                                        if (this.icon) this.icon.src = Gifs.EDIT_ACTION;
-                                    }
-                                    else {
-                                        if (this.state.code !== this.newCode) this.fail();
-                                        else this.unlock(true);
-                                    }
-                                }
-                                else this.codeSubmit();
-
-                            }
+                            this.codeOk();
+                            if(CODE_LENGTH === this.state.code.length)
+                                this.codeAccept();
                         });
                     }
-                    this.codeBackspace = () => this.setState({
-                        code: this.state.code.slice(0, -1)
-                    });
+
+                    this.codeOk = () => {
+                        if(CODE_LENGTH !== -1)return;
+                        const ok = document.querySelector(".PCL--ok");
+                        const active = ok.classList.contains("PCL--ok--active");
+                        const newActive = this.state.code.length > 0;
+                        if(active != newActive) {
+                            if(newActive) {
+                                ok.classList.add("PCL--ok--active");
+                            } else {
+                                ok.classList.remove("PCL--ok--active");
+                            }
+                        }
+                    }
+
+                    this.codeAccept = () => {
+                        if (this.props.type === PasscodeLocker.Types.EDITOR) {
+                            if (!this.state.confirm) {
+                                this.newCode = this.state.code;
+                                this.setState({
+                                    code: '',
+                                    confirm: true
+                                });
+                                if (this.icon) this.icon.src = Gifs.EDIT_ACTION;
+                            }
+                            else {
+                                if (this.state.code !== this.newCode) this.fail();
+                                else this.unlock(true);
+                            }
+                        }
+                        else this.codeSubmit();
+                    }
+
+                    this.codeBackspace = () => {
+                        this.setState({
+                            code: this.state.code.slice(0, -1)
+                        });
+                        setTimeout(() => {
+                            this.codeOk();
+                        });
+                    } 
                 }
 
                 codeSubmit() {
@@ -382,7 +404,13 @@ module.exports = (() => {
                     // Props to https://github.com/253ping
                     this.disableKeys = e => {
                         if(e.ctrlKey && e.shiftKey && e.key === "I") {e.preventDefault(); e.stopPropagation();}
-                        if (e.key === "Enter") {e.preventDefault(); e.stopPropagation(); return false;}
+                        else if(e.ctrlKey) {e.preventDefault(); e.stopPropagation(); return false;} // Prevent all sorts of shortcuts like bold, italic, underline, strikethrough, ...
+                        else if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            this.codeAccept();
+                            return false;
+                        }
                     }
                     window.addEventListener('keydown', this.disableKeys, true);
 
@@ -476,13 +504,18 @@ module.exports = (() => {
                                             React.createElement(
                                                 'div',
                                                 { className: 'PCL--dots PCL--animate' },
-                                                Array(CODE_LENGTH).fill(null).map((_, i) => {
+                                                Array(this.state.code.length).fill(null).map(() => {
                                                     return React.createElement(
                                                         'div',
-                                                        { className: `PCL--dot ${i < this.state.code.length ? 'PCL--dot-active' : ''}` }
+                                                        { className: `PCL--dot PCL--dot-active` }
                                                     );
                                                 })
-                                            )
+                                            ),
+                                            (CODE_LENGTH === -1 ? React.createElement(
+                                                'div',
+                                                { className: 'PCL--ok PCL--animate', onClick: this.codeAccept },
+                                                "OK"
+                                            ) : ()=>{})
                                         ]
                                     ),
                                     React.createElement(
@@ -573,6 +606,13 @@ module.exports = (() => {
             }();
 
             return class PasscodeLock extends Plugin {
+                static Types = {
+                    FOUR_DIGIT: '4-digit',
+                    SIX_DIGIT: '6-digit',
+                    CUSTOM_NUMERIC: 'custom-numeric',
+                    CUSTON_ALPHANUMERIC: 'custom-alphanumeric'
+                }
+
                 getIconPath() {
                     return 'M19,10h-1V7.69c0-3.16-2.57-5.72-5.72-5.72H11.8C8.66,1.97,6,4.62,6,7.77V10H5c-0.55,0-1,0.45-1,1v8c0,1.65,1.35,3,3,3h10c1.65,0,3-1.35,3-3v-8C20,10.45,19.55,10,19,10z M8,7.77c0-2.06,1.74-3.8,3.8-3.8h0.48c2.05,0,3.72,1.67,3.72,3.72V10H8V7.77z M13.06,16.06c-0.02,0.02-0.04,0.04-0.06,0.05V18c0,0.55-0.45,1-1,1s-1-0.45-1-1v-1.89c-0.02-0.01-0.04-0.03-0.06-0.05C10.66,15.78,10.5,15.4,10.5,15c0-0.1,0.01-0.2,0.03-0.29c0.02-0.1,0.05-0.19,0.08-0.28c0.04-0.09,0.09-0.18,0.14-0.26c0.06-0.09,0.12-0.16,0.19-0.23c0.35-0.35,0.86-0.51,1.35-0.41c0.1,0.02,0.19,0.05,0.28,0.08c0.09,0.04,0.18,0.09,0.26,0.14c0.08,0.06,0.16,0.12,0.23,0.19s0.13,0.14,0.19,0.23c0.05,0.08,0.1,0.17,0.13,0.26c0.04,0.09,0.07,0.18,0.09,0.28C13.49,14.8,13.5,14.9,13.5,15C13.5,15.4,13.34,15.77,13.06,16.06z';
                 }
@@ -722,6 +762,7 @@ module.exports = (() => {
     flex-direction: column;
     align-items: center;
     padding-bottom: 22px;
+    max-height: 138px;
 }
 
 .PCL--icon {
@@ -731,6 +772,18 @@ module.exports = (() => {
 
 .PCL--title {
     margin: 25px 0 25px;
+}
+
+.PCL--ok {
+    display: none;
+}
+
+.PCL--ok.PCL--ok--active {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    transform: translateY(-50%);
+    left: 102.5%;
 }
 
 .PCL--dots {
@@ -1053,8 +1106,37 @@ module.exports = (() => {
                         new Settings.Switch('Highlight keyboard typing', 'Highlights buttons on screen when typing passcode from the keyboard', this.settings.highlightButtons, e => {
                             this.settings.highlightButtons = e;
                             this.saveSettings();
-                        })
+                        }),
 
+                        // Inspired by iOS code options
+                        new Settings.RadioGroup('Code options', 'Change code options', this.settings.codeType, [
+                            {
+                                name: '4-Digit Numeric Code',
+                                value: PasscodeLock.Types.FOUR_DIGIT
+                            },
+                            {
+                                name: '6-Digit Numeric Code',
+                                value: PasscodeLock.Types.SIX_DIGIT
+                            },
+                            {
+                                name: 'Custom Numeric Code',
+                                value: PasscodeLock.Types.CUSTOM_NUMERIC
+                            },
+                            // TODO: implement
+                            // {
+                            //     name: 'Custom Alphanumeric Code',
+                            //     value: PasscodeLock.Types.CUSTON_ALPHANUMERIC
+                            // },
+                        ], e => {
+                            this.settings.codeType = e;
+                            this.saveSettings();
+
+                            this.settings.hash = -1;
+                            Toasts.warning('Your passcode has been reset due to a change of the code type. Set it up again in the settings.');
+
+                            CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
+                                this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
+                        }),
                     );
 
                     DOMTools.onMountChange(settingsNode, () => KeybindListener.stop(), true);
@@ -1094,6 +1176,7 @@ module.exports = (() => {
                     super();
 
                     this.defaultSettings = {
+                        codeType: PasscodeLock.Types.FOUR_DIGIT,
                         hash: -1,
                         salt: null,
                         iterations: null,
@@ -1116,6 +1199,9 @@ module.exports = (() => {
                         this.settings.keybind = this.defaultSettings.keybind;
                         this.saveSettings();
                     }
+
+                    CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
+                        this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
 
                     if (!BdApi.getData(this.getName(), 'hasShownAttention')) this.showAttentionModal();
                 }
