@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.0
+ * @version 1.2.0
  * @description Protect your Discord with 4-digit passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.0",
+            "version": "1.2.0",
             "description": "Protect your Discord with 4-digit passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,25 +31,14 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Disabled DevTools hotkey while locked.",
-                    "No longer sends a message while locked.",
-                    "Disabled Discord notifications while locked.",
-                    "Temporarily changed dropdown to radio group in the settings due to broken BD dropdowns."
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Improved passcode storage security.",
-                    "Revised keybind recorder. Should now be working on any non-Windows OS."
+                    "Disabled another DevTools hotkey while locked.",
                 ]
             },
             {
                 "type": "added",
                 "title": "What's new",
                 "items": [
-                    "Added switch that disables button highlighting when typing passcode from the keyboard."
+                    "Added the option to change the length of the passcode. Up to 15 digits are now possible."
                 ]
             },
         ]
@@ -158,7 +147,8 @@ module.exports = (() => {
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
 
             const BG_TRANSITION = 350;
-            const CODE_LENGTH = 4;
+            const MAX_CODE_LENGTH = 15;
+            var CODE_LENGTH = 4;
 
             const getContainer = () => document.querySelector(`.${Selectors.App.app}`);
             const getContainerAsync = async () => {
@@ -210,10 +200,26 @@ module.exports = (() => {
                 get buttonPos() { return this.button && document.body.contains(this.button) ? this.button.getBoundingClientRect() : { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }; }
                 get containerPos() { return getContainer().getBoundingClientRect() }
 
+                backspaceButton() {
+                    return React.createElement(PasscodeBtn, {
+                        click: this.codeBackspace,
+                        code: 'Backspace',
+                        children: React.createElement(
+                            'svg',
+                            {
+                                xmlns: 'http://www.w3.org/2000/svg',
+                                viewBox: '0 0 24 24',
+                                height: '20',
+                                width: '20'
+                            },
+                            React.createElement('path', { fill: 'currentColor', d: 'M22 3H7c-.69 0-1.23.35-1.59.88L.37 11.45c-.22.34-.22.77 0 1.11l5.04 7.56c.36.52.9.88 1.59.88h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.7 13.3c-.39.39-1.02.39-1.41 0L14 13.41l-2.89 2.89c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41L12.59 12 9.7 9.11c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0L14 10.59l2.89-2.89c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41L15.41 12l2.89 2.89c.38.38.38 1.02 0 1.41z' })
+                        )
+                    })
+                }
+
                 buildCancelButton() {
-                    return ![PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)
-                        ? React.createElement('div')
-                        : React.createElement(PasscodeBtn, {
+                    if([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)) {
+                        return React.createElement(PasscodeBtn, {
                             click: () => this.unlock(false),
                             code: 'Escape',
                             children: React.createElement(
@@ -227,6 +233,37 @@ module.exports = (() => {
                                 React.createElement('path', { fill: 'currentColor', d: 'M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z' })
                             )
                         });
+                    } else if (CODE_LENGTH === -1) {
+                        return this.backspaceButton();
+                    } else {
+                        return React.createElement('div')
+                    }
+                }
+
+                buildBackspaceButton() {
+                    if([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) || CODE_LENGTH !== -1) {
+                        return this.backspaceButton();
+                    } else {
+                        return this.buildEnterButton();
+                    }
+                }
+
+                buildEnterButton() {
+                    return React.createElement(PasscodeBtn, {
+                        click: () => this.codeAccept(),
+                        code: 'Enter',
+                        children: React.createElement(
+                            'svg',
+                            {
+                                xmlns: 'http://www.w3.org/2000/svg',
+                                viewBox: '0 0 24 24',
+                                height: '26',
+                                width: '26'
+                            },
+                            React.createElement('path', { fill: 'none', d: 'M0 0h24v24H0V0z' }),
+                            React.createElement('path', { fill: 'currentColor', d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z' })
+                        )
+                    })
                 }
 
                 calculatePosition() {
@@ -252,35 +289,49 @@ module.exports = (() => {
                     };
 
                     this.codeAppend = (num) => {
+                        if(this.state.code.length >= MAX_CODE_LENGTH) {
+                            const dots = document.querySelector(".PCL--dots");
+                            if(!dots.classList.contains("PCL--dots--limit")) {
+                                dots.classList.add("PCL--dots--limit");
+                                setTimeout(() => {
+                                    dots?.classList.remove("PCL--dots--limit");
+                                }, 250);
+                            }
+                            return;
+                        };
                         this.setState({
                             code: this.state.code + num.toString()
                         });
 
                         setTimeout(() => {
-                            if (this.state.code.length >= CODE_LENGTH) {
-
-                                if (this.props.type === PasscodeLocker.Types.EDITOR) {
-                                    if (!this.state.confirm) {
-                                        this.newCode = this.state.code;
-                                        this.setState({
-                                            code: '',
-                                            confirm: true
-                                        });
-                                        if (this.icon) this.icon.src = Gifs.EDIT_ACTION;
-                                    }
-                                    else {
-                                        if (this.state.code !== this.newCode) this.fail();
-                                        else this.unlock(true);
-                                    }
-                                }
-                                else this.codeSubmit();
-
-                            }
+                            if(CODE_LENGTH === this.state.code.length)
+                                this.codeAccept();
                         });
                     }
-                    this.codeBackspace = () => this.setState({
-                        code: this.state.code.slice(0, -1)
-                    });
+
+                    this.codeAccept = () => {
+                        if (this.props.type === PasscodeLocker.Types.EDITOR) {
+                            if (!this.state.confirm) {
+                                this.newCode = this.state.code;
+                                this.setState({
+                                    code: '',
+                                    confirm: true
+                                });
+                                if (this.icon) this.icon.src = Gifs.EDIT_ACTION;
+                            }
+                            else {
+                                if (this.state.code !== this.newCode) this.fail();
+                                else this.unlock(true);
+                            }
+                        }
+                        else this.codeSubmit();
+                    }
+
+                    this.codeBackspace = () => {
+                        this.setState({
+                            code: this.state.code.slice(0, -1)
+                        });
+                    } 
                 }
 
                 codeSubmit() {
@@ -381,8 +432,16 @@ module.exports = (() => {
 
                     // Props to https://github.com/253ping
                     this.disableKeys = e => {
-                        if(e.ctrlKey && e.shiftKey && e.key === "I") {e.preventDefault(); e.stopPropagation();}
-                        if (e.key === "Enter") {e.preventDefault(); e.stopPropagation(); return false;}
+                        // Didn't know that there is more than one shortcut.
+                        if(e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" )) {e.preventDefault(); e.stopPropagation();}
+                        else if(e.ctrlKey) {e.preventDefault(); e.stopPropagation(); return false;} // Prevent all sorts of shortcuts like bold, italic, underline, strikethrough, ...
+                        else if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (this.props.plugin.settings.highlightButtons) document.getElementById('PCLBtn-Enter')?.classList.add('PCL--btn-active');
+                            this.codeAccept();
+                            return false;
+                        }
                     }
                     window.addEventListener('keydown', this.disableKeys, true);
 
@@ -476,10 +535,10 @@ module.exports = (() => {
                                             React.createElement(
                                                 'div',
                                                 { className: 'PCL--dots PCL--animate' },
-                                                Array(CODE_LENGTH).fill(null).map((_, i) => {
+                                                Array(this.state.code.length).fill(null).map(() => {
                                                     return React.createElement(
                                                         'div',
-                                                        { className: `PCL--dot ${i < this.state.code.length ? 'PCL--dot-active' : ''}` }
+                                                        { className: `PCL--dot PCL--dot-active` }
                                                     );
                                                 })
                                             )
@@ -493,20 +552,11 @@ module.exports = (() => {
                                             ...btns,
                                             this.buildCancelButton(),
                                             React.createElement(PasscodeBtn, { number: 0, dec: '+', click: this.codeAppend }),
-                                            React.createElement(PasscodeBtn, {
-                                                click: this.codeBackspace,
-                                                code: 'Backspace',
-                                                children: React.createElement(
-                                                    'svg',
-                                                    {
-                                                        xmlns: 'http://www.w3.org/2000/svg',
-                                                        viewBox: '0 0 24 24',
-                                                        height: '20',
-                                                        width: '20'
-                                                    },
-                                                    React.createElement('path', { fill: 'currentColor', d: 'M22 3H7c-.69 0-1.23.35-1.59.88L.37 11.45c-.22.34-.22.77 0 1.11l5.04 7.56c.36.52.9.88 1.59.88h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.7 13.3c-.39.39-1.02.39-1.41 0L14 13.41l-2.89 2.89c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41L12.59 12 9.7 9.11c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0L14 10.59l2.89-2.89c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41L15.41 12l2.89 2.89c.38.38.38 1.02 0 1.41z' })
-                                                )
-                                            })
+                                            this.buildBackspaceButton(),
+                                            React.createElement('div'),
+                                            ([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) && CODE_LENGTH === -1 ? 
+                                                this.buildEnterButton()    
+                                            : () => {})
                                         ]
                                     ),
                                 ]
@@ -573,6 +623,13 @@ module.exports = (() => {
             }();
 
             return class PasscodeLock extends Plugin {
+                static Types = {
+                    FOUR_DIGIT: '4-digit',
+                    SIX_DIGIT: '6-digit',
+                    CUSTOM_NUMERIC: 'custom-numeric',
+                    CUSTON_ALPHANUMERIC: 'custom-alphanumeric'
+                }
+
                 getIconPath() {
                     return 'M19,10h-1V7.69c0-3.16-2.57-5.72-5.72-5.72H11.8C8.66,1.97,6,4.62,6,7.77V10H5c-0.55,0-1,0.45-1,1v8c0,1.65,1.35,3,3,3h10c1.65,0,3-1.35,3-3v-8C20,10.45,19.55,10,19,10z M8,7.77c0-2.06,1.74-3.8,3.8-3.8h0.48c2.05,0,3.72,1.67,3.72,3.72V10H8V7.77z M13.06,16.06c-0.02,0.02-0.04,0.04-0.06,0.05V18c0,0.55-0.45,1-1,1s-1-0.45-1-1v-1.89c-0.02-0.01-0.04-0.03-0.06-0.05C10.66,15.78,10.5,15.4,10.5,15c0-0.1,0.01-0.2,0.03-0.29c0.02-0.1,0.05-0.19,0.08-0.28c0.04-0.09,0.09-0.18,0.14-0.26c0.06-0.09,0.12-0.16,0.19-0.23c0.35-0.35,0.86-0.51,1.35-0.41c0.1,0.02,0.19,0.05,0.28,0.08c0.09,0.04,0.18,0.09,0.26,0.14c0.08,0.06,0.16,0.12,0.23,0.19s0.13,0.14,0.19,0.23c0.05,0.08,0.1,0.17,0.13,0.26c0.04,0.09,0.07,0.18,0.09,0.28C13.49,14.8,13.5,14.9,13.5,15C13.5,15.4,13.34,15.77,13.06,16.06z';
                 }
@@ -740,26 +797,43 @@ module.exports = (() => {
     justify-content: center;
 }
 
+@keyframes PCL--limit {
+    0% {transform: translateX(10px);}
+    25% {transform: translateX(0px);}
+    50% {transform: translateX(-10px);}
+    100% {transform: translateX(0px);}
+}
+
+.PCL--dots.PCL--dots--limit {
+    animation-name: PCL--limit;
+    animation-duration: 250ms;
+}
+
+@keyframes PCL--dot--anim {
+    0% {
+        opacity: 0;
+        transform: scale(.5) translateX(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateX(0);
+    }
+}
+
 .PCL--dot {
     height: 8px;
     width: 8px;
     border-radius: 50%;
     background: var(--main-color);
     margin: 0 5px;
-    transition: .25s opacity, .25s transform;
-    opacity: 0;
-    transform: scale(.5) translateX(5px);
-}
-
-.PCL--dot-active {
-    opacity: 1;
-    transform: scale(1) translateX(0);
+    animation-name: PCL--dot--anim;
+    animation-duration: 250ms;
 }
 
 .PCL--buttons {
     display: grid;
     grid-template-columns: repeat(3, 60px);
-    grid-template-rows: repeat(4, 60px);
+    grid-template-rows: repeat(5, 60px);
     gap: 30px;
     padding: 40px 20px;
     position: relative;
@@ -1053,8 +1127,37 @@ module.exports = (() => {
                         new Settings.Switch('Highlight keyboard typing', 'Highlights buttons on screen when typing passcode from the keyboard', this.settings.highlightButtons, e => {
                             this.settings.highlightButtons = e;
                             this.saveSettings();
-                        })
+                        }),
 
+                        // Inspired by iOS code options
+                        new Settings.RadioGroup('Code options', 'Change code options', this.settings.codeType, [
+                            {
+                                name: '4-Digit Numeric Code',
+                                value: PasscodeLock.Types.FOUR_DIGIT
+                            },
+                            {
+                                name: '6-Digit Numeric Code',
+                                value: PasscodeLock.Types.SIX_DIGIT
+                            },
+                            {
+                                name: 'Custom Numeric Code',
+                                value: PasscodeLock.Types.CUSTOM_NUMERIC
+                            },
+                            // TODO: implement
+                            // {
+                            //     name: 'Custom Alphanumeric Code',
+                            //     value: PasscodeLock.Types.CUSTON_ALPHANUMERIC
+                            // },
+                        ], e => {
+                            this.settings.codeType = e;
+                            this.saveSettings();
+
+                            this.settings.hash = -1;
+                            Toasts.warning('Your passcode has been reset due to a change of the code type. Set it up again in the settings.');
+
+                            CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
+                                this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
+                        }),
                     );
 
                     DOMTools.onMountChange(settingsNode, () => KeybindListener.stop(), true);
@@ -1094,6 +1197,7 @@ module.exports = (() => {
                     super();
 
                     this.defaultSettings = {
+                        codeType: PasscodeLock.Types.FOUR_DIGIT,
                         hash: -1,
                         salt: null,
                         iterations: null,
@@ -1116,6 +1220,9 @@ module.exports = (() => {
                         this.settings.keybind = this.defaultSettings.keybind;
                         this.saveSettings();
                     }
+
+                    CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
+                        this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
 
                     if (!BdApi.getData(this.getName(), 'hasShownAttention')) this.showAttentionModal();
                 }
