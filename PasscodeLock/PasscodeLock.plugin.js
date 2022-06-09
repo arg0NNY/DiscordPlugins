@@ -3,8 +3,8 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.2.0
- * @description Protect your Discord with 4-digit passcode.
+ * @version 1.2.1
+ * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,8 +21,8 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.0",
-            "description": "Protect your Discord with 4-digit passcode.",
+            "version": "1.2.1",
+            "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
         },
@@ -31,16 +31,16 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Disabled another DevTools hotkey while locked.",
+                    "Slight fixes.",
                 ]
             },
             {
                 "type": "added",
                 "title": "What's new",
                 "items": [
-                    "Added the option to change the length of the passcode. Up to 15 digits are now possible."
+                    "Notifications are now censored while Discord is locked. You can disable them in the settings."
                 ]
-            },
+            }
         ]
     };
 
@@ -209,8 +209,8 @@ module.exports = (() => {
                             {
                                 xmlns: 'http://www.w3.org/2000/svg',
                                 viewBox: '0 0 24 24',
-                                height: '20',
-                                width: '20'
+                                height: '22',
+                                width: '22'
                             },
                             React.createElement('path', { fill: 'currentColor', d: 'M22 3H7c-.69 0-1.23.35-1.59.88L.37 11.45c-.22.34-.22.77 0 1.11l5.04 7.56c.36.52.9.88 1.59.88h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3.7 13.3c-.39.39-1.02.39-1.41 0L14 13.41l-2.89 2.89c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41L12.59 12 9.7 9.11c-.39-.39-.39-1.02 0-1.41.39-.39 1.02-.39 1.41 0L14 10.59l2.89-2.89c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41L15.41 12l2.89 2.89c.38.38.38 1.02 0 1.41z' })
                         )
@@ -227,8 +227,8 @@ module.exports = (() => {
                                 {
                                     xmlns: 'http://www.w3.org/2000/svg',
                                     viewBox: '0 0 24 24',
-                                    height: '26',
-                                    width: '26'
+                                    height: '30',
+                                    width: '30'
                                 },
                                 React.createElement('path', { fill: 'currentColor', d: 'M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z' })
                             )
@@ -256,12 +256,12 @@ module.exports = (() => {
                             'svg',
                             {
                                 xmlns: 'http://www.w3.org/2000/svg',
-                                viewBox: '0 0 24 24',
-                                height: '26',
-                                width: '26'
+                                viewBox: '0 0 48 48',
+                                height: '34',
+                                width: '34'
                             },
                             React.createElement('path', { fill: 'none', d: 'M0 0h24v24H0V0z' }),
-                            React.createElement('path', { fill: 'currentColor', d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z' })
+                            React.createElement('path', { fill: 'currentColor', d: 'M21.05 28.55 16.15 23.65Q15.7 23.2 15.05 23.2Q14.4 23.2 13.9 23.7Q13.4 24.2 13.4 24.85Q13.4 25.5 13.9 25.95L20 32.05Q20.45 32.5 21.05 32.5Q21.65 32.5 22.1 32.05L34.1 20.05Q34.55 19.6 34.525 18.95Q34.5 18.3 34.05 17.85Q33.6 17.35 32.925 17.35Q32.25 17.35 31.75 17.85ZM24 44Q19.75 44 16.1 42.475Q12.45 40.95 9.75 38.25Q7.05 35.55 5.525 31.9Q4 28.25 4 24Q4 19.8 5.525 16.15Q7.05 12.5 9.75 9.8Q12.45 7.1 16.1 5.55Q19.75 4 24 4Q28.2 4 31.85 5.55Q35.5 7.1 38.2 9.8Q40.9 12.5 42.45 16.15Q44 19.8 44 24Q44 28.25 42.45 31.9Q40.9 35.55 38.2 38.25Q35.5 40.95 31.85 42.475Q28.2 44 24 44ZM24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24Q24 24 24 24ZM24 41Q31.25 41 36.125 36.125Q41 31.25 41 24Q41 16.75 36.125 11.875Q31.25 7 24 7Q16.75 7 11.875 11.875Q7 16.75 7 24Q7 31.25 11.875 36.125Q16.75 41 24 41Z' })
                         )
                     })
                 }
@@ -298,7 +298,7 @@ module.exports = (() => {
                                 }, 250);
                             }
                             return;
-                        };
+                        }
                         this.setState({
                             code: this.state.code + num.toString()
                         });
@@ -331,7 +331,7 @@ module.exports = (() => {
                         this.setState({
                             code: this.state.code.slice(0, -1)
                         });
-                    } 
+                    }
                 }
 
                 codeSubmit() {
@@ -427,8 +427,15 @@ module.exports = (() => {
                     };
                     window.addEventListener('keyup', this.keyUpListener);
 
-                    // Disable notifications
-                    if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications = Patcher.instead(DiscordModules.NotificationModule, 'showNotification', () => false);
+                    // Manage notifications
+                    if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications = this.props.plugin.settings.hideNotifications
+                        ? Patcher.instead(DiscordModules.NotificationModule, 'showNotification', () => false)
+                        : Patcher.before(DiscordModules.NotificationModule, 'showNotification', (self, params) => {
+                            params[0] = Gifs.LOCKED_SHAKE;
+                            params[1] = 'New notification';
+                            params[2] = 'You have 1 new notification!';
+                            if (params[4].onClick) params[4].onClick = () => {};
+                        });
 
                     // Props to https://github.com/253ping
                     this.disableKeys = e => {
@@ -535,10 +542,10 @@ module.exports = (() => {
                                             React.createElement(
                                                 'div',
                                                 { className: 'PCL--dots PCL--animate' },
-                                                Array(this.state.code.length).fill(null).map(() => {
+                                                Array(MAX_CODE_LENGTH).fill(null).map((_, i) => {
                                                     return React.createElement(
                                                         'div',
-                                                        { className: `PCL--dot PCL--dot-active` }
+                                                        { className: `PCL--dot ${i < this.state.code.length ? 'PCL--dot-active' : ''}` }
                                                     );
                                                 })
                                             )
@@ -553,10 +560,9 @@ module.exports = (() => {
                                             this.buildCancelButton(),
                                             React.createElement(PasscodeBtn, { number: 0, dec: '+', click: this.codeAppend }),
                                             this.buildBackspaceButton(),
-                                            React.createElement('div'),
-                                            ([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) && CODE_LENGTH === -1 ? 
-                                                this.buildEnterButton()    
-                                            : () => {})
+                                            ...([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) && CODE_LENGTH === -1 ?
+                                                [React.createElement('div'), this.buildEnterButton()]
+                                                : [])
                                         ]
                                     ),
                                 ]
@@ -809,31 +815,38 @@ module.exports = (() => {
     animation-duration: 250ms;
 }
 
-@keyframes PCL--dot--anim {
-    0% {
-        opacity: 0;
-        transform: scale(.5) translateX(5px);
-    }
-    100% {
-        opacity: 1;
-        transform: scale(1) translateX(0);
-    }
-}
-
 .PCL--dot {
+    position: relative;
+    height: 8px;
+    width: 0;
+    /*animation-name: PCL--dot--anim;
+    animation-duration: 250ms;*/
+    transition: .25s opacity, .25s transform, .25s width, .25s margin;
+    opacity: 0;
+    transform: scale(.5);
+}
+.PCL--dot::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
     height: 8px;
     width: 8px;
     border-radius: 50%;
     background: var(--main-color);
+}
+.PCL--dot-active {
+    opacity: 1;
+    transform: scale(1);
+    width: 8px;
     margin: 0 5px;
-    animation-name: PCL--dot--anim;
-    animation-duration: 250ms;
 }
 
 .PCL--buttons {
     display: grid;
     grid-template-columns: repeat(3, 60px);
-    grid-template-rows: repeat(5, 60px);
+    grid-auto-rows: 60px;
     gap: 30px;
     padding: 40px 20px;
     position: relative;
@@ -1076,6 +1089,36 @@ module.exports = (() => {
                             },
                         )),
 
+                        // Inspired by iOS code options
+                        new Settings.RadioGroup('Code type', null, this.settings.codeType, [
+                            {
+                                name: '4-Digit Numeric Code',
+                                value: PasscodeLock.Types.FOUR_DIGIT
+                            },
+                            {
+                                name: '6-Digit Numeric Code',
+                                value: PasscodeLock.Types.SIX_DIGIT
+                            },
+                            {
+                                name: 'Custom Numeric Code',
+                                value: PasscodeLock.Types.CUSTOM_NUMERIC
+                            },
+                            // TODO: implement
+                            // {
+                            //     name: 'Custom Alphanumeric Code',
+                            //     value: PasscodeLock.Types.CUSTON_ALPHANUMERIC
+                            // },
+                        ], e => {
+                            this.settings.codeType = e;
+                            this.saveSettings();
+
+                            this.settings.hash = -1;
+                            Toasts.warning('Your passcode has been reset. Set it up again.');
+
+                            CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
+                                this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
+                        }),
+
                         new Settings.RadioGroup('Auto-lock', 'Require passcode if away for a time.', this.settings.autolock, [
                             {
                                 name: 'Disabled',
@@ -1129,35 +1172,20 @@ module.exports = (() => {
                             this.saveSettings();
                         }),
 
-                        // Inspired by iOS code options
-                        new Settings.RadioGroup('Code options', 'Change code options', this.settings.codeType, [
+                        new Settings.RadioGroup('Notifications when locked', null, this.settings.hideNotifications, [
                             {
-                                name: '4-Digit Numeric Code',
-                                value: PasscodeLock.Types.FOUR_DIGIT
+                                name: 'Disable notifications',
+                                value: true
                             },
                             {
-                                name: '6-Digit Numeric Code',
-                                value: PasscodeLock.Types.SIX_DIGIT
+                                name: 'Censor notifications',
+                                value: false
                             },
-                            {
-                                name: 'Custom Numeric Code',
-                                value: PasscodeLock.Types.CUSTOM_NUMERIC
-                            },
-                            // TODO: implement
-                            // {
-                            //     name: 'Custom Alphanumeric Code',
-                            //     value: PasscodeLock.Types.CUSTON_ALPHANUMERIC
-                            // },
                         ], e => {
-                            this.settings.codeType = e;
+                            this.settings.hideNotifications = e;
                             this.saveSettings();
-
-                            this.settings.hash = -1;
-                            Toasts.warning('Your passcode has been reset due to a change of the code type. Set it up again in the settings.');
-
-                            CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
-                                this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
                         }),
+
                     );
 
                     DOMTools.onMountChange(settingsNode, () => KeybindListener.stop(), true);
@@ -1204,7 +1232,8 @@ module.exports = (() => {
                         autolock: false,
                         keybind: "control+l",
                         highlightButtons: false,
-                        lockOnStartup: true
+                        lockOnStartup: true,
+                        hideNotifications: false
                     };
 
                     this.settings = this.loadSettings(this.defaultSettings);
