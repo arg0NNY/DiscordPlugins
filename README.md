@@ -20,7 +20,7 @@ Syncs your BetterDiscord settings, official themes, and plugins with their confi
 
 
 ## [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
-Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popouts animations, and more.
+Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
 
 [![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link]
 
