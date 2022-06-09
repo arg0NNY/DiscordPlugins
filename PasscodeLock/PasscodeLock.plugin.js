@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.0
+ * @version 1.2.0
  * @description Protect your Discord with 4-digit passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.0",
+            "version": "1.2.0",
             "description": "Protect your Discord with 4-digit passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,25 +31,14 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Disabled DevTools hotkey while locked.",
-                    "No longer sends a message while locked.",
-                    "Disabled Discord notifications while locked.",
-                    "Temporarily changed dropdown to radio group in the settings due to broken BD dropdowns."
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Improved passcode storage security.",
-                    "Revised keybind recorder. Should now be working on any non-Windows OS."
+                    "Disabled another DevTools hotkey while locked.",
                 ]
             },
             {
                 "type": "added",
                 "title": "What's new",
                 "items": [
-                    "Added switch that disables button highlighting when typing passcode from the keyboard."
+                    "Added the option to change the length of the passcode. Up to 15 digits are now possible."
                 ]
             },
         ]
@@ -244,13 +233,15 @@ module.exports = (() => {
                                 React.createElement('path', { fill: 'currentColor', d: 'M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z' })
                             )
                         });
-                    } else {
+                    } else if (CODE_LENGTH === -1) {
                         return this.backspaceButton();
+                    } else {
+                        return React.createElement('div')
                     }
                 }
 
                 buildBackspaceButton() {
-                    if([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type)) {
+                    if([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) || CODE_LENGTH !== -1) {
                         return this.backspaceButton();
                     } else {
                         return this.buildEnterButton();
@@ -563,7 +554,7 @@ module.exports = (() => {
                                             React.createElement(PasscodeBtn, { number: 0, dec: '+', click: this.codeAppend }),
                                             this.buildBackspaceButton(),
                                             React.createElement('div'),
-                                            ([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) ? 
+                                            ([PasscodeLocker.Types.SETTINGS, PasscodeLocker.Types.EDITOR].includes(this.props.type) && CODE_LENGTH === -1 ? 
                                                 this.buildEnterButton()    
                                             : () => {})
                                         ]
