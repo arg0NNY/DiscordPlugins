@@ -1,7 +1,7 @@
 ![betteranimations](https://user-images.githubusercontent.com/52377180/152634904-a58fdab9-3402-44c3-a9aa-8eed14b47c8e.gif)
 
 # [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
-Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
+Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
 
 ![example-min](https://user-images.githubusercontent.com/52377180/152634998-2b1a9be7-b495-4096-b741-1eef7660625b.gif)
 

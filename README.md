@@ -8,31 +8,31 @@
 ```
 
 ## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
-Protect your Discord with 4-digit passcode.
+Protect your Discord with a passcode.
 
 [![Download][download-badge]][passcodelock-download-link] [![View][view-badge]][passcodelock-view-link]
 
 
 ## [SyncedBD](https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD) ![Status][status-review-badge] ![Version][syncedbd-version-badge]
-Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!
+Syncs your BetterDiscord settings, official themes, and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all of your BD configs after a clean installation. Plug-n-play it is!
 
 [![Download][download-badge]][syncedbd-download-link] ![View][unavailable-badge]
 
 
 ## [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
-Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
+Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
 
 [![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link]
 
 
 ## [InMyVoice](https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice) ![Status][status-official-badge] ![Version][inmyvoice-version-badge] ![Downloads][inmyvoice-downloads-badge] ![Likes][inmyvoice-likes-badge]
-Shows if a person in the text chat is also in a voice chat you're in.
+Shows if a person in the text chat is also in a voice chat that you're in.
 
 [![Download][download-badge]][inmyvoice-download-link] [![View][view-badge]][inmyvoice-view-link]
 
 
 ## [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
-Allows you to view recent messages in channels without switching to it.
+Allows you to view recent messages in channels without switching to them.
 
 [![Download][download-badge]][channelspreview-download-link] [![View][view-badge]][channelspreview-view-link]
 
