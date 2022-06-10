@@ -1,5 +1,5 @@
 # [InMyVoice](https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice) ![Status][status-official-badge] ![Version][inmyvoice-version-badge] ![Downloads][inmyvoice-downloads-badge] ![Likes][inmyvoice-likes-badge]
-Shows if a person in the text chat is also in a voice chat you're in.
+Shows if a person in the text chat is also in a voice chat that you're in.
 
 ![Example](https://user-images.githubusercontent.com/52377180/151669091-9e0082e9-badd-466c-a909-bcf3cbc1bdf3.png)
 
