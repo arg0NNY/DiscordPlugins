@@ -8,7 +8,7 @@
 ```
 
 ## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
-Protect your Discord with an up to 15-digit long passcode.
+Protect your Discord with a passcode.
 
 [![Download][download-badge]][passcodelock-download-link] [![View][view-badge]][passcodelock-view-link]
 
