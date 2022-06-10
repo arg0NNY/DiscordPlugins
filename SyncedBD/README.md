@@ -1,7 +1,7 @@
 ![SyncedBD](https://user-images.githubusercontent.com/52377180/157688075-b1408100-9582-4654-85f4-a36f88118aad.gif)
 
 # [SyncedBD](https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD) ![Status][status-review-badge] ![Version][syncedbd-version-badge]
-Syncs your BetterDiscord settings, official themes and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all your BD configs after a clean installation. Plug-n-play it is!
+Syncs your BetterDiscord settings, official themes, and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all of your BD configs after a clean installation. Plug-n-play it is!
 
 [![Download][download-badge]][syncedbd-download-link] ![View][unavailable-badge] [![Support][support-badge]][support-link]
 
