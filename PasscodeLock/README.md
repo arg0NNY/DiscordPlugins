@@ -1,7 +1,7 @@
 ![SyncedBD](https://user-images.githubusercontent.com/52377180/162033207-118f11ff-27f5-4aca-9a27-584b94c0bc07.gif)
 
 ## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
-Protect your Discord with an up to 15-digit long passcode.
+Protect your Discord with a passcode.
 
 > This plugin **DOES** prevent people who are casually snooping, **BUT** if anyone has access to the computer with Discord logged in and is actually determined to get access to it, **there's nothing PasscodeLock can do** within the scope of a BD plugin to prevent them.
 The real solution from a security perspective is just... lock or log out of your computer when you're not at it. *(c) Qwerasd*
