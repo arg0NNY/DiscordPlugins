@@ -10,7 +10,7 @@
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js
  */
 
-module.exports = (() => {
+ module.exports = (() => {
     const config = {
         "info": {
             "name": "PasscodeLock",
@@ -302,6 +302,7 @@ module.exports = (() => {
                         this.setState({
                             code: this.state.code + num.toString()
                         });
+                        this.codeTypingSubmit();
 
                         setTimeout(() => {
                             if(CODE_LENGTH === this.state.code.length)
@@ -343,6 +344,16 @@ module.exports = (() => {
                         this.unlock();
                     else
                         this.fail();
+                }
+
+                codeTypingSubmit() {
+                    if (hashCheck({
+                        string: this.state.code,
+                        salt: this.props.plugin.settings.salt,
+                        iterations: this.props.plugin.settings.iterations
+                    }, this.props.plugin.settings.hash)) {
+                        this.unlock();
+                    }
                 }
 
                 fail() {
