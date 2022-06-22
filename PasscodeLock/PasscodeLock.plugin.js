@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.2.1
+ * @version 1.2.2
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.1",
+            "version": "1.2.2",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,14 +31,14 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Slight fixes.",
+                    "Fixed unnecessary 'Lock Discord' button under 'X' button in the sidebar chat.",
                 ]
             },
             {
-                "type": "added",
-                "title": "What's new",
+                "type": "improved",
+                "title": "Improvements",
                 "items": [
-                    "Notifications are now censored while Discord is locked. You can disable them in the settings."
+                    "Lock shortcut now works with any non-latin layout.",
                 ]
             }
         ]
@@ -585,7 +585,9 @@ module.exports = (() => {
 
                     this.keyDownListener = e => {
                         if (e.repeat) return;
-                        if (!this.pressedKeys.includes(e.key)) this.pressedKeys.push(e.key);
+
+                        const key = e.code.slice(0, -1) === 'Key' ? e.code.slice(-1).toLowerCase() : e.key;
+                        if (!this.pressedKeys.includes(key)) this.pressedKeys.push(key);
                         this.processPressedKeys();
                     }
                     this.keyUpListener = e => this.pressedKeys = this.pressedKeys.filter(key => key !== e.key)
@@ -713,7 +715,7 @@ module.exports = (() => {
                     Patcher.after(HeaderBar, "default", (self, _, value) => {
                         const children = value.props?.children?.props?.children;
                         const toolbar = children ? children[children.length - 1].props?.children?.props?.children : null;
-                        if (!Array.isArray(toolbar) || toolbar.some((e => e?.key === this.getName()))) return;
+                        if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return;
 
                         toolbar.splice(-2, 0, React.createElement(
                             Tooltip.default,
