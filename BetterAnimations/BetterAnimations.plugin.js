@@ -3,8 +3,8 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.2
- * @description Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.
+ * @version 1.1.3
+ * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,8 +21,8 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.2",
-            "description": "Improves your whole experience using Discord. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with the popouts animations and more.",
+            "version": "1.1.3",
+            "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
         },
@@ -31,8 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed animations flickering with transparent themes enabled when switching between Friends and Nitro tabs. Flickering can still be observed when switching between pages too quickly (to be fixed in further updates).",
-                    "Most likely fixed problem when animation element is not removed at the end."
+                    "Fixed popouts overflowing the window borders."
                 ]
             }
         ]
@@ -1207,7 +1206,7 @@ module.exports = (() => {
                         const node = self.elementRef.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
                         if (!node) return;
 
-                        const animator = new RevealAnimator(this.settings.popouts.type, node);
+                        const animator = new RevealAnimator(this.settings.popouts.type, node.children[0]);
                         animator.animate({
                             duration: this.settings.popouts.duration,
                             easing: Easing[this.settings.popouts.easing],
@@ -1447,6 +1446,11 @@ module.exports = (() => {
                             /* Expression Picker Fix */
                             .${Selectors.EmojiPicker.emojiPickerInExpressionPicker}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
                                 background-color: inherit;
+                            }
+                            
+                            
+                            .${Selectors.Popout.layerContainer} {
+                                position: fixed;
                             }
 
 
