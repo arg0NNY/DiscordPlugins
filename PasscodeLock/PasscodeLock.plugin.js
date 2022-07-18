@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.2.2
+ * @version 1.3.0
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,24 +21,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.2",
+            "version": "1.3.0",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
         },
         "changelog": [
             {
-                "type": "fixed",
-                "title": "Fixed",
+                "type": "added",
+                "title": "What's new",
                 "items": [
-                    "Fixed unnecessary 'Lock Discord' button under 'X' button in the sidebar chat.",
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Lock shortcut now works with any non-latin layout.",
+                    "The plugin now has the following localizations: English, Russian, Ukrainian, Dutch, French, German, Spanish. You can help translate the plugin into your language on the Crowdin page, which can be found at the bottom of the plugin settings.",
                 ]
             }
         ]
@@ -143,8 +136,50 @@ module.exports = (() => {
             const Tooltip = WebpackModules.getModule(m => m.default?.displayName === 'Tooltip');
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
             const Markdown = WebpackModules.getModule(m => m.displayName === "Markdown" && m.rules);
+            const LanguageStore = WebpackModules.getModule(m => m.Messages && m.Messages.IMAGE && m);
 
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
+
+            // Help translate the plugin on the Crowdin page: https://crwd.in/betterdiscord-passcodelock
+            const Locale = new class {
+
+                constructor() {
+                    this._names = ['ENTER_PASSCODE', 'ENTER_NEW_PASSCODE', 'RE_ENTER_PASSCODE', 'EDIT_PASSCODE', 'LOCK_DISCORD', 'CODE_TYPE_SETTING', '4DIGIT_NCODE', '6DIGIT_NCODE', 'CUSTOM_NCODE', 'AUTOLOCK_SETTING', 'AUTOLOCK_DESC', 'AUTOLOCK_DISABLED', 'AUTOLOCK_1M', 'AUTOLOCK_5M', 'AUTOLOCK_1H', 'AUTOLOCK_5H', 'LOCK_KEYBIND_SETTING', 'ALWAYS_LOCK_SETTING', 'ALWAYS_LOCK_DESC', 'HIGHLIGHT_TYPING_SETTING', 'HIGHLIGHT_TYPING_DESC', 'NOTIFICATIONS_SETTING', 'NOTIFICATIONS_SETTING_DISABLE', 'NOTIFICATIONS_SETTING_CENSOR', 'NEW_NOTIFICATION', 'NEW_NOTIFICATION_DESC', 'FIRST_SETUP_MESSAGE', 'PASSCODE_UPDATED_MESSAGE', 'PASSCODE_RESET_DEFAULT_MESSAGE', 'PASSCODE_RESET_SECURITY_UPDATE_MESSAGE', 'ATTENTION_MESSAGE'];
+                    this.raw = {
+                        'en': ["Enter your Discord passcode", "Enter your new passcode", "Re-enter your passcode", "Edit Passcode", "Lock Discord", "Code type", "4-Digit Numeric Code", "6-Digit Numeric Code", "Custom Numeric Code", "Auto-lock", "Require passcode if away for a time.", "Disabled", "in 1 minute", "in 5 minutes", "in 1 hour", "in 5 hours", "Lock keybind", "Always lock on startup", "Locks Discord at startup, even if it wasn't locked before Discord shut down", "Highlight keyboard typing", "Highlights buttons on screen when typing passcode from the keyboard", "Notifications when locked", "Disable notifications", "Censor notifications", "New notification", "You have 1 new notification!", "Please first set up the passcode in the plugin settings.", "Passcode has been updated!", "Your passcode has been reset. Set it up again.", "Your passcode has been reset due to security update. Set it up again in the settings.", "### ATTENTION PLEASE!\n\nThis plugin **DOES** prevent people who are casually snooping, **BUT** if anyone has access to the computer with Discord logged in and is actually determined to get access to it, there's nothing PasscodeLock can do within the scope of a BD plugin to prevent them.\n\nThe real solution from a security perspective is just... lock or log out of your computer when you're not at it. *(c) Qwerasd*"],
+                        'ru': ["Введите ваш код Discord", "Введите ваш новый код", "Повторно введите ваш код", "Изменить код", "Заблокировать Discord", "Тип кода", "4-значный код", "6-значный код", "Код произвольной длины", "Автоблокировка", "Запросить ввод кода после периода неактивности.", "Отключено", "через 1 минуту", "через 5 минут", "через 1 час", "через 5 часов", "Горячая клавиша блокировки", "Всегда блокировать при запуске", "Заблокировать Discord при запуске, даже если он не был заблокирован до отключения Discord", "Подсвечивать кнопки клавиатуры", "Подсвечивать кнопки на экране при вводе кода с клавиатуры", "Уведомления при блокировке", "Отключить уведомления", "Скрыть содержимое уведомления", "Новое уведомление", "У вас 1 новое уведомление!", "Для начала установите свой код в настройках плагина.", "Код был изменён!", "Ваш код был сброшен. Установите его снова.", "Ваш код был сброшен из-за обновления безопасности. Установите его снова в настройках плагина.", "### ВНИМАНИЕ!\n\nЭтот плагин **ДЕЙСТВИТЕЛЬНО** предотвратит доступ для людей, которые небрежно отслеживали ваши сообщения, **НО** если кто-то имеет доступ к вашей учетной записи пользователя компьютера с авторизованой учетной записью Discord, и действительно настроен получить доступ к аккаунту, то PasscodeLock ничего не сможет сделать, в рамках плагина для BD, чтобы предотвратить доступ к аккаунту.\n\nРеальное решение с точки зрения безопасности — это просто... выйти из учетной записи или заблокировать компьютер, когда вы им не пользуетесь. *(c) Qwerasd*"],
+                        'nl': ["Voer je Discord toegangscode in", "Voer je nieuwe toegangscode in", "Voer je toegangscode opnieuw in", "Toegangscode bewerken", "Discord vergrendelen", "Soort code", "4-cijferige code", "6-cijferige code", "Bepaal eigen lengte", "Automatisch vergrendelen", "Vereis toegangscode als je een tijdje weg bent.", "Uitgeschakeld", "na 1 minuut", "na 5 minuten", "na 1 uur", "na 5 uur", "Toetsencombinatie om te vergrendelen", "Altijd vergrendelen bij het opstarten", "Vergrendelt Discord bij het opstarten, zelfs als het niet vergrendeld was voordat Discord afsluit", "Toetsaanslagen weergeven", "Toont de toetsaanslagen bij het invoeren van de code", "Meldingen wanneer vergrendeld", "Meldingen uitschakelen", "Meldingen censureren", "Nieuwe melding", "Je hebt 1 nieuwe melding!", "Stel eerst de toegangscode in de plug-in-instellingen in.", "Toegangscode is bijgewerkt!", "Je toegangscode is gereset. Stel het opnieuw in.", "Je toegangscode is gerest vanwege een beveiligingsupdate. Stel het opnieuw in in de instellingen.", "### LET OP!\n\n**JA**, deze plugin houd mensen tegen die gewoon even rondsnuffelen op je pc. **MAAR**, als iemand met een beetje technische ervaring toegang heeft tot de pc waarmee je bent ingelogd op Discord, dan kan een BD-plugin als PasscodeLock niets doen om diegene tegen te houden.\n\nDe echte oplossing voor je veiligheid is het vergrendelen/uitloggen van je computer als je die niet aan het gebruiken bent. *(c) Qwerasd*"],
+                        'fr': ["Entrez votre code d'accès Discord", "Entrez votre nouveau code", "Resaisissez votre code", "Modifier le code d'accès", "Verrouiller Discord", "Type de code", "Code de numéro à 4 chiffres", "Code de numéro à 6 chiffres", "Code numérique personnalisé", "Verrouillage automatique", "Code d'accès requis en cas d'absence après un certain temps.", "Désactivé", "dans 1 minute", "dans 5 minutes", "dans 1 heure", "dans 5 heures", "Verrouillage des touches", "Toujours verrouiller au démarrage", "Verrouille Discord au démarrage, même si ce n'est pas verrouillé avant l'arrêt de Discord", "Mettre en surbrillance la saisie clavier", "Surligne les boutons sur l'écran lors de la saisie du code d'accès avec le clavier", "Notifications lorsque verrouillé", "Désactiver les notifications", "Notifications censurées", "Nouvelle notification", "Vous avez 1 nouvelle notification!", "Veuillez d'abord configurer le mot de passe dans les paramètres du plugin.", "Le code d'accès a été mis à jour !", "Votre code d'accès a été réinitialisé. Veuillez le configurer à nouveau.", "Votre code d'accès a été réinitialisé en raison de la mise à jour de sécurité. Configurez-le à nouveau dans les paramètres.", "### ATTENTION SVP!\n\nCe plugin empêche les personnes qui fouinent par hasard, **MAIS** si quelqu'un a accès à l'ordinateur sur lequel Discord est connecté et est déterminé à y accéder, PasscodeLock ne peut rien faire dans le cadre d'un plugin BD pour l'en empêcher.\n\nLa vraie solution du point de vue de la sécurité est simplement... de verrouiller ou de déconnecter votre ordinateur lorsque vous n'y êtes pas. *(c) Qwerasd*"],
+                        'de': ["Gib deinen Discord Zugangscode ein", "Gib deinen neuen Discord Zugangscode ein", "Gib deinen Discord Zugangscode erneut ein", "Zugangscode bearbeiten", "Discord sperren", "Code Typ", "4 Zahlen Code", "6 Zahlen Code", "Zugangscode beliebiger Länge", "Automatisch sperren", "Sperrt Discord, falls du für angegeben Zeit inaktiv bist.", "Deaktiviert", "Nach 1 Minute", "Nach 5 Minuten", "Nach 1 Stunde", "Nach 5 Stunden", "Tastenkombination zum Sperren", "Beim Start immer sperren", "Sperrt Discord beim Start, auch wenn Discord beim Schließen nicht gesperrt war", "Tastatureingabe anzeigen", "Zeigt die Tastatureingabe beim Eingeben des Codes an", "Benachrichtigungen während Discord gesperrt ist", "Benachrichtigungen deaktivieren", "Benachrichtigungen zensieren", "Neue Benachrichtigung", "Du hast eine Benachrichtigung!", "Bitte richte zuerst den Zugangscode in den Plugin-Einstellungen ein.", "Zugangscode wurde aktualisiert!", "Dein Zugangscode wurde zurückgesetzt. Richte ihn erneut ein.", "Dein Zugangscode wurde aufgrund eines Sicherheitsupdates zurückgesetzt. Richte ihn in den Plugin-Einstellungen erneut ein.", "### Achtung!\n\nDiese Plugin schützt nur Oberflächlich. Wenn jemand Zugriff auf den PC, auf dem du mit Discord angemeldet bist hat, sowie technische Erfahrung hat, gibt es nichts was ein BD-Plugin tun kann um den Zugriff zu verhindern.\n\nDie richtige Lösung für echte Sicherheit ist den PC zu sperren oder dich abzumelden. *(c) Qwerasd*"],
+                        'es-ES': ["Introduce tu código de acceso de Discord", "Introduzca su nuevo código de acceso", "Vuelva a introducir su código de acceso", "Editar código de acceso", "Cerradura Discord", "Tipo de código", "Código de 4 dígitos", "Código de 6 dígitos", "Código numérico personalizado", "Cierre automático", "Requiere código de acceso si se ausenta por un tiempo.", "Desactivado", "en 1 minuto", "en 5 minutos", "en 1 hora", "en 5 horas", "Cerrar la tecla", "Bloqueo siempre al arrancar", "Bloquea Discord al iniciar, incluso si no estaba bloqueado antes de que Discord se apagara", "Resaltar la escritura al introducir el código", "Resalta los botones en la pantalla al escribir el código de acceso desde el teclado", "Notificaciones cuando se bloquea", "Desactivar las notificaciones", "Censurar las notificaciones", "Nueva notificación", "¡Tienes 1 nueva notificación!", "Por favor, primero configure el código de acceso en la configuración del plugin.", "El código de acceso ha sido actualizado!", "Tu código de acceso ha sido restablecido. Configúrala de nuevo.", "Tu código de acceso se ha restablecido debido a una actualización de seguridad. Vuelve a configurarlo en los ajustes.", "### ¡ATENCIÓN POR FAVOR!\n\nEste plugin **SÍ** evita que la gente husmee casualmente, **PERO** si alguien tiene acceso al ordenador con Discord conectado y está realmente decidido a acceder a él, no hay nada que PasscodeLock pueda hacer dentro del ámbito de un plugin de BD para evitarlo.\n\nLa verdadera solución, desde el punto de vista de la seguridad, es simplemente... bloquear o cerrar la sesión de tu ordenador cuando no estés en él. *(c) Qwerasd*"],
+                        'uk': ["Введіть свій пароль Discord", "Введіть новий пароль", "Повторно введіть пароль", "Редагувати пароль", "Заблокувати Discord", "Тип коду", "4-значний цифровий код", "6-значний цифровий код", "Користувальницький цифровий код", "Автоблокування", "Запитувати код доступу при відсутності вас протягом певного часу.", "Вимкнено", "через 1 хвилину", "через 5 хвилин", "через 1 годину", "через 5 годин", "Клавіша блокування", "Завжди блокувати при запуску", "Замки Discord під час запуску, навіть якщо вони не були заблоковані до закриття Discord", "Підсвічувати клавіатуру введення", "Підсвічує кнопки на екрані під час введення паролю з клавіатури", "Сповіщення при заблокованому екрані", "Вимкнути сповіщення", "Цензорні сповіщення", "Нове сповіщення", "У вас є 1 нове сповіщення!", "Спочатку налаштуйте пароль в налаштуваннях плагіна.", "Пароль оновлений!", "Ваш пароль був скинутий. Налаштуйте його знову.", "Ваш пароль було скинуто через оновлення безпеки. Налаштуйте його знову в налаштуваннях.", "### УВАГА!\n\nЦей плагін не дозволяє стороннім людям, які поступово сопіють, **Якщо** будь-хто має доступ до комп'ютера з компанією Discord увійти в систему, і він насправді налаштований отримати доступ до нього, немає жодного PasscodeLock для запобігання їх формату.\n\nСправжнє рішення з точки зору безпеки є справедливим... блокування чи вихід з вашого комп'ютера, коли ви не на нього. *(c) Qwerasd*"]
+                    }
+
+                    this.lang = this.generateDict(this._names, this.raw);
+                }
+
+                generateDict(names, raw) {
+                    const dict = {};
+
+                    for (const key in raw) {
+                        dict[key] = {};
+                        raw[key].forEach((value, i) => {
+                            dict[key][names[i]] = value;
+                        });
+                    }
+
+                    return dict;
+                }
+
+                getCurrentLocale() {
+                    return (LanguageStore.getLocale() || LanguageStore.chosenLocale || LanguageStore._chosenLocale || "en").replace("en-US", "en").replace("en-GB", "en");
+                }
+
+                get current() {
+                    return this.lang[this.getCurrentLocale()] ?? this.lang["en"];
+                }
+
+            }();
 
             const BG_TRANSITION = 350;
             const MAX_CODE_LENGTH = 15;
@@ -432,8 +467,8 @@ module.exports = (() => {
                         ? Patcher.instead(DiscordModules.NotificationModule, 'showNotification', () => false)
                         : Patcher.before(DiscordModules.NotificationModule, 'showNotification', (self, params) => {
                             params[0] = Gifs.LOCKED_SHAKE;
-                            params[1] = 'New notification';
-                            params[2] = 'You have 1 new notification!';
+                            params[1] = Locale.current.NEW_NOTIFICATION;
+                            params[2] = Locale.current.NEW_NOTIFICATION_DESC;
                             if (params[4].onClick) params[4].onClick = () => {};
                         });
 
@@ -507,8 +542,8 @@ module.exports = (() => {
                     );
 
                     const titleText = () => {
-                        if (this.props.type === PasscodeLocker.Types.EDITOR) return !this.state.confirm ? 'Enter your new passcode' : 'Re-enter your passcode';
-                        return 'Enter your Discord passcode';
+                        if (this.props.type === PasscodeLocker.Types.EDITOR) return !this.state.confirm ? Locale.current.ENTER_NEW_PASSCODE : Locale.current.RE_ENTER_PASSCODE;
+                        return Locale.current.ENTER_PASSCODE;
                     };
 
                     return React.createElement(
@@ -660,7 +695,7 @@ module.exports = (() => {
                     type = type ?? PasscodeLocker.Types.DEFAULT;
 
                     if (this.locked) return;
-                    if (this.settings.hash === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error('Please first set up the passcode in the plugin settings.');
+                    if (this.settings.hash === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error(Locale.current.FIRST_SETUP_MESSAGE);
 
                     this.unlock();
 
@@ -720,7 +755,7 @@ module.exports = (() => {
                         toolbar.splice(-2, 0, React.createElement(
                             Tooltip.default,
                             {
-                                text: "Lock Discord",
+                                text: Locale.current.LOCK_DISCORD,
                                 key: this.getName(),
                                 position: "bottom"
                             },
@@ -970,7 +1005,7 @@ module.exports = (() => {
                     this.settings.iterations = hashed.iterations;
                     this.saveSettings();
 
-                    Toasts.success('Passcode has been updated!');
+                    Toasts.success(Locale.current.PASSCODE_UPDATED_MESSAGE);
                 }
 
                 enableAutolock() {
@@ -1069,7 +1104,7 @@ module.exports = (() => {
 
                         new Settings.SettingField(null, null, () => {}, Buttons(
                             {
-                                children: ButtonIcon('edit', 'Edit Passcode'),
+                                children: ButtonIcon('edit', Locale.current.EDIT_PASSCODE),
                                 icon: true,
                                 color: Button.Colors.BRAND,
                                 size: Button.Sizes.SMALL,
@@ -1080,7 +1115,7 @@ module.exports = (() => {
                                 })
                             },
                             {
-                                children: ButtonIcon('lock', 'Lock Discord'),
+                                children: ButtonIcon('lock', Locale.current.LOCK_DISCORD),
                                 icon: true,
                                 color: Button.Colors.TRANSPARENT,
                                 size: Button.Sizes.SMALL,
@@ -1092,17 +1127,17 @@ module.exports = (() => {
                         )),
 
                         // Inspired by iOS code options
-                        new Settings.RadioGroup('Code type', null, this.settings.codeType, [
+                        new Settings.RadioGroup(Locale.current.CODE_TYPE_SETTING, null, this.settings.codeType, [
                             {
-                                name: '4-Digit Numeric Code',
+                                name: Locale.current['4DIGIT_NCODE'],
                                 value: PasscodeLock.Types.FOUR_DIGIT
                             },
                             {
-                                name: '6-Digit Numeric Code',
+                                name: Locale.current['6DIGIT_NCODE'],
                                 value: PasscodeLock.Types.SIX_DIGIT
                             },
                             {
-                                name: 'Custom Numeric Code',
+                                name: Locale.current.CUSTOM_NCODE,
                                 value: PasscodeLock.Types.CUSTOM_NUMERIC
                             },
                             // TODO: implement
@@ -1115,31 +1150,31 @@ module.exports = (() => {
                             this.saveSettings();
 
                             this.settings.hash = -1;
-                            Toasts.warning('Your passcode has been reset. Set it up again.');
+                            Toasts.warning(Locale.current.PASSCODE_RESET_DEFAULT_MESSAGE);
 
                             CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
                                 this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
                         }),
 
-                        new Settings.RadioGroup('Auto-lock', 'Require passcode if away for a time.', this.settings.autolock, [
+                        new Settings.RadioGroup(Locale.current.AUTOLOCK_SETTING, Locale.current.AUTOLOCK_DESC, this.settings.autolock, [
                             {
-                                name: 'Disabled',
+                                name: Locale.current.AUTOLOCK_DISABLED,
                                 value: false
                             },
                             {
-                                name: 'in 1 minute',
+                                name: Locale.current.AUTOLOCK_1M,
                                 value: 60
                             },
                             {
-                                name: 'in 5 minutes',
+                                name: Locale.current.AUTOLOCK_5M,
                                 value: 60 * 5
                             },
                             {
-                                name: 'in 1 hour',
+                                name: Locale.current.AUTOLOCK_1H,
                                 value: 60 * 60
                             },
                             {
-                                name: 'in 5 hours',
+                                name: Locale.current.AUTOLOCK_5H,
                                 value: 60 * 60 * 5
                             },
                         ], e => {
@@ -1147,7 +1182,7 @@ module.exports = (() => {
                             this.saveSettings();
                         }),
 
-                        new Settings.SettingField('Lock Keybind', null, () => {}, props => {
+                        new Settings.SettingField(Locale.current.LOCK_KEYBIND_SETTING, null, () => {}, props => {
                             return React.createElement(this.KeybindRecorder, {
                                 defaultValue: this.KeybindStore.toCombo(this.keybindSetting.replace("control", "ctrl")),
                                 onChange: (e) => {
@@ -1164,29 +1199,41 @@ module.exports = (() => {
                             })
                         }),
 
-                        new Settings.Switch('Always lock on startup', 'Locks Discord at startup, even if it wasn\'t locked before Discord shut down', this.settings.lockOnStartup, e => {
+                        new Settings.Switch(Locale.current.ALWAYS_LOCK_SETTING, Locale.current.ALWAYS_LOCK_DESC, this.settings.lockOnStartup, e => {
                             this.settings.lockOnStartup = e;
                             this.saveSettings();
                         }),
 
-                        new Settings.Switch('Highlight keyboard typing', 'Highlights buttons on screen when typing passcode from the keyboard', this.settings.highlightButtons, e => {
+                        new Settings.Switch(Locale.current.HIGHLIGHT_TYPING_SETTING, Locale.current.HIGHLIGHT_TYPING_DESC, this.settings.highlightButtons, e => {
                             this.settings.highlightButtons = e;
                             this.saveSettings();
                         }),
 
-                        new Settings.RadioGroup('Notifications when locked', null, this.settings.hideNotifications, [
+                        new Settings.RadioGroup(Locale.current.NOTIFICATIONS_SETTING, null, this.settings.hideNotifications, [
                             {
-                                name: 'Disable notifications',
+                                name: Locale.current.NOTIFICATIONS_SETTING_DISABLE,
                                 value: true
                             },
                             {
-                                name: 'Censor notifications',
+                                name: Locale.current.NOTIFICATIONS_SETTING_CENSOR,
                                 value: false
                             },
                         ], e => {
                             this.settings.hideNotifications = e;
                             this.saveSettings();
                         }),
+
+                        new Settings.SettingField(null, React.createElement(DiscordModules.TextElement, {
+                            children: [
+                                'Not your language? Help translate the plugin on the ',
+                                React.createElement(DiscordModules.Anchor, {
+                                    children: 'Crowdin page',
+                                    href: 'https://crwd.in/betterdiscord-passcodelock'
+                                }),
+                                '.'
+                            ],
+                            className: `${DiscordModules.TextElement.Colors.STANDARD} ${DiscordModules.TextElement.Sizes.SIZE_14}`
+                        }), () => {}, document.createElement('div'))
 
                     );
 
@@ -1245,7 +1292,7 @@ module.exports = (() => {
                         ['hash', 'salt', 'iterations'].forEach(k => this.settings[k] = this.defaultSettings[k]);
                         this.saveSettings();
 
-                        Toasts.warning('Your passcode has been reset due to security update. Set it up again in the settings.');
+                        Toasts.warning(Locale.current.PASSCODE_RESET_SECURITY_UPDATE_MESSAGE);
                     }
                     if (typeof this.settings.keybind !== 'string') {
                         this.settings.keybind = this.defaultSettings.keybind;
@@ -1283,10 +1330,7 @@ module.exports = (() => {
                                         React.createElement(
                                             Markdown,
                                             null,
-                                            `### ATTENTION PLEASE!  
-  
-This plugin **DOES** prevent people who are casually snooping, **BUT** if anyone has access to the computer with Discord logged in and is actually determined to get access to it, **there's nothing PasscodeLock can do** within the scope of a BD plugin to prevent them.
-\nThe real solution from a security perspective is just... lock or log out of your computer when you're not at it. *(c) Qwerasd*`
+                                            Locale.current.ATTENTION_MESSAGE
                                         )
                                     )
                                 ]
