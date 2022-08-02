@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.2.2
+ * @version 1.2.3
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,17 +21,24 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.2.2",
+            "version": "1.2.3",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
         "changelog": [
             {
+                "type": "added",
+                "title": "What's new",
+                "items": [
+                    "Localization of the plugin has begun. You can help translate the plugin into your language on the Crowdin page, which can be found in the plugin settings."
+                ]
+            },
+            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed plugin breaking BD toasts displaying."
+                    "Plugin is now working correctly."
                 ]
             }
         ],
@@ -209,7 +216,8 @@ module.exports = (() => {
                 PluginUtilities,
                 Popouts,
                 Toasts,
-                Utilities
+                Utilities,
+                Settings
             } = Api;
             const {
                 React,
@@ -221,9 +229,12 @@ module.exports = (() => {
             } = DiscordModules;
 
             const {
-                ChannelTypes,
-                ActionTypes
+                ChannelTypes
             } = DiscordConstants;
+
+            const ActionTypes = {
+                MESSAGE_CREATE: 'MESSAGE_CREATE'
+            };
 
             const Selectors = {
                 Messages: WebpackModules.getByProps('message', 'cozyMessage'),
@@ -626,6 +637,17 @@ module.exports = (() => {
 
                     const element = panel.getElement();
                     element.id = this.getSettingsPanelId();
+                    element.prepend(new Settings.SettingField(null, React.createElement(DiscordModules.TextElement, {
+                        children: [
+                            'Not your language? Help translate the plugin on the ',
+                            React.createElement(DiscordModules.Anchor, {
+                                children: 'Crowdin page',
+                                href: 'https://crwd.in/betterdiscord-channelspreview'
+                            }),
+                            '.'
+                        ],
+                        className: `${DiscordModules.TextElement.Colors.STANDARD} ${DiscordModules.TextElement.Sizes.SIZE_14}`
+                    }), () => {}, document.createElement('div')).inputWrapper);
 
                     return element;
                 }
