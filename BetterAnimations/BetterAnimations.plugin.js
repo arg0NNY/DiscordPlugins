@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.5
+ * @version 1.1.6
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.5",
+            "version": "1.1.6",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed guild animation executing when switching between channels."
+                    "Fixed broken new message reveal animations."
                 ]
             }
         ]
@@ -1168,6 +1168,43 @@ module.exports = (() => {
                 }
 
                 patchMessages() {
+                    const animateStack = new Set();
+                    this.messageMutationObserver = new MutationObserver(records => {
+                        records.forEach(r => r.addedNodes.forEach(n => {
+                            const node = n.id?.startsWith('chat-message') ? n : (n.querySelector ? n.querySelector('*[id^="chat-message"]') : null);
+                            if (!node) return;
+
+                            const idSplit = node.id.split('-');
+                            const id = idSplit[idSplit.length - 1];
+                            if (!animateStack.has(id)) return;
+                            animateStack.delete(id);
+
+                            const messageNode = document.getElementById(node.id);
+                            if (!messageNode) return;
+
+                            messageNode.style.overflow = 'hidden';
+                            messageNode.animate([
+                                {height: 0, opacity: 0},
+                                {height: messageNode.clientHeight+'px', opacity: 0}
+                            ], {
+                                duration: 250,
+                                easing: Easing.easeInOut
+                            }).finished.then(() => {
+                                messageNode.style.overflow = '';
+
+                                const animator = new RevealAnimator(this.settings.messages.type, messageNode);
+                                animator.animate({
+                                    duration: this.settings.messages.duration,
+                                    easing: Easing[this.settings.messages.easing],
+                                    offset: 10,
+                                    scale: .1,
+                                    position: this.settings.messages.position
+                                });
+                            });
+                        }));
+                    });
+                    this.messageMutationObserver.observe(document, { childList: true, subtree: true });
+
                     this.messageCreateHandler = (e) => {
                         if (!this.settings.messages.enabled) return;
 
@@ -1175,27 +1212,9 @@ module.exports = (() => {
 
                         if (e.message.author.id === UserInfoStore.getId() && e.message.state !== MessageStates.SENDING) return;
 
-                        const messageNode = document.getElementById(`chat-messages-${e.message.id}`);
-                        if (!messageNode) return;
-
-                        messageNode.style.overflow = 'hidden';
-                        messageNode.animate([
-                            {height: 0, opacity: 0},
-                            {height: messageNode.clientHeight+'px', opacity: 0}
-                        ], {
-                            duration: 250,
-                            easing: Easing.easeInOut
-                        }).finished.then(() => {
-                            messageNode.style.overflow = '';
-
-                            const animator = new RevealAnimator(this.settings.messages.type, messageNode);
-                            animator.animate({
-                                duration: this.settings.messages.duration,
-                                easing: Easing[this.settings.messages.easing],
-                                offset: 10,
-                                scale: .1,
-                                position: this.settings.messages.position
-                            });
+                        animateStack.add(e.message.id);
+                        setTimeout(() => {
+                            animateStack.delete(e.message.id);
                         });
                     };
 
@@ -1470,6 +1489,7 @@ module.exports = (() => {
 
                 onStop() {
                     Dispatcher.unsubscribe(ActionTypes.MESSAGE_CREATE, this.messageCreateHandler);
+                    this.messageMutationObserver.disconnect();
 
                     Patcher.unpatchAll();
                     this.clearCss();
