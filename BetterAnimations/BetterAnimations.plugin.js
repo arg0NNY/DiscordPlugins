@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.6
+ * @version 1.1.7
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.6",
+            "version": "1.1.7",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed broken new message reveal animations."
+                    "Fixed broken guild and channels switching animations."
                 ]
             }
         ]
@@ -339,7 +339,7 @@ module.exports = (() => {
             class Route {
                 constructor(name, path, {element, scrollers, getter, forceGuildChange, noGuilds}) {
                     this.name = name;
-                    this.path = path;
+                    this.path = typeof path === 'object' ? path : [path];
                     this._element = element;
                     this._scrollers = scrollers;
                     this._getter = getter;
@@ -360,7 +360,11 @@ module.exports = (() => {
                 }
             }
             const Routes = [
-                new Route('Chat', '/channels/@me/:channelId', {
+                new Route('Chat', [
+                    "/channels/:guildId/:channelId/threads/:threadId",
+                    "/channels/@me/:channelId",
+                    "/channels/:guildId/:channelId?/:messageId?"
+                ], {
                     element: `.${Selectors.Chat.chat}`,
                     scrollers: [Selectors.Messages.scroller, DiscordClasses.MemberList.members.value, Selectors.Content.scrollerBase]
                 }),
@@ -1034,8 +1038,8 @@ module.exports = (() => {
 
                         if (RouteLocationHistory.current === RouteLocationHistory.previous) return;
 
-                        const current = Routes.find(r => r.path === RoutePathHistory.current);
-                        const previous = Routes.find(r => r.path === RoutePathHistory.previous);
+                        const current = Routes.find(r => r.path.includes(RoutePathHistory.current));
+                        const previous = Routes.find(r => r.path.includes(RoutePathHistory.previous));
                         if (!current || !previous) return;
 
                         guildSwitched = current._guildSwitched || previous._guildSwitched;
