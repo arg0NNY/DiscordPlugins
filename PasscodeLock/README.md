@@ -21,6 +21,6 @@ The real solution from a security perspective is just... lock or log out of your
 
 [passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
 [passcodelock-view-link]: https://betterdiscord.app/plugin/PasscodeLock
-[passcodelock-version-badge]: https://img.shields.io/badge/version-1.3.2-blue
+[passcodelock-version-badge]: https://img.shields.io/badge/version-1.3.3-blue
 [passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins

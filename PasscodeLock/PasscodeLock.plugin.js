@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.3.2
+ * @version 1.3.3
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.2",
+            "version": "1.3.3",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,7 +32,9 @@ module.exports = (() => {
                 "title": "Fixed",
                 "items": [
                     "Plugin works in the latest Discord breakdown update.",
-                    "Lock button in the channel header disabled due to changed webpack modules structure. Waiting for a workaround."
+                    "Lock button in the channel header disabled due to changed webpack modules structure. Waiting for a workaround.",
+                    "Most probably fixed lock keybind not working sometimes.",
+                    "(+) Fixed lock keybind resetting after Discord restart."
                 ]
             }
         ]
@@ -759,6 +761,14 @@ module.exports = (() => {
                 }
 
                 onStart() {
+                    if (!this.KeybindRecorder) {
+                        this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.cleanUp);
+                        this.KeybindStore = {
+                            toCombo: WebpackModules.getModule(m => m?.toString().includes("numpad plus")),
+                            toString: WebpackModules.getModule(m => m?.toString().includes('"UNK"'))
+                        };
+                    }
+
                     this.injectCSS();
                     // this.patchHeaderBar(); // BROKEN: Module have become getter, wait for solution
                     this.patchSettingsButton();
@@ -1057,14 +1067,6 @@ module.exports = (() => {
                 }
 
                 getSettingsPanel() {
-                    if (!this.KeybindRecorder) {
-                        this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.cleanUp);
-                        this.KeybindStore = {
-                            toCombo: WebpackModules.getModule(m => m?.toString().includes("numpad plus")),
-                            toString: WebpackModules.getModule(m => m?.toString().includes('"UNK"'))
-                        };
-                    }
-
                     const Buttons = (...props) => {
                         class Panel extends React.Component {
                             render() {
