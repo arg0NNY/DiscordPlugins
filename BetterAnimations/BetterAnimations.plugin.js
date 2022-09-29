@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.7
+ * @version 1.1.8
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.7",
+            "version": "1.1.8",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,9 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed broken guild and channels switching animations."
+                    "Plugin works in the latest Discord breakdown update.",
+                    "Removed members list animations.",
+                    "Temporarily disabled the expression picker animations. Expect them to be fixed in the next updates."
                 ]
             }
         ]
@@ -85,28 +87,35 @@ module.exports = (() => {
                 UserSettingsWindow,
                 GuildSettingsWindow,
                 ChannelSettingsWindow,
-                Dispatcher,
                 DiscordConstants,
-                UserInfoStore
+                UserStore,
+                ButtonData
             } = DiscordModules;
 
-            const {
-                MessageStates
-            } = DiscordConstants;
+            const Dispatcher = WebpackModules.getByProps('_subscriptions', '_waitQueue');
+
+            // const {
+            //     MessageStates
+            // } = DiscordConstants;
+            const MessageStates = {
+                SENDING: 0,
+            }
 
             const ActionTypes = {
-                MESSAGE_CREATE: 'MESSAGE_CREATE'
+                MESSAGE_CREATE: 'MESSAGE_CREATE',
+                CHANNEL_SELECT: 'CHANNEL_SELECT',
             }
 
             const ChannelIntegrationsSettingsWindow = WebpackModules.getByProps('setSection', 'saveWebhook');
             const ExpressionPickerActions = WebpackModules.getByProps('setExpressionPickerView');
-            const {PreloadedUserSettingsActionCreators} = WebpackModules.getByProps('PreloadedUserSettingsActionCreators');
+            // const {PreloadedUserSettingsActionCreators} = WebpackModules.getByProps('PreloadedUserSettingsActionCreators');
             const ThreadPopoutActions = WebpackModules.getByProps('StatusTab', 'useActiveThreads');
             const ThreadActions = WebpackModules.getByProps('createThread', 'unarchiveThread');
-            const ReferencePositionLayer = WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
-            const RouteWithImpression = WebpackModules.getModule(m => m.default?.displayName === 'RouteWithImpression');
-            const Button = WebpackModules.getByProps('ButtonLink');
+            const ReferencePositionLayer = WebpackModules.getModule(m => m.prototype?.updatePosition); // WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
+            const RouteWithImpression = WebpackModules.getModule(m => m.prototype?.render?.toString().includes('e.props.path?P(n.pathname,e.props)'));
+            const Button = ButtonData;
             const GuildDiscoveryActions = WebpackModules.getByProps('searchGuildDiscovery');
+            const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
 
             const Selectors = {
                 Chat: WebpackModules.getByProps('chat', 'channelName'),
@@ -240,7 +249,7 @@ module.exports = (() => {
                     })
                 },
                 Members: WebpackModules.getByProps('members', 'hiddenMembers'),
-                EmojiPicker: WebpackModules.getByProps('emojiPickerInExpressionPicker', 'searchBar'),
+                EmojiPicker: WebpackModules.getByProps('emojiPickerInExpressionPicker', 'emojiPicker'),
                 StickerPicker: WebpackModules.getByProps('listWrapper', 'loadingIndicator'),
                 GifPicker: WebpackModules.getByProps('backButton', 'gutterSize'),
                 Popout: WebpackModules.getByProps('disabledPointerEvents', 'layer'),
@@ -1013,14 +1022,13 @@ module.exports = (() => {
                 }
 
                 patches() {
-                    this.patchChannelActions();
-                    this.patchPages();
-                    this.patchGuildDiscovery();
-                    this.patchSettingsView();
-                    this.patchMessages();
-                    this.patchPopouts();
-                    this.patchMemberList();
-                    this.patchExpressionPicker();
+                    this.patchChannelActions(); // working
+                    this.patchPages(); // working
+                    // this.patchGuildDiscovery();
+                    this.patchSettingsView(); // working
+                    this.patchMessages(); // working
+                    this.patchPopouts(); // working
+                    // this.patchExpressionPicker(); // TODO: Fix
                 }
 
                 patchChannelActions() {
@@ -1032,9 +1040,11 @@ module.exports = (() => {
                 patchPages() {
                     let guildSwitched = null;
 
-                    Patcher.before(RouteWithImpression, 'default', (self, _) => {
-                        RoutePathHistory.push(typeof _[0].path === 'object' ? _[0].path[0] : _[0].path);
-                        RouteLocationHistory.push(_[0].location.pathname);
+                    Patcher.before(RouteWithImpression.prototype, 'render', (self, _) => {
+                        if (self.props.path === undefined || (typeof self.props.path === 'object' && self.props.path.length > 5)) return;
+
+                        RoutePathHistory.push(typeof self.props.path === 'object' ? self.props.path[0] : self.props.path);
+                        RouteLocationHistory.push(self.props.location.pathname);
 
                         if (RouteLocationHistory.current === RouteLocationHistory.previous) return;
 
@@ -1049,7 +1059,9 @@ module.exports = (() => {
 
                         this.setMainAnimator(new ContainerAnimator(guildSwitched ? this.settings.guild.type : this.settings.channel.type, guildSwitched ? `.${Selectors.Layout.base}` : previous.element, previous.scrollers, {elementToAppear: guildSwitched ? `.${Selectors.Layout.base}` : current.element}));
                     });
-                    Patcher.after(RouteWithImpression, 'default', (self, _, value) => {
+                    Patcher.after(RouteWithImpression.prototype, 'render', (self, _, value) => {
+                        if (self.props.path === undefined || (typeof self.props.path === 'object' && self.props.path.length > 5)) return;
+
                         const {duration, easing} = guildSwitched ? this.settings.guild : this.settings.channel;
 
                         this.animateMainAnimator({
@@ -1174,6 +1186,7 @@ module.exports = (() => {
                 patchMessages() {
                     const animateStack = new Set();
                     this.messageMutationObserver = new MutationObserver(records => {
+                        // console.log(records);
                         records.forEach(r => r.addedNodes.forEach(n => {
                             const node = n.id?.startsWith('chat-message') ? n : (n.querySelector ? n.querySelector('*[id^="chat-message"]') : null);
                             if (!node) return;
@@ -1214,7 +1227,7 @@ module.exports = (() => {
 
                         if (!e.message.id) return;
 
-                        if (e.message.author.id === UserInfoStore.getId() && e.message.state !== MessageStates.SENDING) return;
+                        if (e.message.author.id === UserStore.getCurrentUser().id && e.message.state !== MessageStates.SENDING) return;
 
                         animateStack.add(e.message.id);
                         setTimeout(() => {
@@ -1226,8 +1239,9 @@ module.exports = (() => {
                 }
 
                 patchPopouts() {
-                    Patcher.before(ReferencePositionLayer.default.prototype, 'componentDidMount', (self, _) => {
+                    Patcher.before(ReferencePositionLayer.prototype, 'componentDidMount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
+                        self = self.ref.current;
 
                         const node = self.elementRef.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
                         if (!node) return;
@@ -1241,8 +1255,9 @@ module.exports = (() => {
                             position: self.props.position
                         });
                     });
-                    Patcher.before(ReferencePositionLayer.default.prototype, 'componentWillUnmount', (self, _) => {
+                    Patcher.before(ReferencePositionLayer.prototype, 'componentWillUnmount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
+                        self = self.ref.current;
 
                         const node = self.elementRef.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
                         if (!node) return;
@@ -1261,7 +1276,7 @@ module.exports = (() => {
                         });
                     });
 
-                    this.patchPopoutSections();
+                    // this.patchPopoutSections();
                 }
 
                 patchPopoutSections() {
@@ -1305,14 +1320,14 @@ module.exports = (() => {
                     };
 
                     // Inbox Popout
-                    Patcher.before(PreloadedUserSettingsActionCreators, 'updateAsync', (self, _) => {
-                        if (_[0] !== 'inbox') return;
-                        before();
-                    });
-                    Patcher.after(PreloadedUserSettingsActionCreators, 'updateAsync', (self, _) => {
-                        if (_[0] !== 'inbox') return;
-                        after();
-                    });
+                    // Patcher.before(PreloadedUserSettingsActionCreators, 'updateAsync', (self, _) => {
+                    //     if (_[0] !== 'inbox') return;
+                    //     before();
+                    // });
+                    // Patcher.after(PreloadedUserSettingsActionCreators, 'updateAsync', (self, _) => {
+                    //     if (_[0] !== 'inbox') return;
+                    //     after();
+                    // });
 
                     // Threads Popout
                     const threadsBefore = (section, _) => {
@@ -1329,61 +1344,6 @@ module.exports = (() => {
                     Patcher.after(ThreadPopoutActions, 'useActiveThreads', (self, _) => threadsAfter());
                     Patcher.before(ThreadPopoutActions, 'useArchivedThreads', (self, _) => threadsBefore('archived', _));
                     Patcher.after(ThreadPopoutActions, 'useArchivedThreads', (self, _) => threadsAfter());
-                }
-
-                async patchMemberList() {
-                    const ChannelMembers = (await ReactComponents.getComponentByName('ChannelMembers', '.membersWrap-3NUR2t')).component;
-
-                    const animate = (content, list, reverse = false) => {
-                        const chatNode = document.querySelector(`.${Selectors.Chat.chat}`);
-
-                        content.animate({
-                            width: [(chatNode.clientWidth + list.clientWidth) + 'px', chatNode.clientWidth + 'px']
-                        }, {
-                            duration: this.settings.membersList.duration,
-                            easing: Easing[this.settings.membersList.easing],
-                            direction: reverse ? 'reverse' : 'normal'
-                        }).finished.then(() => {
-                            if (reverse) list.remove();
-                        });
-                    };
-                    const preventStop = () => {
-                        if (!clonedNode) return;
-                        clonedNode.remove();
-                        clonedNode = null;
-                    };
-                    const clone = node => {
-                        clonedNode = node.cloneNode(true);
-                        node.after(clonedNode);
-                        clonedNode.querySelector(`.${Selectors.Content.scrollerBase}`).scrollTop = node.querySelector(`.${Selectors.Content.scrollerBase}`).scrollTop;
-                        clonedNode.classList.add(CLONED_NODE_CLASSNAME);
-                    }
-                    let clonedNode = null;
-
-                    Patcher.before(ChannelMembers.prototype, 'componentDidMount', (self, _) => {
-                        if (!this.settings.membersList.enabled) return;
-
-                        preventStop();
-
-                        const content = document.querySelector(`.${Selectors.Chat.content}`);
-                        const listContainer = document.querySelector(`.${Selectors.Members.container}`);
-
-                        animate(content, listContainer);
-                    });
-                    Patcher.before(ChannelMembers.prototype, 'componentWillUnmount', (self, _) => {
-                        if (!this.settings.membersList.enabled) return;
-
-                        preventStop();
-
-                        const content = document.querySelector(`.${Selectors.Chat.content}`);
-                        const listContainer = document.querySelector(`.${Selectors.Members.container}`);
-
-                        clone(listContainer);
-
-                        animate(content, clonedNode, true);
-                    });
-
-                    // TODO: Animate Threads Sidebar
                 }
 
                 patchExpressionPicker() {
@@ -1412,8 +1372,8 @@ module.exports = (() => {
 
                         if (ExpressionPickerViewHistory.current === ExpressionPickerViewHistory.previous) return;
 
-                        const current = ExpressionPickerRoutes.find(r => r.path === ExpressionPickerViewHistory.current);
-                        const previous = ExpressionPickerRoutes.find(r => r.path === ExpressionPickerViewHistory.previous);
+                        const current = ExpressionPickerRoutes.find(r => r.path.includes(ExpressionPickerViewHistory.current));
+                        const previous = ExpressionPickerRoutes.find(r => r.path.includes(ExpressionPickerViewHistory.previous));
                         if (!current || !previous) return;
 
                         if (!this.settings.expressionPicker.enabled) return;
@@ -1423,19 +1383,47 @@ module.exports = (() => {
                     };
 
                     const after = () => {
-                        if (pickerAnimator) pickerAnimator.animate({
+                        if (!pickerAnimator) return
+                        pickerAnimator.animate({
                             duration: this.settings.expressionPicker.duration,
                             easing: Easing[this.settings.expressionPicker.easing],
                             offset: 20,
                             scale: .1
-                        });
+                        })
+                        pickerAnimator = null;
                     };
 
-                    Patcher.before(ExpressionPickerActions, 'setExpressionPickerView', (self, _) => before(_[0]));
-                    Patcher.before(ExpressionPickerActions, 'toggleExpressionPicker', (self, _) => before(_[0]));
 
-                    Patcher.after(ExpressionPickerActions, 'setExpressionPickerView', after);
-                    Patcher.after(ExpressionPickerActions, 'toggleExpressionPicker', after);
+                    // Stickers handling
+                    const EmojiPickerToggler = WebpackModules.getModule(m => m.type?.render?.toString().includes('TOGGLE_EMOJI_POPOUT'));
+                    const EmojiPickerClickTracker = WebpackModules.getByProps('trackWithMetadata');
+
+                    let stickerClicked = false;
+                    Patcher.before(EmojiPickerToggler.type, 'render', (self, _) => {
+                        if (!stickerClicked) return;
+                        before('sticker');
+                    })
+                    Patcher.after(EmojiPickerToggler.type, 'render', (self, _) => {
+                        if (!stickerClicked) return;
+                        stickerClicked = false;
+                        after();
+                    })
+                    Patcher.before(EmojiPickerClickTracker, 'trackWithMetadata', (self, params) => {
+                        if (['expression_picker_tab_clicked', 'expression_picker_opened'].includes(params[0]) && params[1].tab === 'sticker') {
+                            stickerClicked = true;
+                            setTimeout(() => stickerClicked = false);
+                        }
+                    })
+
+                    // Gifs and emojis handling
+                    const EmojiPickerGifs = WebpackModules.getModule(m => m.render?.toString().includes('getSuggestions'));
+                    const EmojiPickerEmojis = WebpackModules.getModule(m => m.type?.render?.toString().includes('emojiSize'));
+
+                    Patcher.before(EmojiPickerGifs, 'render', (self, _) => before('gif'))
+                    Patcher.before(EmojiPickerEmojis.type, 'render', (self, _) => before('emoji'))
+
+                    Patcher.after(EmojiPickerGifs, 'render', after);
+                    Patcher.after(EmojiPickerEmojis.type, 'render', after);
                 }
 
                 injectCss() {
@@ -1469,10 +1457,7 @@ module.exports = (() => {
                             }
 
 
-                            /* Expression Picker Fix */
-                            .${Selectors.EmojiPicker.emojiPickerInExpressionPicker}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
-                                background-color: inherit;
-                            }
+                            
                             
                             
                             .${Selectors.Popout.layerContainer} {
@@ -1485,6 +1470,10 @@ module.exports = (() => {
                                 padding: 0 10px;
                             }
                         `);
+                    //     /* Expression Picker Fix */
+                    // .${Selectors.EmojiPicker.emojiPickerInExpressionPicker}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
+                    //         background-color: inherit;
+                    //     }
                 }
 
                 clearCss() {
@@ -1908,7 +1897,7 @@ module.exports = (() => {
                                 let buttons = [];
                                 props.forEach(p => {
                                     buttons.push(
-                                        React.createElement(Button.default, {
+                                        React.createElement(Button, {
                                             style: {
                                                 display: 'inline-flex',
                                                 marginRight: '10px'
@@ -1954,14 +1943,14 @@ module.exports = (() => {
                         new Settings.SettingField(null, null, () => {}, Buttons(
                             {
                                 children: 'Check for updates',
-                                color: Button.ButtonColors.BRAND,
-                                size: Button.ButtonSizes.SMALL,
+                                color: Button.Colors.BRAND,
+                                size: Button.Sizes.SMALL,
                                 onClick: () => this.checkForUpdates()
                             },
                             {
                                 children: 'Reset settings to default',
-                                color: Button.ButtonColors.TRANSPARENT,
-                                size: Button.ButtonSizes.SMALL,
+                                color: Button.Colors.TRANSPARENT,
+                                size: Button.Sizes.SMALL,
                                 onClick: () => {
                                     this.settings = this.defaultSettings;
                                     this.saveSettings();
@@ -1975,7 +1964,7 @@ module.exports = (() => {
                         new Settings.SettingField(null, React.createElement(DiscordModules.TextElement, {
                             children: [
                                 'Not your language? Help translate the plugin on the ',
-                                React.createElement(DiscordModules.Anchor, {
+                                React.createElement(Anchor, {
                                     children: 'Crowdin page',
                                     href: 'https://crwd.in/betterdiscord-betteranimations'
                                 }),
@@ -1994,6 +1983,11 @@ module.exports = (() => {
 
                             new Settings.SettingField('Animation type', null, () => {}, AnimationTypes(containerTypes, ContainerAnimator.TYPES, ContainerAnimationExample, () => this.settings.guild)),
 
+                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.guild.easing, easings, e => {
+                                this.settings.guild.easing = e;
+                                this.saveSettings();
+                            }),
+
                             new Settings.Slider('Duration', null, 100, 5000, this.settings.guild.duration, e => {
                                 this.settings.guild.duration = e;
                                 this.saveSettings();
@@ -2001,11 +1995,6 @@ module.exports = (() => {
                                 markers: markers(100, 5001, 100),
                                 stickToMarkers: true,
                                 renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.guild.easing, easings, e => {
-                                this.settings.guild.easing = e;
-                                this.saveSettings();
                             })
 
                         ),
@@ -2020,6 +2009,11 @@ module.exports = (() => {
 
                             new Settings.SettingField('Animation type', null, () => {}, AnimationTypes(containerTypes, ContainerAnimator.TYPES, ContainerAnimationExample, () => this.settings.channel)),
 
+                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.channel.easing, easings, e => {
+                                this.settings.channel.easing = e;
+                                this.saveSettings();
+                            }),
+
                             new Settings.Slider('Duration', null, 100, 5000, this.settings.channel.duration, e => {
                                 this.settings.channel.duration = e;
                                 this.saveSettings();
@@ -2027,11 +2021,6 @@ module.exports = (() => {
                                 markers: markers(100, 5001, 100),
                                 stickToMarkers: true,
                                 renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.channel.easing, easings, e => {
-                                this.settings.channel.easing = e;
-                                this.saveSettings();
                             })
 
                         ),
@@ -2046,6 +2035,11 @@ module.exports = (() => {
 
                             new Settings.SettingField('Animation type', null, () => {}, AnimationTypes(containerTypes, ContainerAnimator.TYPES, ContainerAnimationExample, () => this.settings.settings)),
 
+                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.settings.easing, easings, e => {
+                                this.settings.settings.easing = e;
+                                this.saveSettings();
+                            }),
+
                             new Settings.Slider('Duration', null, 100, 5000, this.settings.settings.duration, e => {
                                 this.settings.settings.duration = e;
                                 this.saveSettings();
@@ -2053,11 +2047,6 @@ module.exports = (() => {
                                 markers: markers(100, 5001, 100),
                                 stickToMarkers: true,
                                 renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.settings.easing, easings, e => {
-                                this.settings.settings.easing = e;
-                                this.saveSettings();
                             })
 
                         ),
@@ -2077,6 +2066,11 @@ module.exports = (() => {
                                 this.saveSettings();
                             }),
 
+                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.messages.easing, easings, e => {
+                                this.settings.messages.easing = e;
+                                this.saveSettings();
+                            }),
+
                             new Settings.Slider('Duration', null, 100, 5000, this.settings.messages.duration, e => {
                                 this.settings.messages.duration = e;
                                 this.saveSettings();
@@ -2084,11 +2078,6 @@ module.exports = (() => {
                                 markers: markers(100, 5001, 100),
                                 stickToMarkers: true,
                                 renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.messages.easing, easings, e => {
-                                this.settings.messages.easing = e;
-                                this.saveSettings();
                             })
 
                         ),
@@ -2103,6 +2092,11 @@ module.exports = (() => {
 
                             new Settings.SettingField('Animation type', null, () => {}, AnimationTypes(revealTypes, RevealAnimator.TYPES, RevealAnimationExample, () => this.settings.popouts)),
 
+                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.popouts.easing, easings, e => {
+                                this.settings.popouts.easing = e;
+                                this.saveSettings();
+                            }),
+
                             new Settings.Slider('Duration', null, 100, 5000, this.settings.popouts.duration, e => {
                                 this.settings.popouts.duration = e;
                                 this.saveSettings();
@@ -2110,35 +2104,6 @@ module.exports = (() => {
                                 markers: markers(100, 5001, 100),
                                 stickToMarkers: true,
                                 renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.popouts.easing, easings, e => {
-                                this.settings.popouts.easing = e;
-                                this.saveSettings();
-                            })
-
-                        ),
-
-                        // Members List section
-                        new Settings.SettingGroup('Members List Animations').append(
-
-                            new Settings.Switch('Enable members list toggle animation', null, this.settings.membersList.enabled, e => {
-                                this.settings.membersList.enabled = e;
-                                this.saveSettings();
-                            }),
-
-                            new Settings.Slider('Duration', null, 100, 5000, this.settings.membersList.duration, e => {
-                                this.settings.membersList.duration = e;
-                                this.saveSettings();
-                            }, {
-                                markers: markers(100, 5001, 100),
-                                stickToMarkers: true,
-                                renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.membersList.easing, easings, e => {
-                                this.settings.membersList.easing = e;
-                                this.saveSettings();
                             })
 
                         ),
@@ -2153,6 +2118,11 @@ module.exports = (() => {
 
                             new Settings.SettingField('Animation type', null, () => {}, AnimationTypes(containerTypes, ContainerAnimator.TYPES, ContainerAnimationExample, () => this.settings.expressionPicker)),
 
+                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.expressionPicker.easing, easings, e => {
+                                this.settings.expressionPicker.easing = e;
+                                this.saveSettings();
+                            }),
+
                             new Settings.Slider('Duration', null, 100, 5000, this.settings.expressionPicker.duration, e => {
                                 this.settings.expressionPicker.duration = e;
                                 this.saveSettings();
@@ -2160,11 +2130,6 @@ module.exports = (() => {
                                 markers: markers(100, 5001, 100),
                                 stickToMarkers: true,
                                 renderMarker: v => v%500 === 0 || v === 100 ? (v / 1000).toFixed(1) + 's' : ''
-                            }),
-
-                            new Settings.Dropdown('Easing', 'Easing functions can be viewed at www.easings.net', this.settings.expressionPicker.easing, easings, e => {
-                                this.settings.expressionPicker.easing = e;
-                                this.saveSettings();
                             })
 
                         )
@@ -2215,11 +2180,6 @@ module.exports = (() => {
                             easing: 'easeInOutBack',
                             duration: 300
                         },
-                        membersList: {
-                            enabled: false,
-                            easing: 'easeInOutCubic',
-                            duration: 300
-                        },
                         expressionPicker: {
                             enabled: true,
                             type: 'scaleChange',
@@ -2232,17 +2192,12 @@ module.exports = (() => {
                 }
 
                 checkForUpdates() {
-                    fetch(config.info.github_raw)
-                        .then(response => response.text())
-                        .then(result => {
-                            const latestVersion = PluginUpdater.defaultVersioner(result);
+                    PluginUpdater.hasUpdate(config.info.github_raw)
+                        .then(hasUpdate => {
+                            if (hasUpdate) return Toasts.info('Plugin update has been found');
 
-                            if (latestVersion === '0.0.0') return Toasts.error('Failed to get plugin latest version information');
-                            if (latestVersion === this.getVersion()) return Toasts.success('Plugin is up to date');
-
-                            Toasts.info('Plugin update has been found');
-                            PluginUpdater.checkForUpdate(this.getName(), this.getVersion(), config.info.github_raw);
-                        });
+                            Toasts.success('Plugin is up to date');
+                        })
                 }
             }
         }
