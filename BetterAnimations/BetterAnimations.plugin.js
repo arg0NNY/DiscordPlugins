@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.8
+ * @version 1.1.9
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.8",
+            "version": "1.1.9",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -33,7 +33,8 @@ module.exports = (() => {
                 "items": [
                     "Plugin works in the latest Discord breakdown update.",
                     "Removed members list animations.",
-                    "Temporarily disabled the expression picker animations. Expect them to be fixed in the next updates."
+                    "Temporarily disabled the expression picker animations. Expect them to be fixed in the next updates.",
+                    "(+) Fixed animation not working on the self messages."
                 ]
             }
         ]
@@ -98,7 +99,7 @@ module.exports = (() => {
             //     MessageStates
             // } = DiscordConstants;
             const MessageStates = {
-                SENDING: 0,
+                SENDING: 'SENDING',
             }
 
             const ActionTypes = {
