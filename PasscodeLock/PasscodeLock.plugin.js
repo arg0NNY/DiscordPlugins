@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.3.4
+ * @version 1.3.5
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.4",
+            "version": "1.3.5",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,7 +31,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Removed CryptoJS in favour of Web Crypto API."
+                    "Plugin works in the latest BetterDiscord update.",
+                    "The Lock button in the channel header is back and working."
                 ]
             }
         ]
@@ -86,6 +87,14 @@ module.exports = (() => {
                 ConfirmationModal,
                 ButtonData
             } = DiscordModules;
+
+            function getMangled(filter) {
+                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
+                return target ? [
+                    target,
+                    Object.keys(target).find(k => filter(target[k]))
+                ] : [];
+            }
 
             const Selectors = {
                 Chat: WebpackModules.getByProps("title", "chat"),
@@ -170,9 +179,9 @@ module.exports = (() => {
 
             const hashCheck = async ({ string, salt, iterations }, hashed) => await pbkdf2(string, salt, iterations) === hashed;
 
-            const HeaderBar = WebpackModules.getModule(m => m.default?.displayName === 'HeaderBar');
-            const Button = WebpackModules.getByProps("BorderColors", "Colors");
-            const Tooltip = WebpackModules.getModule(m => m.default?.displayName === 'Tooltip');
+            const Button = ButtonData;
+            const HeaderBar = getMangled(m => m?.Title && m?.Caret);
+            const Tooltip = WebpackModules.getModule(m => m?.Positions && m?.Colors);
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
             const Markdown = WebpackModules.getModule(m => m.rules);
             const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
@@ -792,13 +801,13 @@ module.exports = (() => {
                     if (!this.KeybindRecorder) {
                         this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.cleanUp);
                         this.KeybindStore = {
-                            toCombo: WebpackModules.getModule(m => m?.toString().includes("numpad plus")),
-                            toString: WebpackModules.getModule(m => m?.toString().includes('"UNK"'))
+                            toCombo: WebpackModules.getModule(m => m.toString && m.toString().includes("numpad plus"), { searchExports: true }),
+                            toString: WebpackModules.getModule(m => m.toString && m.toString().includes('"UNK"'), { searchExports: true })
                         };
                     }
 
                     this.injectCSS();
-                    // this.patchHeaderBar(); // BROKEN: Module have become getter, wait for solution
+                    this.patchHeaderBar();
                     this.patchSettingsButton();
                     this.enableAutolock();
 
@@ -811,13 +820,13 @@ module.exports = (() => {
                 }
 
                 async patchHeaderBar() {
-                    Patcher.after(HeaderBar, "default", (self, _, value) => {
+                    Patcher.after(...HeaderBar, (self, _, value) => {
                         const children = value.props?.children?.props?.children;
                         const toolbar = children ? children[children.length - 1].props?.children?.props?.children : null;
                         if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return;
 
                         toolbar.splice(-2, 0, React.createElement(
-                            Tooltip.default,
+                            Tooltip,
                             {
                                 text: Locale.current.LOCK_DISCORD,
                                 key: this.getName(),
@@ -836,8 +845,6 @@ module.exports = (() => {
                             )
                         ));
                     });
-
-                    (await ReactComponents.getComponentByName('HeaderBarContainer', `.${Selectors.Chat.title}`)).forceUpdateAll();
                 }
 
                 injectCSS() {
