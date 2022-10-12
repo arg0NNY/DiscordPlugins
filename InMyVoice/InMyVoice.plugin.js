@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.2
+ * @version 1.0.3
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.2",
+            "version": "1.0.3",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
@@ -30,7 +30,7 @@ module.exports = (() => {
             "type": "fixed",
             "title": "Fixed",
             "items": [
-                "Fixed tag wasn't displaying after Discord update."
+                "Plugin works in the latest Discord breakdown update."
             ]
         }],
         "defaultConfig": [
@@ -79,8 +79,17 @@ module.exports = (() => {
 
             const {
                 React,
-                UserInfoStore
+                UserStore,
+                ChannelStore
             } = DiscordModules;
+
+            function getMangled(filter) {
+                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
+                return target ? [
+                    target,
+                    Object.keys(target).find(k => filter(target[k]))
+                ] : [];
+            }
 
             const Selectors = {
                 BotTag: {
@@ -94,8 +103,8 @@ module.exports = (() => {
             const {getVoiceChannelId} = WebpackModules.getByProps("getVoiceChannelId");
             const VoiceChannelStore = WebpackModules.getByProps("getVoiceStatesForChannel");
 
-            const MessageTimestamp = WebpackModules.find(m => typeof m.default === "function" && m.default.toString().includes("showTimestampOnHover"));
-            const BotTag = WebpackModules.getByProps('BotTagTypes');
+            const MessageHeader = getMangled(m => m?.toString && m.toString().includes('roleDot') && m.toString().includes('preload'));
+            const BotTag = getMangled(m => m?.toString && m.toString().includes('BOT_TAG_BOT'));
 
             return class InMyVoice extends Plugin {
                 onStart() {
@@ -108,13 +117,14 @@ module.exports = (() => {
                 }
 
                 patchMessages() {
-                    Patcher.after(MessageTimestamp, 'default', (self, _, value) => {
-                        const Header = Utilities.findInTree(value, e => Array.isArray(e?.props?.children) && e.props.children.find(c => c?.props?.message));
+                    Patcher.before(...MessageHeader, (self, props) => {
+                        const { decorations, message } = props[0];
+                        if (!decorations || typeof decorations[1] !== 'object' || !'length' in decorations[1]) return
 
-                        const author = value.props.message.author;
+                        const author = message.author;
                         if (!this.isInMyVoice(author)) return;
 
-                        Header.props.children.push(React.createElement(BotTag.default, {
+                        props[0].decorations[1].unshift(React.createElement(BotTag[0][BotTag[1]], {
                             className: `${Selectors.BotTag.botTagCozy} ${UNIQUE_TAG}`,
                             useRemSizes: true,
                             type: 'IN_VOICE'
@@ -123,7 +133,7 @@ module.exports = (() => {
                 }
 
                 patchBotTags() {
-                    Patcher.after(BotTag, 'default', (self, _, value) => {
+                    Patcher.after(...BotTag, (self, _, value) => {
                         if (!value.props.className.includes(UNIQUE_TAG)) return;
 
                         const TagContainer = Utilities.findInReactTree(value, e => e.children?.some(c => typeof c?.props?.children === 'string'));
@@ -144,7 +154,8 @@ module.exports = (() => {
                             style: {
                                 position: 'relative',
                                 top: '1px',
-                                left: '2px'
+                                left: '2px',
+                                marginRight: '1px'
                             }
                         },
                         React.createElement('path', {
@@ -155,7 +166,11 @@ module.exports = (() => {
                 }
 
                 isInMyVoice(user) {
-                    return UserInfoStore.getId() !== user.id && getVoiceChannelId() && Object.keys(VoiceChannelStore.getVoiceStatesForChannel(getVoiceChannelId())).includes(user.id);
+                    return UserStore.getCurrentUser().id !== user.id
+                        && getVoiceChannelId()
+                        && VoiceChannelStore.getVoiceStatesForChannel(
+                            ChannelStore.getChannel(getVoiceChannelId())
+                        ).map(s => s.user.id).includes(user.id);
                 }
 
                 onStop() {
