@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.9
+ * @version 1.1.10
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.9",
+            "version": "1.1.10",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,10 +31,11 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin works in the latest Discord breakdown update.",
-                    "Removed members list animations.",
-                    "Temporarily disabled the expression picker animations. Expect them to be fixed in the next updates.",
-                    "(+) Fixed animation not working on the self messages."
+                    "Plugin works in the latest BetterDiscord update.",
+                    "Expression picker animations are back and working.",
+                    "Guild discovery animations are back and working.",
+                    "Fixed user popout animations not working properly.",
+                    "Fixed Slip Scale animation on the popouts animating the wrong side."
                 ]
             }
         ]
@@ -93,6 +94,14 @@ module.exports = (() => {
                 ButtonData
             } = DiscordModules;
 
+            function getMangled(filter) {
+                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
+                return target ? [
+                    target,
+                    Object.keys(target).find(k => filter(target[k]))
+                ] : [];
+            }
+
             const Dispatcher = WebpackModules.getByProps('_subscriptions', '_waitQueue');
 
             // const {
@@ -112,11 +121,12 @@ module.exports = (() => {
             // const {PreloadedUserSettingsActionCreators} = WebpackModules.getByProps('PreloadedUserSettingsActionCreators');
             const ThreadPopoutActions = WebpackModules.getByProps('StatusTab', 'useActiveThreads');
             const ThreadActions = WebpackModules.getByProps('createThread', 'unarchiveThread');
-            const ReferencePositionLayer = WebpackModules.getModule(m => m.prototype?.updatePosition); // WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
-            const RouteWithImpression = WebpackModules.getModule(m => m.prototype?.render?.toString().includes('e.props.path?P(n.pathname,e.props)'));
+            const ReferencePositionLayer = WebpackModules.getModule(m => m.prototype?.updatePosition, {searchExports: true}); // WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
+            const RouteWithImpression = WebpackModules.getModule(m => m?.prototype?.render?.toString().includes('e.props.path?P(n.pathname,e.props)'), {searchExports: true});
             const Button = ButtonData;
             const GuildDiscoveryActions = WebpackModules.getByProps('searchGuildDiscovery');
             const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
+            const UserPopout = getMangled(m => m?.toString && m.toString().includes('().canViewThemes'));
 
             const Selectors = {
                 Chat: WebpackModules.getByProps('chat', 'channelName'),
@@ -696,7 +706,7 @@ module.exports = (() => {
 
                     this.animation = ContainerAnimator.TYPES[type];
                     this.node = typeof element === 'string' ? document.querySelector(element) : element;
-                    this.parentNode = this.node.parentNode;
+                    this.parentNode = this.node?.parentNode;
                     this.scrollSelectors = scrollSelectors;
                     if (elementToAppear) this.elementToAppear = elementToAppear;
                     this.zIndex = zIndex ?? 10;
@@ -707,7 +717,7 @@ module.exports = (() => {
                 }
 
                 init() {
-                    if (!this.node) return Logger.err('Unable to find node to animate.');
+                    if (!this.node) return Logger.warn('Unable to find node to animate.');
                     const rect = {
                         top: this.node.offsetTop,
                         left: this.node.offsetLeft,
@@ -939,7 +949,7 @@ module.exports = (() => {
 
                             node.animate(
                                 [
-                                    {opacity: 0, transform: `translate${['top', 'bottom'].includes(position) ? 'Y' : 'X'}(${['right', 'bottom'].includes(position) ? '' : '-'}${offset ?? 10}px) scale(${1 - scale})`},
+                                    {opacity: 0, transform: `translate${['top', 'bottom'].includes(position) ? 'Y' : 'X'}(${['right', 'bottom'].includes(position) ? '-' : ''}${offset ?? 10}px) scale(${1 - scale})`},
                                     {opacity: 1, transform: `translate${['top', 'bottom'].includes(position) ? 'Y' : 'X'}(0) scale(1)`},
                                 ],
                                 {duration, easing, direction: reverse ? 'reverse' : 'normal'}
@@ -1023,13 +1033,13 @@ module.exports = (() => {
                 }
 
                 patches() {
-                    this.patchChannelActions(); // working
-                    this.patchPages(); // working
-                    // this.patchGuildDiscovery();
-                    this.patchSettingsView(); // working
-                    this.patchMessages(); // working
-                    this.patchPopouts(); // working
-                    // this.patchExpressionPicker(); // TODO: Fix
+                    this.patchChannelActions();
+                    this.patchPages();
+                    this.patchGuildDiscovery();
+                    this.patchSettingsView();
+                    this.patchMessages();
+                    this.patchPopouts();
+                    this.patchExpressionPicker();
                 }
 
                 patchChannelActions() {
@@ -1050,7 +1060,7 @@ module.exports = (() => {
                         if (RouteLocationHistory.current === RouteLocationHistory.previous) return;
 
                         const current = Routes.find(r => r.path.includes(RoutePathHistory.current));
-                        const previous = Routes.find(r => r.path.includes(RoutePathHistory.previous));
+                        const previous = Routes.find(r => r.path.includes(RoutePathHistory.previous ?? '/channels/@me'));
                         if (!current || !previous) return;
 
                         guildSwitched = current._guildSwitched || previous._guildSwitched;
@@ -1086,11 +1096,13 @@ module.exports = (() => {
                 patchGuildDiscovery() {
                     let animator = null;
 
-                    const before = () => {
+                    const before = (id) => {
                         if (!this.settings.settings.enabled) return;
 
                         if (animator?.clonedNode) animator.forceEnd();
-                        animator = new ContainerAnimator(this.settings.channel.type, `.${Selectors.Pages.pageWrapper}, .${Selectors.StudentHubs.scroller}`, [Selectors.Content.scrollerBase]);
+                        animator = new ContainerAnimator(this.settings.channel.type, `.${Selectors.Pages.pageWrapper}, .${Selectors.StudentHubs.scroller}`, [Selectors.Content.scrollerBase], {
+                            elementToAppear: `.${id === -2 ? Selectors.StudentHubs.scroller : Selectors.Pages.pageWrapper}`,
+                        });
                     };
 
                     const after = () => {
@@ -1102,14 +1114,16 @@ module.exports = (() => {
                         });
                     };
 
-                    Patcher.before(GuildDiscoveryActions, 'selectCategory', (self, _) => {
+                    const selectCategory = getMangled(m => m?.toString && m.toString().includes('GUILD_DISCOVERY_SELECT_CATEGORY'));
+
+                    Patcher.before(...selectCategory, (self, _) => {
                         GuildDiscoveryCategoryHistory.push(_[0]);
 
                         if (GuildDiscoveryCategoryHistory.current === GuildDiscoveryCategoryHistory.previous) return;
 
-                        before();
+                        before(_[0]);
                     });
-                    Patcher.after(GuildDiscoveryActions, 'selectCategory', () => {
+                    Patcher.after(...selectCategory, () => {
                         if (GuildDiscoveryCategoryHistory.current === GuildDiscoveryCategoryHistory.previous) return;
 
                         after();
@@ -1187,7 +1201,6 @@ module.exports = (() => {
                 patchMessages() {
                     const animateStack = new Set();
                     this.messageMutationObserver = new MutationObserver(records => {
-                        // console.log(records);
                         records.forEach(r => r.addedNodes.forEach(n => {
                             const node = n.id?.startsWith('chat-message') ? n : (n.querySelector ? n.querySelector('*[id^="chat-message"]') : null);
                             if (!node) return;
@@ -1240,6 +1253,18 @@ module.exports = (() => {
                 }
 
                 patchPopouts() {
+                    const animate = (node, position) => {
+                        const animator = new RevealAnimator(this.settings.popouts.type, node);
+                        animator.animate({
+                            duration: this.settings.popouts.duration,
+                            easing: Easing[this.settings.popouts.easing],
+                            offset: 10,
+                            scale: .1,
+                            position
+                        });
+                    };
+                    let popoutNode = null;
+
                     Patcher.before(ReferencePositionLayer.prototype, 'componentDidMount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
                         self = self.ref.current;
@@ -1247,14 +1272,8 @@ module.exports = (() => {
                         const node = self.elementRef.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
                         if (!node) return;
 
-                        const animator = new RevealAnimator(this.settings.popouts.type, node.children[0]);
-                        animator.animate({
-                            duration: this.settings.popouts.duration,
-                            easing: Easing[this.settings.popouts.easing],
-                            offset: 10,
-                            scale: .1,
-                            position: self.props.position
-                        });
+                        popoutNode = node;
+                        animate(node.children[0], self.props.position);
                     });
                     Patcher.before(ReferencePositionLayer.prototype, 'componentWillUnmount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
@@ -1277,74 +1296,12 @@ module.exports = (() => {
                         });
                     });
 
-                    // this.patchPopoutSections();
-                }
+                    Patcher.before(...UserPopout, (self, props) => {
+                        if (!popoutNode || popoutNode.children[0]?.className.includes('loadingPopout')) return;
+                        animate(popoutNode.children[0], props[0].position);
 
-                patchPopoutSections() {
-                    let hideAnimator = null;
-                    let appearAnimator = null;
-
-                    const before = () => {
-                        if (!this.settings.popouts.enabled) return;
-
-                        hideAnimator = new RevealAnimator(this.settings.popouts.type, `.${Selectors.Popout.layer} > div`, {
-                            needsCopy: true,
-                            scrollSelectors: [Selectors.Content.scrollerBase]
-                        });
-                    };
-                    const after = () => {
-                        if (!this.settings.popouts.enabled) return;
-
-                        const appearNode = document.querySelector(`.${Selectors.Popout.layer} > div`);
-                        appearNode.style.opacity = 0;
-
-                        const params = {
-                            duration: this.settings.popouts.duration,
-                            easing: Easing[this.settings.popouts.easing],
-                            offset: 10,
-                            scale: .1,
-                            position: 'bottom'
-                        };
-
-                        if (hideAnimator) hideAnimator.animate({
-                            ...params,
-                            reverse: true
-                        }).then(() => {
-                            appearNode.style.opacity = 1;
-
-                            appearAnimator = new RevealAnimator(this.settings.popouts.type, appearNode);
-                            appearAnimator.animate({
-                                ...params,
-                                delay: params.duration
-                            });
-                        });
-                    };
-
-                    // Inbox Popout
-                    // Patcher.before(PreloadedUserSettingsActionCreators, 'updateAsync', (self, _) => {
-                    //     if (_[0] !== 'inbox') return;
-                    //     before();
-                    // });
-                    // Patcher.after(PreloadedUserSettingsActionCreators, 'updateAsync', (self, _) => {
-                    //     if (_[0] !== 'inbox') return;
-                    //     after();
-                    // });
-
-                    // Threads Popout
-                    const threadsBefore = (section, _) => {
-                        ThreadsPopoutSectionHistory.push(['active', _[1], _[2]].join('.'));
-                        if (ThreadsPopoutSectionHistory.current === ThreadsPopoutSectionHistory.previous) return;
-                        before();
-                    };
-                    const threadsAfter = () => {
-                        if (ThreadsPopoutSectionHistory.current === ThreadsPopoutSectionHistory.previous) return;
-                        after();
-                    };
-
-                    Patcher.before(ThreadPopoutActions, 'useActiveThreads', (self, _) => threadsBefore('active', _));
-                    Patcher.after(ThreadPopoutActions, 'useActiveThreads', (self, _) => threadsAfter());
-                    Patcher.before(ThreadPopoutActions, 'useArchivedThreads', (self, _) => threadsBefore('archived', _));
-                    Patcher.after(ThreadPopoutActions, 'useArchivedThreads', (self, _) => threadsAfter());
+                        popoutNode = null;
+                    })
                 }
 
                 patchExpressionPicker() {
@@ -1384,47 +1341,22 @@ module.exports = (() => {
                     };
 
                     const after = () => {
-                        if (!pickerAnimator) return
-                        pickerAnimator.animate({
+                        if (pickerAnimator) pickerAnimator.animate({
                             duration: this.settings.expressionPicker.duration,
                             easing: Easing[this.settings.expressionPicker.easing],
                             offset: 20,
                             scale: .1
-                        })
-                        pickerAnimator = null;
+                        });
                     };
 
+                    const setExpressionPickerView = getMangled(m => m?.toString && m.toString().includes('c.setState({activeView:e,lastActiveView:c.getState().activeView})'));
+                    const toggleExpressionPicker = getMangled(m => m?.toString && m.toString().includes('c.getState().activeView===e?s():u(e,t)'));
 
-                    // Stickers handling
-                    const EmojiPickerToggler = WebpackModules.getModule(m => m.type?.render?.toString().includes('TOGGLE_EMOJI_POPOUT'));
-                    const EmojiPickerClickTracker = WebpackModules.getByProps('trackWithMetadata');
+                    Patcher.before(...setExpressionPickerView, (self, _) => before(_[0]));
+                    Patcher.before(...toggleExpressionPicker, (self, _) => before(_[0]));
 
-                    let stickerClicked = false;
-                    Patcher.before(EmojiPickerToggler.type, 'render', (self, _) => {
-                        if (!stickerClicked) return;
-                        before('sticker');
-                    })
-                    Patcher.after(EmojiPickerToggler.type, 'render', (self, _) => {
-                        if (!stickerClicked) return;
-                        stickerClicked = false;
-                        after();
-                    })
-                    Patcher.before(EmojiPickerClickTracker, 'trackWithMetadata', (self, params) => {
-                        if (['expression_picker_tab_clicked', 'expression_picker_opened'].includes(params[0]) && params[1].tab === 'sticker') {
-                            stickerClicked = true;
-                            setTimeout(() => stickerClicked = false);
-                        }
-                    })
-
-                    // Gifs and emojis handling
-                    const EmojiPickerGifs = WebpackModules.getModule(m => m.render?.toString().includes('getSuggestions'));
-                    const EmojiPickerEmojis = WebpackModules.getModule(m => m.type?.render?.toString().includes('emojiSize'));
-
-                    Patcher.before(EmojiPickerGifs, 'render', (self, _) => before('gif'))
-                    Patcher.before(EmojiPickerEmojis.type, 'render', (self, _) => before('emoji'))
-
-                    Patcher.after(EmojiPickerGifs, 'render', after);
-                    Patcher.after(EmojiPickerEmojis.type, 'render', after);
+                    Patcher.after(...setExpressionPickerView, after);
+                    Patcher.after(...toggleExpressionPicker, after);
                 }
 
                 injectCss() {
@@ -1458,7 +1390,10 @@ module.exports = (() => {
                             }
 
 
-                            
+                            /* Expression Picker Fix */
+                            .${Selectors.EmojiPicker.emojiPickerInExpressionPicker}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
+                                background-color: inherit;
+                            }
                             
                             
                             .${Selectors.Popout.layerContainer} {
@@ -1471,10 +1406,6 @@ module.exports = (() => {
                                 padding: 0 10px;
                             }
                         `);
-                    //     /* Expression Picker Fix */
-                    // .${Selectors.EmojiPicker.emojiPickerInExpressionPicker}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
-                    //         background-color: inherit;
-                    //     }
                 }
 
                 clearCss() {
@@ -1483,7 +1414,7 @@ module.exports = (() => {
 
                 onStop() {
                     Dispatcher.unsubscribe(ActionTypes.MESSAGE_CREATE, this.messageCreateHandler);
-                    this.messageMutationObserver.disconnect();
+                    this.messageMutationObserver?.disconnect();
 
                     Patcher.unpatchAll();
                     this.clearCss();
