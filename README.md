@@ -13,28 +13,22 @@ Protect your Discord with a passcode.
 [![Download][download-badge]][passcodelock-download-link] [![View][view-badge]][passcodelock-view-link]
 
 
-## [SyncedBD](https://github.com/arg0NNY/DiscordPlugins/tree/master/SyncedBD) ![Status][status-discontinued-badge] ![Version][syncedbd-version-badge]
-Syncs your BetterDiscord settings, official themes, and plugins with their configs between BD installations linked to your Discord account. Allows you to automatically import all of your BD configs after a clean installation. Plug-n-play it is!
-
-[![Download][download-badge]][syncedbd-download-link] ![View][unavailable-badge]
-
-
 ## [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
 Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
 
 [![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link]
 
 
-## [InMyVoice](https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice) ![Status][status-official-badge] ![Version][inmyvoice-version-badge] ![Downloads][inmyvoice-downloads-badge] ![Likes][inmyvoice-likes-badge]
-Shows if a person in the text chat is also in a voice chat that you're in.
-
-[![Download][download-badge]][inmyvoice-download-link] [![View][view-badge]][inmyvoice-view-link]
-
-
 ## [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
 Allows you to view recent messages in channels without switching to them.
 
 [![Download][download-badge]][channelspreview-download-link] [![View][view-badge]][channelspreview-view-link]
+
+
+## [InMyVoice](https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice) ![Status][status-official-badge] ![Version][inmyvoice-version-badge] ![Downloads][inmyvoice-downloads-badge] ![Likes][inmyvoice-likes-badge]
+Shows if a person in the text chat is also in a voice chat that you're in.
+
+[![Download][download-badge]][inmyvoice-download-link] [![View][view-badge]][inmyvoice-view-link]
 
 ```
  
@@ -90,9 +84,6 @@ SOFTWARE.
 [passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27PasscodeLock%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 
-[syncedbd-download-link]: https://arg0nny.github.io/bd/download/?id=SyncedBD
-[syncedbd-version-badge]: https://img.shields.io/badge/version-1.3.0-blue
-
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
 [betteranimations-version-badge]: https://img.shields.io/badge/version-1.1.10-blue
@@ -107,6 +98,6 @@ SOFTWARE.
 
 [channelspreview-download-link]: https://arg0nny.github.io/bd/download/?id=ChannelsPreview
 [channelspreview-view-link]: https://betterdiscord.app/plugin/ChannelsPreview
-[channelspreview-version-badge]: https://img.shields.io/badge/version-1.2.3-blue
+[channelspreview-version-badge]: https://img.shields.io/badge/version-1.3.0-blue
 [channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27ChannelsPreview%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27ChannelsPreview%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
