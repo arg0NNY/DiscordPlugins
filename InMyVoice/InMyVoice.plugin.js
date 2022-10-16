@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.3
+ * @version 1.0.4
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.3",
+            "version": "1.0.4",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
@@ -30,7 +30,7 @@ module.exports = (() => {
             "type": "fixed",
             "title": "Fixed",
             "items": [
-                "Plugin works in the latest Discord breakdown update."
+                "Fixed an error occurring when Original Poster tag displayed."
             ]
         }],
         "defaultConfig": [
@@ -124,7 +124,7 @@ module.exports = (() => {
                         const author = message.author;
                         if (!this.isInMyVoice(author)) return;
 
-                        props[0].decorations[1].unshift(React.createElement(BotTag[0][BotTag[1]], {
+                        decorations[1].unshift(React.createElement(BotTag[0][BotTag[1]], {
                             className: `${Selectors.BotTag.botTagCozy} ${UNIQUE_TAG}`,
                             useRemSizes: true,
                             type: 'IN_VOICE'
@@ -134,7 +134,7 @@ module.exports = (() => {
 
                 patchBotTags() {
                     Patcher.after(...BotTag, (self, _, value) => {
-                        if (!value.props.className.includes(UNIQUE_TAG)) return;
+                        if (!value.props?.className?.includes(UNIQUE_TAG)) return;
 
                         const TagContainer = Utilities.findInReactTree(value, e => e.children?.some(c => typeof c?.props?.children === 'string'));
 
