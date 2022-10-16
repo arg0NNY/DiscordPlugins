@@ -25,7 +25,7 @@ Allows you to view recent messages in channels without switching to them.
 [![Download][download-badge]][channelspreview-download-link] [![View][view-badge]][channelspreview-view-link]
 
 
-# [BetterGuildTooltip](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip) ![Status][status-review-badge] ![Version][betterguildtooltip-version-badge]
+## [BetterGuildTooltip](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip) ![Status][status-review-badge] ![Version][betterguildtooltip-version-badge]
 Displays an online and total member count in the guild tooltip.
 
 [![Download][download-badge]][betterguildtooltip-download-link] ![View][unavailable-badge]
