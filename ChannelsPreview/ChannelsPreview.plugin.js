@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.3.0
+ * @version 1.3.1
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,32 +21,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.0",
+            "version": "1.3.1",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
         "changelog": [
             {
-                "type": "added",
-                "title": "What's new",
-                "items": [
-                    "Added support for threads.",
-                    "Added support for text chats in voice channels."
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Improved stability of the darkening layer display."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin works in the latest Discord breakdown update."
+                    "Fixed plugin not compiling."
                 ]
             }
         ],
@@ -277,7 +262,6 @@ module.exports = (() => {
             let displayedSettingsNotice = false;
 
             const ChannelItem = getMangled(m => m?.toString?.().includes('notInteractive,c?T.SELECTED'));
-            const FluxTypingUsers = WebpackModules.getModule((_, m) => m.exports?.Z?.displayName === 'FluxContainer(n)' && Object.getOwnPropertyDescriptor(m.exports, 'Z').get?.toString().includes('Oe')).Z;
             const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
             const Chat = WebpackModules.getModule(m => m.type?.toString().includes('showingQuarantineBanner'));
             const DMItemRenderer = getMangled(m => m?.toString?.().includes('{return(0,e.children)(p(e.id))}'));
@@ -288,6 +272,7 @@ module.exports = (() => {
             let MessageComponent = null;
             let EmptyMessage = null;
             let ThreadStartedMessage = null;
+            let FluxTypingUsers = null;
             function attemptGettingModules(channel, needThreadStarter = false) {
                 function getModule(rootNode, className, filter) {
                     return ReactTools.getComponents(rootNode.getElementsByClassName(className)[0])
@@ -295,12 +280,13 @@ module.exports = (() => {
                 }
 
                 return new Promise(resolve => {
-                    if (MessageComponent && EmptyMessage && (ThreadStartedMessage || !needThreadStarter)) return resolve();
+                    if (MessageComponent && EmptyMessage && FluxTypingUsers && (ThreadStartedMessage || !needThreadStarter)) return resolve();
 
                     const elem = document.createElement('div');
                     ReactDOM.render(React.createElement(Chat, { channel }), elem, () => {
                         if (!MessageComponent) MessageComponent = getModule(elem, Selectors.Messages.messageListItem, m => m?.toString?.().includes('message'));
                         if (!EmptyMessage) EmptyMessage = getModule(elem, Selectors.EmptyMessage.container, m => m?.toString?.().includes('showingBanner'));
+                        if (!FluxTypingUsers) FluxTypingUsers = ReactTools.getReactInstance(document.getElementsByClassName(Selectors.Chat.form)[0])?.memoizedProps?.children?.find(c => c.props && 'poggermodeEnabled' in c.props)?.type;
                         if (!ThreadStartedMessage) ThreadStartedMessage = getModule(elem, Selectors.Messages.quotedChatMessage, m => m?.toString?.().includes('THREAD_STARTER_MESSAGE'));
 
                         ReactDOM.unmountComponentAtNode(elem);
@@ -420,7 +406,7 @@ module.exports = (() => {
                             },
                             [
                                 ...messagesElements,
-                                ...(settings.appearance.typingUsers !== false ? [React.createElement(FluxTypingUsers, {channel})] : [])
+                                ...(FluxTypingUsers && settings.appearance.typingUsers !== false ? [React.createElement(FluxTypingUsers, {channel})] : [])
                             ]
                         )
                     );
