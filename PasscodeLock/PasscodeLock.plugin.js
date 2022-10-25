@@ -36,7 +36,7 @@ module.exports = (() => {
                 ]
             },
             {
-                "type": "improvements",
+                "type": "improved",
                 "title": "Improvements",
                 "items": [
                     "Auto-lock setting is more flexible now."
