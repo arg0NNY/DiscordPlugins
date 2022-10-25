@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.3.5
+ * @version 1.4.0
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,18 +21,33 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.5",
+            "version": "1.4.0",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
         },
         "changelog": [
             {
+                "type": "added",
+                "title": "What's new",
+                "items": [
+                    "Plugin now auto-deafs you when you lock Discord.",
+                    "Added `Too many tries` message when you enter wrong passcode 3 times in a row, growing from 5 to 30 seconds.",
+                ]
+            },
+            {
+                "type": "improvements",
+                "title": "Improvements",
+                "items": [
+                    "Auto-lock setting is more flexible now."
+                ]
+            },
+            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin works in the latest BetterDiscord update.",
-                    "The Lock button in the channel header is back and working."
+                    "Moved away from deprecated `BdApi` methods.",
+                    "Fixed a bug where a user could submit a code with a static length earlier than necessary by pressing `Enter`."
                 ]
             }
         ]
@@ -54,7 +69,7 @@ module.exports = (() => {
         getVersion() { return config.info.version; }
 
         load() {
-            BdApi.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
+            BdApi.UI.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
                 confirmText: "Download Now",
                 cancelText: "Cancel",
                 onConfirm: () => {
@@ -76,8 +91,7 @@ module.exports = (() => {
                 PluginUtilities,
                 Settings,
                 DOMTools,
-                Toasts,
-                ReactComponents
+                Toasts
             } = Api;
 
             const {
@@ -85,7 +99,8 @@ module.exports = (() => {
                 ReactDOM,
                 ModalActions,
                 ConfirmationModal,
-                ButtonData
+                ButtonData,
+                VoiceInfo
             } = DiscordModules;
 
             function getMangled(filter) {
@@ -95,6 +110,16 @@ module.exports = (() => {
                     Object.keys(target).find(k => filter(target[k]))
                 ] : [];
             }
+
+            const Data = new Proxy({}, {
+                get (_, k) {
+                    return BdApi.Data.load(config.info.name, k);
+                },
+                set (_, k, v) {
+                    BdApi.Data.save(config.info.name, k, v);
+                    return true;
+                }
+            });
 
             const Selectors = {
                 Chat: WebpackModules.getByProps("title", "chat"),
@@ -186,6 +211,9 @@ module.exports = (() => {
             const Markdown = WebpackModules.getModule(m => m.rules);
             const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
             const LanguageStore = WebpackModules.getModule(m => m.Messages && m.Messages.IMAGE && m);
+            const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
+
+            const playSound = getMangled(m => m?.toString?.().includes('getSoundpack'));
 
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
 
@@ -381,8 +409,11 @@ module.exports = (() => {
 
                     this.state = {
                         code: '',
-                        confirm: false
+                        confirm: false,
+                        delay: false,
+                        delayLeft: 0
                     };
+                    this.handleDelay();
 
                     this.codeAppend = (num) => {
                         if(this.state.code.length >= MAX_CODE_LENGTH) {
@@ -406,6 +437,8 @@ module.exports = (() => {
                     }
 
                     this.codeAccept = () => {
+                        if (this.state.code === '') return;
+
                         if (this.props.type === PasscodeLocker.Types.EDITOR) {
                             if (!this.state.confirm) {
                                 this.newCode = this.state.code;
@@ -451,6 +484,14 @@ module.exports = (() => {
                         [PasscodeLocker.Types.SETTINGS]: Gifs.SETTINGS_ROTATE,
                         [PasscodeLocker.Types.EDITOR]: Gifs.EDIT_ACTION
                     }[this.props.type];
+
+                    if (this.props.type !== PasscodeLocker.Types.DEFAULT) return;
+
+                    Data.attempts = (Data.attempts ?? 0) + 1;
+                    if (Data.attempts >= 3) {
+                        Data.delayUntil = Date.now() + Math.min(30000, 5000 * (Data.attempts - 2));
+                        this.handleDelay();
+                    }
                 }
 
                 unlock(success = true) {
@@ -500,28 +541,48 @@ module.exports = (() => {
                 }
 
                 componentWillUnmount() {
+                    clearInterval(this.delayHandler);
                     window.removeEventListener('keyup', this.keyUpListener);
                     window.removeEventListener('keydown', this.disableKeys, true);
                     if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications();
                 }
 
+                handleDelay(delayUntil = Data.delayUntil) {
+                    if (Date.now() >= Data.delayUntil && !this.state.delay) return;
+
+                    this.setState(Object.assign(
+                        {},
+                        {
+                            delay: Date.now() < Data.delayUntil,
+                            delayLeft: Math.ceil((delayUntil - Date.now()) / 1000)
+                        },
+                        Date.now() < Data.delayUntil ? {code: ''} : {}
+                    ));
+                }
+
                 componentDidMount() {
                     document.onkeydown = e => {
-                        if (this.props.plugin.settings.highlightButtons) document.getElementById(`PCLBtn-${e.key}`)?.classList.add('PCL--btn-active');
-
                         e.preventDefault();
                         e.stopPropagation();
+
+                        if (this.state.delay) return false;
+                        if (this.props.plugin.settings.highlightButtons) document.getElementById(`PCLBtn-${e.key}`)?.classList.add('PCL--btn-active');
+
                         return false;
                     };
 
                     this.keyUpListener = e => {
                         if (this.props.plugin.settings.highlightButtons) document.getElementById(`PCLBtn-${e.key}`)?.classList.remove('PCL--btn-active');
+                        if (this.state.delay) return;
 
                         if (!isNaN(+e.key) && e.key !== ' ') this.codeAppend(+e.key);
                         if (e.key === 'Backspace') this.codeBackspace();
                         if (e.key === 'Escape' && this.props.type !== PasscodeLocker.Types.DEFAULT) this.unlock(false);
                     };
                     window.addEventListener('keyup', this.keyUpListener);
+
+                    // Manage delay
+                    this.delayHandler = setInterval(() => this.handleDelay(), 1000);
 
                     // Manage notifications
                     if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications = this.props.plugin.settings.hideNotifications
@@ -539,8 +600,12 @@ module.exports = (() => {
                         if(e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "C" )) {e.preventDefault(); e.stopPropagation();}
                         else if(e.ctrlKey) {e.preventDefault(); e.stopPropagation(); return false;} // Prevent all sorts of shortcuts like bold, italic, underline, strikethrough, ...
                         else if (e.key === "Enter") {
+                            if (CODE_LENGTH !== -1) return;
+
                             e.preventDefault();
                             e.stopPropagation();
+                            if (this.state.delay) return false;
+
                             if (this.props.plugin.settings.highlightButtons) document.getElementById('PCLBtn-Enter')?.classList.add('PCL--btn-active');
                             this.codeAccept();
                             return false;
@@ -652,6 +717,7 @@ module.exports = (() => {
                                         { className: 'PCL--buttons' },
                                         [
                                             React.createElement('div', { className: 'PCL--divider PCL--animate' }),
+                                            React.createElement('div', { className: `PCL--delay ${this.state.delay && 'PCL--delay--visible'}` }, `Too many tries.\nPlease try again in ${this.state.delayLeft} ${this.state.delayLeft > 1 ? 'seconds' : 'second'}.`),
                                             ...btns,
                                             this.buildCancelButton(),
                                             React.createElement(PasscodeBtn, { number: 0, dec: '+', click: this.codeAppend }),
@@ -730,6 +796,46 @@ module.exports = (() => {
 
             }();
 
+            const VoiceProtector = new class {
+
+                constructor() {
+                    this._willPlaySound = false;
+                }
+
+                get willPlaySound() {
+                    return this._willPlaySound;
+                }
+                set willPlaySound(value) {
+                    this._willPlaySound = value;
+                    if (value) setTimeout(() => this._willPlaySound = false);
+                }
+
+                get autoDeafened() {
+                    return Data.autoDeafened;
+                }
+                set autoDeafened(value) {
+                    return Data.autoDeafened = value;
+                }
+
+                deafIfNeeded() {
+                    if (VoiceInfo.isSelfDeaf()) return;
+
+                    this.willPlaySound = true;
+                    VoiceActions.toggleSelfDeaf();
+                    this.autoDeafened = true;
+                }
+
+                undeafIfNeeded() {
+                    if (!this.autoDeafened) return;
+                    this.autoDeafened = false;
+
+                    if (!VoiceInfo.isSelfDeaf()) return;
+                    this.willPlaySound = true;
+                    VoiceActions.toggleSelfDeaf();
+                }
+
+            }();
+
             return class PasscodeLock extends Plugin {
                 static Types = {
                     FOUR_DIGIT: '4-digit',
@@ -762,7 +868,7 @@ module.exports = (() => {
                     if (this.locked) return;
                     if (this.settings.hash === -1 && type !== PasscodeLocker.Types.EDITOR) return Toasts.error(Locale.current.FIRST_SETUP_MESSAGE);
 
-                    this.unlock();
+                    this.unlock(false, true);
 
                     this.element = document.createElement('div');
                     (await getContainerAsync()).appendChild(this.element);
@@ -770,13 +876,21 @@ module.exports = (() => {
                     this.disableInteractions();
 
                     this.locked = true;
-                    if (type === PasscodeLocker.Types.DEFAULT) BdApi.setData(this.getName(), 'locked', true);
+                    if (type === PasscodeLocker.Types.DEFAULT) {
+                        VoiceProtector.deafIfNeeded();
+                        Data.locked = true;
+                    }
                 }
 
-                unlock(safeUnlock = false) {
+                unlock(safeUnlock = false, preventiveUnlock = false) {
+                    if (!preventiveUnlock) {
+                        VoiceProtector.undeafIfNeeded();
+                        Data.attempts = 0;
+                        Data.delayUntil = null;
+                    }
                     this.enableInteractions();
                     this.locked = false;
-                    if (safeUnlock) BdApi.setData(this.getName(), 'locked', false);
+                    if (safeUnlock) Data.locked = false;
 
                     if (!this.element) return;
 
@@ -807,6 +921,7 @@ module.exports = (() => {
                     }
 
                     this.injectCSS();
+                    this.patchPlaySound();
                     this.patchHeaderBar();
                     this.patchSettingsButton();
                     this.enableAutolock();
@@ -816,7 +931,15 @@ module.exports = (() => {
                     this.keybind = this.keybindSetting.split('+');
                     KeybindListener.listen(this.keybind, () => this.onLockKeybind());
 
-                    if (this.settings.lockOnStartup || BdApi.getData(this.getName(), 'locked')) this.lock();
+                    if (this.settings.lockOnStartup || Data.locked) this.lock();
+                }
+
+                patchPlaySound() {
+                    Patcher.instead(...playSound, (_, props, original) => {
+                        if (!props[0]?.endsWith('deafen') || !VoiceProtector.willPlaySound) return original(...props);
+                        VoiceProtector.willPlaySound = false;
+                        return false;
+                    });
                 }
 
                 async patchHeaderBar() {
@@ -1011,6 +1134,25 @@ module.exports = (() => {
 .PCL--animated {
     transform: scale(1);
     opacity: 1;
+}
+
+.PCL--delay {
+    display: none;
+    position: absolute;
+    top: 55px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    white-space: pre-wrap;
+    line-height: 1.2;
+    text-align: center;
+}
+.PCL--delay--visible {
+    display: block;
+}
+.PCL--delay--visible ~ * {
+    opacity: 0;
+    pointer-events: none;
 }
 `);
                 }
@@ -1222,30 +1364,45 @@ module.exports = (() => {
                                 this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
                         }),
 
-                        new Settings.RadioGroup(Locale.current.AUTOLOCK_SETTING, Locale.current.AUTOLOCK_DESC, this.settings.autolock, [
-                            {
-                                name: Locale.current.AUTOLOCK_DISABLED,
-                                value: false
-                            },
-                            {
-                                name: Locale.current.AUTOLOCK_1M,
-                                value: 60
-                            },
-                            {
-                                name: Locale.current.AUTOLOCK_5M,
-                                value: 60 * 5
-                            },
-                            {
-                                name: Locale.current.AUTOLOCK_1H,
-                                value: 60 * 60
-                            },
-                            {
-                                name: Locale.current.AUTOLOCK_5H,
-                                value: 60 * 60 * 5
-                            },
-                        ], e => {
-                            this.settings.autolock = e;
+                        // new Settings.RadioGroup(Locale.current.AUTOLOCK_SETTING, Locale.current.AUTOLOCK_DESC, this.settings.autolock, [
+                        //     {
+                        //         name: Locale.current.AUTOLOCK_DISABLED,
+                        //         value: false
+                        //     },
+                        //     {
+                        //         name: Locale.current.AUTOLOCK_1M,
+                        //         value: 60
+                        //     },
+                        //     {
+                        //         name: Locale.current.AUTOLOCK_5M,
+                        //         value: 60 * 5
+                        //     },
+                        //     {
+                        //         name: Locale.current.AUTOLOCK_1H,
+                        //         value: 60 * 60
+                        //     },
+                        //     {
+                        //         name: Locale.current.AUTOLOCK_5H,
+                        //         value: 60 * 60 * 5
+                        //     },
+                        // ], e => {
+                        //     this.settings.autolock = e;
+                        //     this.saveSettings();
+                        // }),
+
+                        new Settings.Slider(Locale.current.AUTOLOCK_SETTING, Locale.current.AUTOLOCK_DESC, -800, 5*60*60, this.settings.autolock === false ? -800 : this.settings.autolock, e => {
+                            this.settings.autolock = e < 0 ? false : e;
                             this.saveSettings();
+                        }, {
+                            markers: [
+                                -800,
+                                60,
+                                5 * 60,
+                                ...Array.from({ length: 4 }, (_, i) => (15 + i * 15) * 60),
+                                ...Array.from({ length: 4 }, (_, i) => (2 + i) * 60 * 60),
+                            ],
+                            stickToMarkers: true,
+                            renderMarker: e => e === -800 ? 'OFF' : e < 60 * 60 ? `${e / 60}${e < 10 * 60 ? '' : 'm'}` : `${e / 60 / 60}h`
                         }),
 
                         new Settings.SettingField(Locale.current.LOCK_KEYBIND_SETTING, null, () => {}, props => {
@@ -1368,7 +1525,7 @@ module.exports = (() => {
                     CODE_LENGTH = (this.settings.codeType === PasscodeLock.Types.FOUR_DIGIT ? 4 :
                         this.settings.codeType === PasscodeLock.Types.SIX_DIGIT ? 6 : -1);
 
-                    if (!BdApi.getData(this.getName(), 'hasShownAttention')) this.showAttentionModal();
+                    if (!Data.hasShownAttention) this.showAttentionModal();
                 }
 
                 showAttentionModal() {
@@ -1408,7 +1565,7 @@ module.exports = (() => {
                         return React.createElement(Modal, props)
                     });
 
-                    BdApi.setData(this.getName(), 'hasShownAttention', true);
+                    Data.hasShownAttention = true;
                 }
             }
         }
