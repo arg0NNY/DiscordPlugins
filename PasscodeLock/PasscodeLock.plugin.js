@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.4.0
+ * @version 1.4.1
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,33 +21,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.0",
+            "version": "1.4.1",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
         },
         "changelog": [
             {
-                "type": "added",
-                "title": "What's new",
-                "items": [
-                    "Plugin now auto-deafs you when you lock Discord.",
-                    "Added `Too many tries` message when you enter wrong passcode 3 times in a row, growing from 5 to 30 seconds.",
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Auto-lock setting is more flexible now."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Moved away from deprecated `BdApi` methods.",
-                    "Fixed a bug where a user could submit a code with a static length earlier than necessary by pressing `Enter`."
+                    "Fixed Lock Discord button not displaying."
                 ]
             }
         ]
@@ -205,7 +189,7 @@ module.exports = (() => {
             const hashCheck = async ({ string, salt, iterations }, hashed) => await pbkdf2(string, salt, iterations) === hashed;
 
             const Button = ButtonData;
-            const HeaderBar = getMangled(m => m?.Title && m?.Caret);
+            const HeaderBar = getMangled(m => m?.Title && m?.Caret && m?.toString?.().includes('toolbar'));
             const Tooltip = WebpackModules.getModule(m => m?.Positions && m?.Colors);
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
             const Markdown = WebpackModules.getModule(m => m.rules);
@@ -943,7 +927,7 @@ module.exports = (() => {
                 }
 
                 async patchHeaderBar() {
-                    Patcher.after(...HeaderBar, (self, _, value) => {
+                    Patcher.after(...HeaderBar, (self, props, value) => {
                         const children = value.props?.children?.props?.children;
                         const toolbar = children ? children[children.length - 1].props?.children?.props?.children : null;
                         if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return;
