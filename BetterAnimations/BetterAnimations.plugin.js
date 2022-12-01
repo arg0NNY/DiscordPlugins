@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.10
+ * @version 1.1.11
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.10",
+            "version": "1.1.11",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,11 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin works in the latest BetterDiscord update.",
-                    "Expression picker animations are back and working.",
-                    "Guild discovery animations are back and working.",
-                    "Fixed user popout animations not working properly.",
-                    "Fixed Slip Scale animation on the popouts animating the wrong side."
+                    "Fixed plugin messing up determining whether guild or channel was switched."
                 ]
             }
         ]
@@ -1043,7 +1039,7 @@ module.exports = (() => {
                 }
 
                 patchChannelActions() {
-                    Patcher.after(ChannelActions, 'selectChannel', (self, params, value) => {
+                    Patcher.before(ChannelActions, 'selectChannel', (self, params, value) => {
                         GuildIdHistory.push(params[0].guildId);
                     });
                 }
