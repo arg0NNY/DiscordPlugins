@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.3.2
+ * @version 1.3.3
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.2",
+            "version": "1.3.3",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed preview not showing up on guild channels."
+                    "Fixed preview not showing up on DMs."
                 ]
             }
         ],
@@ -264,7 +264,7 @@ module.exports = (() => {
             const ChannelItem = getMangled(m => typeof m === 'function' && m?.toString?.().includes('notInteractive'));
             const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
             const Chat = WebpackModules.getModule(m => m.type?.toString().includes('showingQuarantineBanner'));
-            const DMItemRenderer = getMangled(m => m?.toString?.().includes('{return(0,e.children)(p(e.id))}'));
+            const DMItemRenderer = getMangled(m => m?.toString?.().match(/{return\(0,.+\.children\)\(.+\(.+\.id\)\)}/));
             const Clickable = WebpackModules.getModule(m => m?.defaultProps && m?.toString?.().includes('handleKeyPress'), {searchExports: true});
             const AppearanceSettingsStore = WebpackModules.getByProps('fontSize', 'fontScale');
             const VoiceChannelActions = WebpackModules.getByProps('updateChatOpen');
