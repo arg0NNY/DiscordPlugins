@@ -3,12 +3,12 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.0.0
+ * @version 1.0.1
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
-*/
+ */
 
 module.exports = (() => {
     const config = {
@@ -18,10 +18,10 @@ module.exports = (() => {
                 {
                     "name": "arg0NNY",
                     "discord_id": '224538553944637440',
-  					"github_username": 'arg0NNY'
+                    "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.0",
+            "version": "1.0.1",
             "description": "Displays an online and total member count in the guild tooltip.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js"
@@ -40,6 +40,15 @@ module.exports = (() => {
                 name: 'Display total count',
                 note: 'Displays a total member count in the guild tooltip.',
                 value: true
+            }
+        ],
+        "changelog": [
+            {
+                "type": "fixed",
+                "title": "Fixed",
+                "items": [
+                    "Fixed plugin not working."
+                ]
             }
         ]
     };
@@ -79,7 +88,8 @@ module.exports = (() => {
             const {
                 React,
                 MemberCountStore,
-                Flux
+                Flux,
+                GuildChannelsStore
             } = DiscordModules;
 
             function getMangled(filter) {
@@ -92,16 +102,15 @@ module.exports = (() => {
 
             const Dispatcher = WebpackModules.getByProps('_subscriptions', '_waitQueue');
 
-			const ActionTypes = {
-				CONNECTION_OPEN: 'CONNECTION_OPEN',
-				GUILD_CREATE: 'GUILD_CREATE',
-				GUILD_DELETE: 'GUILD_DELETE',
-				GUILD_MEMBER_LIST_UPDATE: 'GUILD_MEMBER_LIST_UPDATE',
-				ONLINE_GUILD_MEMBER_COUNT_UPDATE: 'ONLINE_GUILD_MEMBER_COUNT_UPDATE'
-			};
+            const ActionTypes = {
+                CONNECTION_OPEN: 'CONNECTION_OPEN',
+                GUILD_CREATE: 'GUILD_CREATE',
+                GUILD_DELETE: 'GUILD_DELETE',
+                GUILD_MEMBER_LIST_UPDATE: 'GUILD_MEMBER_LIST_UPDATE',
+                ONLINE_GUILD_MEMBER_COUNT_UPDATE: 'ONLINE_GUILD_MEMBER_COUNT_UPDATE'
+            };
 
             const useStateFromStores = WebpackModules.getModule(m => m?.toString?.().includes('useStateFromStores'), {searchExports: true});
-            const getDefaultChannelForGuild = WebpackModules.getModule(m => m?.toString?.().includes('getLastSelectedTimestamp'), {searchExports: true});
 
             const Selectors = {
                 Guild: WebpackModules.getByProps('statusOffline', 'guildDetail')
@@ -195,10 +204,10 @@ module.exports = (() => {
                         'div',
                         {
                             className: Selectors.Guild.statusCounts,
-							style: {
-								columnGap: 0,
-								'-webkit-column-gap': 0
-							}
+                            style: {
+                                columnGap: 0,
+                                '-webkit-column-gap': 0
+                            }
                         },
                         [
                             ...(onlineDisplayed ? [React.createElement(
@@ -207,26 +216,26 @@ module.exports = (() => {
                                     className: Selectors.Guild.statusOnline
                                 }
                             ),
-                            React.createElement(
-                                'span',
-                                {
-                                    className: Selectors.Guild.count
-                                },
-                                membersOnline ?? presenceCount
-                            )] : []),
+                                React.createElement(
+                                    'span',
+                                    {
+                                        className: Selectors.Guild.count
+                                    },
+                                    membersOnline ?? presenceCount
+                                )] : []),
                             ...(totalDisplayed ? [React.createElement(
                                 'i',
                                 {
                                     className: Selectors.Guild.statusOffline
                                 }
                             ),
-                            React.createElement(
-                                'span',
-                                {
-                                    className: Selectors.Guild.count
-                                },
-                                memberCount ?? members
-                            )] : [])
+                                React.createElement(
+                                    'span',
+                                    {
+                                        className: Selectors.Guild.count
+                                    },
+                                    memberCount ?? members
+                                )] : [])
                         ]
                     )
                 ) : React.createElement('div');
@@ -256,7 +265,7 @@ module.exports = (() => {
                 _preloadGuild(guild) {
                     GuildActions.preload(
                         guild.id,
-                        getDefaultChannelForGuild(guild.id)
+                        GuildChannelsStore.getDefaultChannel(guild.id).id
                     );
                 }
 
