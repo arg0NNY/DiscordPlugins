@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.11
+ * @version 1.1.12
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.11",
+            "version": "1.1.12",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed plugin messing up determining whether guild or channel was switched."
+                    "Fixed Popouts animations not working.",
+                    "Fixed Emoji Picker animations not working.",
                 ]
             }
         ]
@@ -117,12 +118,12 @@ module.exports = (() => {
             // const {PreloadedUserSettingsActionCreators} = WebpackModules.getByProps('PreloadedUserSettingsActionCreators');
             const ThreadPopoutActions = WebpackModules.getByProps('StatusTab', 'useActiveThreads');
             const ThreadActions = WebpackModules.getByProps('createThread', 'unarchiveThread');
-            const ReferencePositionLayer = WebpackModules.getModule(m => m.prototype?.updatePosition, {searchExports: true}); // WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
+            const ReferencePositionLayer = WebpackModules.getModule(m => m?.prototype?.calculatePositionStyle, {searchExports: true}); // WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
             const RouteWithImpression = WebpackModules.getModule(m => m?.prototype?.render?.toString().includes('e.props.path?P(n.pathname,e.props)'), {searchExports: true});
             const Button = ButtonData;
             const GuildDiscoveryActions = WebpackModules.getByProps('searchGuildDiscovery');
-            const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
-            const UserPopout = getMangled(m => m?.toString && m.toString().includes('().canViewThemes'));
+            const Anchor = WebpackModules.getModule(m => m?.toString?.().includes('noreferrer noopener') && m?.toString?.().includes('focusProps'), {searchExports: true});
+            const UserPopout = WebpackModules.getModule(m => m?.type?.toString?.().includes('Unexpected missing user'), {searchExports: true});
 
             const Selectors = {
                 Chat: WebpackModules.getByProps('chat', 'channelName'),
@@ -1263,9 +1264,8 @@ module.exports = (() => {
 
                     Patcher.before(ReferencePositionLayer.prototype, 'componentDidMount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
-                        self = self.ref.current;
 
-                        const node = self.elementRef.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
+                        const node = self.ref?.current ?? self.elementRef?.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
                         if (!node) return;
 
                         popoutNode = node;
@@ -1273,9 +1273,8 @@ module.exports = (() => {
                     });
                     Patcher.before(ReferencePositionLayer.prototype, 'componentWillUnmount', (self, _) => {
                         if (!this.settings.popouts.enabled) return;
-                        self = self.ref.current;
 
-                        const node = self.elementRef.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
+                        const node = self.ref?.current ?? self.elementRef?.current ?? document.getElementById(self.props.id) ?? document.querySelector(`.${self.props.className}`);
                         if (!node) return;
 
                         const animator = new RevealAnimator(this.settings.popouts.type, node, {
@@ -1292,7 +1291,7 @@ module.exports = (() => {
                         });
                     });
 
-                    Patcher.before(...UserPopout, (self, props) => {
+                    Patcher.before(UserPopout, 'type', (self, props) => {
                         if (!popoutNode || popoutNode.children[0]?.className.includes('loadingPopout')) return;
                         animate(popoutNode.children[0], props[0].position);
 
@@ -1345,8 +1344,8 @@ module.exports = (() => {
                         });
                     };
 
-                    const setExpressionPickerView = getMangled(m => m?.toString && m.toString().includes('c.setState({activeView:e,lastActiveView:c.getState().activeView})'));
-                    const toggleExpressionPicker = getMangled(m => m?.toString && m.toString().includes('c.getState().activeView===e?s():u(e,t)'));
+                    const setExpressionPickerView = getMangled(m => m?.toString?.().match(/\w+\.setState\({activeView:\w+,lastActiveView:\w+\.getState\(\)\.activeView}\)/));
+                    const toggleExpressionPicker = getMangled(m => m?.toString?.().match(/\w+\.getState\(\)\.activeView===\w+\?\w+\(\):\w+\(\w+,\w+\)/));
 
                     Patcher.before(...setExpressionPickerView, (self, _) => before(_[0]));
                     Patcher.before(...toggleExpressionPicker, (self, _) => before(_[0]));
