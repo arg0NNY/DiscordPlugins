@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.4.1
+ * @version 1.4.2
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.1",
+            "version": "1.4.2",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed Lock Discord button not displaying."
+                    "Fixed plugin causing Discord to crash."
                 ]
             }
         ]
@@ -190,10 +190,10 @@ module.exports = (() => {
 
             const Button = ButtonData;
             const HeaderBar = getMangled(m => m?.Title && m?.Caret && m?.toString?.().includes('toolbar'));
-            const Tooltip = WebpackModules.getModule(m => m?.Positions && m?.Colors);
+            const Tooltip = BdApi.Components.Tooltip;
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
             const Markdown = WebpackModules.getModule(m => m.rules);
-            const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
+            const Anchor = WebpackModules.getModule(m => m?.toString?.().includes('noreferrer noopener') && m?.toString?.().includes('focusProps'), {searchExports: true});
             const LanguageStore = WebpackModules.getModule(m => m.Messages && m.Messages.IMAGE && m);
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
 
