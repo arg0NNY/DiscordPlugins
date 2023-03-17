@@ -17,4 +17,4 @@ Use Discord's Colour Themes without Nitro!
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [freethemes-download-link]: https://arg0nny.github.io/bd/download/?id=FreeThemes
-[freethemes-version-badge]: https://img.shields.io/badge/version-1.0.0-blue
+[freethemes-version-badge]: https://img.shields.io/badge/version-1.1.0-blue
