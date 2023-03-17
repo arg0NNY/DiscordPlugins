@@ -1,6 +1,6 @@
 ![BetterGuildTooltip](https://user-images.githubusercontent.com/52377180/196028848-18d5e46a-dbc6-49d2-8604-c3a2e03a09cd.png)
 
-## [BetterGuildTooltip](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip) ![Status][status-official-badge] ![Version][betterguildtooltip-version-badge] ![Downloads][betterguildtooltip-downloads-badge] ![Likes][betterguildtooltip-likes-badge]
+# [BetterGuildTooltip](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip) ![Status][status-official-badge] ![Version][betterguildtooltip-version-badge] ![Downloads][betterguildtooltip-downloads-badge] ![Likes][betterguildtooltip-likes-badge]
 Displays an online and total member count in the guild tooltip.
 
 [![Download][download-badge]][betterguildtooltip-download-link] [![View][view-badge]][betterguildtooltip-view-link] [![Support][support-badge]][support-link]
