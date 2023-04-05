@@ -1,6 +1,6 @@
 ![FreeThemes](https://user-images.githubusercontent.com/52377180/225885754-cd6841cc-1fb4-4f7e-af63-eefc76ca85f0.png)
 
-# [FreeThemes](https://github.com/arg0NNY/DiscordPlugins/tree/master/FreeThemes) ![Status][status-review-badge] ![Version][freethemes-version-badge]
+# [FreeThemes](https://github.com/arg0NNY/DiscordPlugins/tree/master/FreeThemes) ![Status][status-unofficial-badge] ![Version][freethemes-version-badge]
 Use Discord's Colour Themes without Nitro!
 
 [![Download][download-badge]][freethemes-download-link] ![View][unavailable-badge] [![Support][support-badge]][support-link]

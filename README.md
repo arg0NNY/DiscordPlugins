@@ -19,7 +19,7 @@ Improves your whole Discord experience. Adds highly customizable switching anima
 [![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link]
 
 
-## [FreeThemes](https://github.com/arg0NNY/DiscordPlugins/tree/master/FreeThemes) ![Status][status-review-badge] ![Version][freethemes-version-badge]
+## [FreeThemes](https://github.com/arg0NNY/DiscordPlugins/tree/master/FreeThemes) ![Status][status-unofficial-badge] ![Version][freethemes-version-badge]
 Use Discord's Colour Themes without Nitro!
 
 [![Download][download-badge]][freethemes-download-link] ![View][unavailable-badge]
