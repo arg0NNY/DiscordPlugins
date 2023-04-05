@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.12
+ * @version 1.1.13
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.12",
+            "version": "1.1.13",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,8 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed Popouts animations not working.",
-                    "Fixed Emoji Picker animations not working.",
+                    "Fixed plugin not working."
                 ]
             }
         ]
@@ -119,7 +118,7 @@ module.exports = (() => {
             const ThreadPopoutActions = WebpackModules.getByProps('StatusTab', 'useActiveThreads');
             const ThreadActions = WebpackModules.getByProps('createThread', 'unarchiveThread');
             const ReferencePositionLayer = WebpackModules.getModule(m => m?.prototype?.calculatePositionStyle, {searchExports: true}); // WebpackModules.getModule(m => m.default?.displayName === 'ReferencePositionLayer');
-            const RouteWithImpression = WebpackModules.getModule(m => m?.prototype?.render?.toString().includes('e.props.path?P(n.pathname,e.props)'), {searchExports: true});
+            const RouteWithImpression = WebpackModules.getModule(m => ['location', 'computedMatch'].every(s => m?.prototype?.render?.toString().includes(s)), {searchExports: true});
             const Button = ButtonData;
             const GuildDiscoveryActions = WebpackModules.getByProps('searchGuildDiscovery');
             const Anchor = WebpackModules.getModule(m => m?.toString?.().includes('noreferrer noopener') && m?.toString?.().includes('focusProps'), {searchExports: true});
@@ -257,7 +256,7 @@ module.exports = (() => {
                     })
                 },
                 Members: WebpackModules.getByProps('members', 'hiddenMembers'),
-                EmojiPicker: WebpackModules.getByProps('emojiPickerInExpressionPicker', 'emojiPicker'),
+                EmojiPicker: WebpackModules.getByProps('emojiPickerHasTabWrapper', 'emojiPicker'),
                 StickerPicker: WebpackModules.getByProps('listWrapper', 'loadingIndicator'),
                 GifPicker: WebpackModules.getByProps('backButton', 'gutterSize'),
                 Popout: WebpackModules.getByProps('disabledPointerEvents', 'layer'),
@@ -1243,7 +1242,7 @@ module.exports = (() => {
                         animateStack.add(e.message.id);
                         setTimeout(() => {
                             animateStack.delete(e.message.id);
-                        });
+                        }, 100);
                     };
 
                     Dispatcher.subscribe(ActionTypes.MESSAGE_CREATE, this.messageCreateHandler);
@@ -1302,7 +1301,7 @@ module.exports = (() => {
                 patchExpressionPicker() {
                     const ExpressionPickerRoutes = [
                         new Route('Emoji', 'emoji', {
-                            element: `.${Selectors.EmojiPicker.emojiPickerInExpressionPicker}`,
+                            element: `.${Selectors.EmojiPicker.emojiPickerHasTabWrapper}`,
                             scrollers: [Selectors.Content.scrollerBase],
                             noGuilds: true
                         }),
@@ -1386,7 +1385,7 @@ module.exports = (() => {
 
 
                             /* Expression Picker Fix */
-                            .${Selectors.EmojiPicker.emojiPickerInExpressionPicker}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
+                            .${Selectors.EmojiPicker.emojiPickerHasTabWrapper}, .${Selectors.StickerPicker.wrapper}, .${Selectors.GifPicker.container} {
                                 background-color: inherit;
                             }
                             
