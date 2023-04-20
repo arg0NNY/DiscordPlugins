@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.0.1
+ * @version 1.0.2
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.1",
+            "version": "1.0.2",
             "description": "Displays an online and total member count in the guild tooltip.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js"
@@ -118,7 +118,7 @@ module.exports = (() => {
 
             const GuildInfoStore = WebpackModules.getByProps('getGuild', 'hasFetchFailed');
             const GuildActions = WebpackModules.getByProps('preload', 'closePrivateChannel');
-            const GuildTooltip = getMangled(m => m?.toString?.().includes('includeActivity'));
+            const GuildTooltip = getMangled(m => ['includeActivity', 'onBlur'].every(s => m?.toString?.().includes(s)));
 
             const memberCounts = new Map();
             const onlineMemberCounts = new Map();

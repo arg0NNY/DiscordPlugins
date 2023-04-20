@@ -18,6 +18,6 @@ Displays an online and total member count in the guild tooltip.
 
 [betterguildtooltip-download-link]: https://arg0nny.github.io/bd/download/?id=BetterGuildTooltip
 [betterguildtooltip-view-link]: https://betterdiscord.app/plugin/BetterGuildTooltip
-[betterguildtooltip-version-badge]: https://img.shields.io/badge/version-1.0.1-blue
+[betterguildtooltip-version-badge]: https://img.shields.io/badge/version-1.0.2-blue
 [betterguildtooltip-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27BetterGuildTooltip%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [betterguildtooltip-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27BetterGuildTooltip%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
