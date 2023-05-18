@@ -166,11 +166,12 @@ module.exports = (() => {
                 }
 
                 isInMyVoice(user) {
-                    return UserStore.getCurrentUser().id !== user.id
-                        && getVoiceChannelId()
-                        && VoiceChannelStore.getVoiceStatesForChannel(
-                            ChannelStore.getChannel(getVoiceChannelId())
-                        ).map(s => s.user.id).includes(user.id);
+                    const voiceChannelId = getVoiceChannelId();
+                    const currentUser = UserStore.getCurrentUser();
+                    if(currentUser.id === user.id || !voiceChannelId) return false;
+                    const voiceState = VoiceChannelStore.getVoiceStatesForChannel(voiceChannelId);                    
+                    const values = Object.values(voiceState);
+                    return values.findIndex(x => x.userId === user.id) !== -1;
                 }
 
                 onStop() {
