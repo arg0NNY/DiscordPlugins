@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.4
+ * @version 1.0.5
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.4",
+            "version": "1.0.5",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
@@ -30,7 +30,7 @@ module.exports = (() => {
             "type": "fixed",
             "title": "Fixed",
             "items": [
-                "Fixed an error occurring when Original Poster tag displayed."
+                "Fixed an error occurring when the `In voice` tag was displayed."
             ]
         }],
         "defaultConfig": [
@@ -166,11 +166,12 @@ module.exports = (() => {
                 }
 
                 isInMyVoice(user) {
-                    return UserStore.getCurrentUser().id !== user.id
-                        && getVoiceChannelId()
-                        && VoiceChannelStore.getVoiceStatesForChannel(
-                            ChannelStore.getChannel(getVoiceChannelId())
-                        ).map(s => s.user.id).includes(user.id);
+                    const voiceChannelId = getVoiceChannelId();
+                    const currentUser = UserStore.getCurrentUser();
+                    if(currentUser.id === user.id || !voiceChannelId) return false;
+                    const voiceState = VoiceChannelStore.getVoiceStatesForChannel(voiceChannelId);                    
+                    const values = Object.values(voiceState);
+                    return values.findIndex(x => x.userId === user.id) !== -1;
                 }
 
                 onStop() {
