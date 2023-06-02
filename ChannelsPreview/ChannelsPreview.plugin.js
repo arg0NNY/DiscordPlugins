@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.3.3
+ * @version 1.3.4
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.3",
+            "version": "1.3.4",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed preview not showing up on DMs."
+                    "Fixed popup showing nothing due to Discord's changes."
                 ]
             }
         ],
@@ -262,12 +262,15 @@ module.exports = (() => {
             let displayedSettingsNotice = false;
 
             const ChannelItem = getMangled(m => typeof m === 'function' && m?.toString?.().includes('notInteractive'));
-            const Anchor = WebpackModules.getModule(m => m?.toString().includes('noreferrer noopener') && m?.toString().includes('focusProps'));
+            const Anchor = WebpackModules.getModule(m => m?.toString?.().includes('noreferrer noopener') && m?.toString?.().includes('focusProps'), {searchExports: true});
             const Chat = WebpackModules.getModule(m => m.type?.toString().includes('showingQuarantineBanner'));
             const DMItemRenderer = getMangled(m => m?.toString?.().match(/{return\(0,.+\.children\)\(.+\(.+\.id\)\)}/));
             const Clickable = WebpackModules.getModule(m => m?.defaultProps && m?.toString?.().includes('handleKeyPress'), {searchExports: true});
             const AppearanceSettingsStore = WebpackModules.getByProps('fontSize', 'fontScale');
             const VoiceChannelActions = WebpackModules.getByProps('updateChatOpen');
+            const useStateFromStores = WebpackModules.getModule(m => m.toString?.().includes("useStateFromStores"));
+            const ThemeStore = WebpackModules.getModule(m => m.theme);
+            const ThemeContext = WebpackModules.getModule(m => m?.toString?.().includes("amoled:") && m?.toString?.().includes("Provider"), {searchExports: true});
 
             let MessageComponent = null;
             let EmptyMessage = null;
@@ -283,15 +286,24 @@ module.exports = (() => {
                     if (MessageComponent && EmptyMessage && FluxTypingUsers && (ThreadStartedMessage || !needThreadStarter)) return resolve();
 
                     const elem = document.createElement('div');
-                    ReactDOM.render(React.createElement(Chat, { channel }), elem, () => {
-                        if (!MessageComponent) MessageComponent = getModule(elem, Selectors.Messages.messageListItem, m => m?.toString?.().includes('message'));
-                        if (!EmptyMessage) EmptyMessage = getModule(elem, Selectors.EmptyMessage.container, m => m?.toString?.().includes('showingBanner'));
-                        if (!FluxTypingUsers) FluxTypingUsers = ReactTools.getReactInstance(document.getElementsByClassName(Selectors.Chat.form)[0])?.memoizedProps?.children?.[2]?.type;
-                        if (!ThreadStartedMessage) ThreadStartedMessage = getModule(elem, Selectors.Messages.quotedChatMessage, m => m?.toString?.().includes('THREAD_STARTER_MESSAGE'));
+                    ReactDOM.render(
+                        React.createElement(function () {
+                            const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
+                            return React.createElement(ThemeContext, { theme },
+                                React.createElement(Chat, { channel })
+                            );
+                        }),
+                        elem,
+                        () => {
+                            if (!MessageComponent) MessageComponent = getModule(elem, Selectors.Messages.messageListItem, m => m?.toString?.().includes('message'));
+                            if (!EmptyMessage) EmptyMessage = getModule(elem, Selectors.EmptyMessage.container, m => m?.toString?.().includes('showingBanner'));
+                            if (!FluxTypingUsers) FluxTypingUsers = ReactTools.getReactInstance(document.getElementsByClassName(Selectors.Chat.form)[0])?.memoizedProps?.children?.[2]?.type;
+                            if (!ThreadStartedMessage) ThreadStartedMessage = getModule(elem, Selectors.Messages.quotedChatMessage, m => m?.toString?.().includes('THREAD_STARTER_MESSAGE'));
 
-                        ReactDOM.unmountComponentAtNode(elem);
-                        resolve();
-                    });
+                            ReactDOM.unmountComponentAtNode(elem);
+                            resolve();
+                        }
+                    );
                 })
             }
 
