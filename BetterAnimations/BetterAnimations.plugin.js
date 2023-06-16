@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.13
+ * @version 1.1.14
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.13",
+            "version": "1.1.14",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed plugin not working."
+                    "Fixed guilds and channels animations not working due to Discord's changes.."
                 ]
             }
         ]
@@ -379,7 +379,8 @@ module.exports = (() => {
                 new Route('Chat', [
                     "/channels/:guildId/:channelId/threads/:threadId",
                     "/channels/@me/:channelId",
-                    "/channels/:guildId/:channelId?/:messageId?"
+                    "/channels/:guildId/:channelId?/:messageId?",
+                    "/channels/:guildId/:channelId/threads/:threadId/:messageId?"
                 ], {
                     element: `.${Selectors.Chat.chat}`,
                     scrollers: [Selectors.Messages.scroller, DiscordClasses.MemberList.members.value, Selectors.Content.scrollerBase]
