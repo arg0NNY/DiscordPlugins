@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.4.2
+ * @version 1.4.3
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.2",
+            "version": "1.4.3",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed plugin causing Discord to crash."
+                    "Fixed Lock Discord button not showing up in the toolbar."
                 ]
             }
         ]
@@ -75,7 +75,8 @@ module.exports = (() => {
                 PluginUtilities,
                 Settings,
                 DOMTools,
-                Toasts
+                Toasts,
+                Utilities
             } = Api;
 
             const {
@@ -197,7 +198,7 @@ module.exports = (() => {
             const LanguageStore = WebpackModules.getModule(m => m.Messages && m.Messages.IMAGE && m);
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
 
-            const playSound = getMangled(m => m?.toString?.().includes('getSoundpack'));
+            const playSound = getMangled(m => typeof m === 'function' && m.toString?.().includes('getSoundpack'));
 
             const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
 
@@ -928,8 +929,7 @@ module.exports = (() => {
 
                 async patchHeaderBar() {
                     Patcher.after(...HeaderBar, (self, props, value) => {
-                        const children = value.props?.children?.props?.children;
-                        const toolbar = children ? children[children.length - 1].props?.children?.props?.children : null;
+                        const toolbar = Utilities.findInReactTree(value, i => i?.className === Selectors.HeaderBar.toolbar)?.children?.props?.children;
                         if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return;
 
                         toolbar.splice(-2, 0, React.createElement(
