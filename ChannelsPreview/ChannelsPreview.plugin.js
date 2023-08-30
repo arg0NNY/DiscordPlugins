@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.3.4
+ * @version 1.3.5
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.4",
+            "version": "1.3.5",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -270,7 +270,7 @@ module.exports = (() => {
             const VoiceChannelActions = WebpackModules.getByProps('updateChatOpen');
             const useStateFromStores = WebpackModules.getModule(m => m.toString?.().includes("useStateFromStores"));
             const ThemeStore = WebpackModules.getModule(m => m.theme);
-            const ThemeContext = WebpackModules.getModule(m => m?.toString?.().includes("amoled:") && m?.toString?.().includes("Provider"), {searchExports: true});
+            const ThemeContext = WebpackModules.getModule(m => m?.toString?.().includes(".DARK") && m?.toString?.().includes("primaryColor") && m?.toString?.().includes("Provider"), {searchExports: true});
 
             let MessageComponent = null;
             let EmptyMessage = null;
@@ -279,7 +279,7 @@ module.exports = (() => {
             function attemptGettingModules(channel, needThreadStarter = false) {
                 function getModule(rootNode, className, filter) {
                     return ReactTools.getComponents(rootNode.getElementsByClassName(className)[0])
-                        .find(c => filter(c));
+                    .find(c => filter(c));
                 }
 
                 return new Promise(resolve => {
@@ -574,7 +574,7 @@ module.exports = (() => {
 
                         if (settings.trigger.displayOn !== 'mwheel') return;
                         setTimeout(() => {
-                            if (clickable) clickable.ref.current.onauxclick = e => e.preventDefault();
+                            if (clickable?.ref?.current) clickable.ref.current.onauxclick = e => e.preventDefault();
                         }, 0);
                     };
 
