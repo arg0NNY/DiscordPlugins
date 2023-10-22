@@ -7,6 +7,12 @@
  
 ```
 
+## [BetterChannelList](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList) ![Status][status-review-badge] ![Version][betterchannellist-version-badge]
+3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
+
+[![Download][download-badge]][betterchannellist-download-link] ![View][unavailable-badge]
+
+
 ## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
 Protect your Discord with a passcode.
 
@@ -122,3 +128,6 @@ SOFTWARE.
 
 [freethemes-download-link]: https://arg0nny.github.io/bd/download/?id=FreeThemes
 [freethemes-version-badge]: https://img.shields.io/badge/version-1.1.0-blue
+
+[betterchannellist-download-link]: https://arg0nny.github.io/bd/download/?id=BetterChannelList
+[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.0.0-blue
