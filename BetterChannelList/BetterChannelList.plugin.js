@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.0
+ * @version 1.0.1
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -21,11 +21,28 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.0.0",
+      "version": "1.0.1",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
-    }
+    },
+    "changelog": [
+      {
+        "type": "improved",
+        "title": "Improvements",
+        "items": [
+          "Moved away from ZeresPluginLibrary settings components in favour of Discord's with intention to get rid of library dependency in the further updates."
+        ]
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "items": [
+          "Fixed plugin crashing due to Discord's changes.",
+          "Minor style fixes."
+        ]
+      }
+    ]
   };
 
   return !global.ZeresPluginLibrary ? class {
@@ -55,8 +72,9 @@ module.exports = (() => {
   } : (([Plugin, Api]) => {
     const plugin = (Plugin, Api) => {
       const {
-        Webpack: { Filters }
-      } = BdApi
+        Webpack: { Filters },
+        DOM
+      } = new BdApi(config.info.name)
 
       const {
         Patcher,
@@ -64,9 +82,8 @@ module.exports = (() => {
         DiscordModules,
         Logger,
         Utilities,
-        PluginUtilities,
-        Settings,
-        DOMTools
+        DOMTools,
+        DiscordClasses
       } = Api
 
       const {
@@ -76,17 +93,10 @@ module.exports = (() => {
         UserStore,
         SelectedGuildStore,
         React,
+        ReactDOM,
         RelationshipStore,
         MessageStore
       } = DiscordModules
-
-      function getMangled(filter) {
-        const target = WebpackModules.getModule(m => Object.values(m).some(filter), { searchGetters: false })
-        return target ? [
-          target,
-          Object.keys(target).find(k => filter(target[k]))
-        ] : []
-      }
 
       const Data = new Proxy({}, {
         get (_, k) {
@@ -105,29 +115,32 @@ module.exports = (() => {
 
       const { getSocket } = WebpackModules.getByProps('getSocket')
       const Common = WebpackModules.getByProps('Shakeable', 'List')
-      const ChannelItem = getMangled(Filters.byStrings('notInteractive'))
+      const ChannelItem = WebpackModules.getByProps('ChannelItemIcon')
+      const { ChannelItemIcon } = ChannelItem
       const ChannelTypes = WebpackModules.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
       const MessageTypes = WebpackModules.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
       const LocaleStore = WebpackModules.getModule(m => m.Messages?.IMAGE)
-      const useStateFromStores = WebpackModules.getByString('useStateFromStores')
+      const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores')
       const ForumPostAuthor = WebpackModules.getByString('FORUM_POST_AUTHOR')
       const buildMessageReplyContent = WebpackModules.getModule(Filters.byStrings('REPLY_QUOTE_MESSAGE_BLOCKED'), { searchExports: true })
       const buildMessageContent = WebpackModules.getByString('parseInlineReply')
-      const ScrollerProvider = getMangled(Filters.byStrings('setFocus', 'containerProps', 'orientation', 'Provider'))
-      const formatMessageContent = WebpackModules.getModule(m => m?.toString?.().match(/{return \w+\(\w+\)\.join\(""\)}/), { searchExports: true })
+      const List = WebpackModules.getByProps('ListNavigatorProvider')
+      const { astToString } = WebpackModules.getByProps('astToString')
       const JoinMessages = WebpackModules.getByProps('getSystemMessageUserJoin')
-      const getMember = WebpackModules.getModule(Filters.byStrings('friendNickname', 'getChannel'), { searchExports: true })
-      const formatRoleSubscriptionPurchase = WebpackModules.getModule(Filters.byStrings('roleSubscriptionOnClickHandler', 'formatParams', 'astFormat'), { searchExports: true })
-      const formatGuildApplicationPremiumSubscription = WebpackModules.getModule(Filters.byStrings('SYSTEM_MESSAGE_APPLICATION_SUBSCRIPTION_PURCHASE_MOBILE'), { searchExports: true })
-      const formatPrivateChannelIntegrationAdded = WebpackModules.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_ADDED_MOBILE'), { searchExports: true })
-      const formatPrivateChannelIntegrationRemoved = WebpackModules.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_REMOVED_MOBILE'), { searchExports: true })
-      const Emoji = WebpackModules.getByString('allowAnimatedEmoji')
-      const useChannelIcon = WebpackModules.getModule(Filters.byStrings('user_channel_emoji_overrides'), { searchExports: true })
-      const NativeChannelIcon = WebpackModules.getModule(Filters.byStrings('hasActiveThreads', 'iconContainer'), { searchExports: true })
+      const { useNullableMessageAuthor } = WebpackModules.getByProps('useNullableMessageAuthor')
+      const { getRoleSubscriptionPurchaseSystemMessageAstFormattedContent } = WebpackModules.getByProps('getRoleSubscriptionPurchaseSystemMessageAstFormattedContent')
+      const { getApplicationSubscriptionSystemMessageASTContent } = WebpackModules.getByProps('getApplicationSubscriptionSystemMessageASTContent')
+      const {
+        getPrivateChannelIntegrationAddedSystemMessageASTContent,
+        getPrivateChannelIntegrationRemovedSystemMessageASTContent
+      } = WebpackModules.getByProps('getPrivateChannelIntegrationAddedSystemMessageASTContent')
+      const Emoji = WebpackModules.getByString('allowAnimatedEmoji', 'AnimateEmoji')
+      const { useChannelEmojiAndColor } = WebpackModules.getByProps('useChannelEmojiAndColor')
       const SortedVoiceStateStore = WebpackModules.getModule(Filters.byStoreName('SortedVoiceStateStore'))
       const isLimited = WebpackModules.getByString('canEveryoneRole', 'permissionOverwrites')
       const GuildBanner = WebpackModules.getModule(m => m?.type?.toString?.().includes('guildBanner'))
       const ActiveThreadsStore = WebpackModules.getModule(Filters.byStoreName('ActiveThreadsStore'))
+      const AppView = WebpackModules.getModule(m => Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY')(m?.default))
 
       const Selectors = {
         ChannelItem: WebpackModules.getByProps('unread', 'link'),
@@ -140,7 +153,9 @@ module.exports = (() => {
         App: WebpackModules.getByProps('app', 'layers'),
         Base: WebpackModules.getByProps('base', 'sidebar'),
         DirectMessages: WebpackModules.getByProps('activity', 'channel'),
-        GuildHeader: WebpackModules.getByProps('header', 'bannerImage')
+        GuildHeader: WebpackModules.getByProps('bannerImage', 'bannerImg'),
+        Margins: DiscordClasses.Margins,
+        SidebarFooter: WebpackModules.getByProps('nameTag', 'godlike')
       }
 
       function deepEqual (x, y) {
@@ -237,8 +252,8 @@ module.exports = (() => {
       }
 
       function buildLastMessageContent (channel, message) {
-        const format = formatMessageContent
-        const member = getMember(message)
+        const format = astToString
+        const author = useNullableMessageAuthor(message)
 
         if (!message) return null
 
@@ -247,15 +262,15 @@ module.exports = (() => {
             return format(
               JoinMessages.getSystemMessageUserJoin(message.id)
                 .astFormat({
-                  username: member?.nick ?? message.author.username,
+                  username: author?.nick ?? message.author.username,
                   usernameHook: e => e
                 })
             )
 
           case MessageTypes.ROLE_SUBSCRIPTION_PURCHASE:
             return format(
-              formatRoleSubscriptionPurchase({
-                username: member?.nick ?? message.author.username,
+              getRoleSubscriptionPurchaseSystemMessageAstFormattedContent({
+                username: author?.nick ?? message.author.username,
                 guildId: channel.guild_id,
                 roleSubscriptionData: message.roleSubscriptionData
               })
@@ -263,25 +278,25 @@ module.exports = (() => {
 
           case MessageTypes.GUILD_APPLICATION_PREMIUM_SUBSCRIPTION:
             return format(
-              formatGuildApplicationPremiumSubscription({
+              getApplicationSubscriptionSystemMessageASTContent({
                 application: message.application,
-                username: member?.nick
+                username: author?.nick
               })
             )
 
           case MessageTypes.PRIVATE_CHANNEL_INTEGRATION_ADDED:
             return format(
-              formatPrivateChannelIntegrationAdded({
+              getPrivateChannelIntegrationAddedSystemMessageASTContent({
                 application: message.application,
-                username: member?.nick
+                username: author?.nick
               })
             )
 
           case MessageTypes.PRIVATE_CHANNEL_INTEGRATION_REMOVED:
             return format(
-              formatPrivateChannelIntegrationRemoved({
+              getPrivateChannelIntegrationRemovedSystemMessageASTContent({
                 application: message.application,
-                username: member?.nick
+                username: author?.nick
               })
             )
 
@@ -389,7 +404,7 @@ module.exports = (() => {
       }
 
       function ChannelEmojiIcon ({ channel }) {
-        const { emoji, color } = useChannelIcon(channel)
+        const { emoji, color } = useChannelEmojiAndColor(channel)
 
         return React.createElement(
           'div',
@@ -438,7 +453,7 @@ module.exports = (() => {
         if (locked) return React.createElement(ChannelLockedIcon)
         if (channel.isGuildStageVoice()) return React.createElement(ChannelStageIcon)
         if (channel.isGuildVoice()) return React.createElement(ChannelVoiceIcon)
-        return React.createElement(NativeChannelIcon, { channel, locked })
+        return React.createElement(ChannelItemIcon, { channel, locked })
       }
 
       function ChannelVoiceBadge ({ channel, locked, connected, selected }) {
@@ -565,7 +580,7 @@ module.exports = (() => {
         }
 
         injectStyle () {
-          PluginUtilities.addStyle(this.styleName, `
+          DOM.addStyle(this.styleName, `
             .BCL--last-message {
               pointer-events: none;
               padding-top: 2px;
@@ -677,7 +692,7 @@ module.exports = (() => {
               left: 0;
               height: 100%;
               width: 5px;
-              z-index: 99;
+              z-index: 150;
             }
             body:has(.BCL--resize-handler--dragging) *, .BCL--resize-handler {
               cursor: ew-resize !important;
@@ -705,11 +720,15 @@ module.exports = (() => {
             .${Selectors.GuildHeader.bannerImage}, .${Selectors.GuildHeader.bannerImg} {
               width: 100%;
             }
+            .${Selectors.SidebarFooter.avatarWrapper} {
+              flex: 1;
+              min-width: 0;
+            }
           `)
         }
 
         patchChannelItem () {
-          Patcher.after(...ChannelItem, (self, [{ channel, guild, muted, selected, unread, locked, connected }], value) => {
+          Patcher.after(ChannelItem, 'default', (self, [{ channel, guild, muted, selected, unread, locked, connected }], value) => {
             const link = Utilities.findInReactTree(value, byClassName(Selectors.ChannelItem.link))
             if (!link) return
 
@@ -762,7 +781,7 @@ module.exports = (() => {
 
         patchScrollerProvider () {
           let guildChannels
-          Patcher.after(...ScrollerProvider, (self, props, value) => {
+          Patcher.after(List, 'ListNavigatorProvider', (self, props, value) => {
             if (value.props?.value?.id !== 'channels') return
 
             const scroller = Utilities.findInReactTree(value, m => m.props?.guildChannels)
@@ -788,43 +807,38 @@ module.exports = (() => {
         }
 
         injectResizer () {
-          Patcher.after(Common.Shakeable.prototype, 'render', (self, props, value) => {
-            const layers = Utilities.findInReactTree(value, byClassName(Selectors.App.layers))
-            if (!layers) return
+          Patcher.after(AppView, 'default', (self, props, value) => {
+            if (!this.settings.resizer.enabled) return
 
-            Patcher.after(layers.props.children, 'type', (self, props, value) => {
-              if (!this.settings.resizer.enabled) return
+            const base = Utilities.findInReactTree(value, byClassName(Selectors.Base.base))
+            const content = base && Utilities.findInReactTree(base, byClassName(Selectors.Base.content))
+            const sidebarIndex = content && content.props.children.findIndex(c => c?.props?.hasOwnProperty('hideSidebar'))
+            if (typeof sidebarIndex !== 'number') return
 
-              const base = Utilities.findInReactTree(value, byClassName(Selectors.Base.base))
-              const content = base && Utilities.findInReactTree(base, byClassName(Selectors.Base.content))
-              const sidebarIndex = content && content.props.children.findIndex(c => c?.props?.hasOwnProperty('hideSidebar'))
-              if (typeof sidebarIndex !== 'number') return
+            const getCurrentWidth = () => Data.sidebarWidth ?? (this.settings.redesign.enabled ? SIDEBAR_REDESIGNED_DEFAULT_WIDTH : SIDEBAR_DEFAULT_WIDTH)
 
-              const getCurrentWidth = () => Data.sidebarWidth ?? (this.settings.redesign.enabled ? SIDEBAR_REDESIGNED_DEFAULT_WIDTH : SIDEBAR_DEFAULT_WIDTH)
+            const getSidebarNode = () => document.querySelector(`.${Selectors.Base.sidebar}`)
+            const update = () => {
+              const node = getSidebarNode()
+              if (node) node.style.width = getCurrentWidth() + 'px'
+            }
+            const onResize = e => {
+              const rect = getSidebarNode()?.getBoundingClientRect()
+              if (rect) Data.sidebarWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, e.clientX - rect.x))
+              update()
+            }
+            const onClick = e => {
+              if (e.detail !== 2) return
+              Data.sidebarWidth = null
+              update()
+            }
 
-              const getSidebarNode = () => document.querySelector(`.${Selectors.Base.sidebar}`)
-              const update = () => {
-                const node = getSidebarNode()
-                if (node) node.style.width = getCurrentWidth() + 'px'
-              }
-              const onResize = e => {
-                const rect = getSidebarNode()?.getBoundingClientRect()
-                if (rect) Data.sidebarWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, e.clientX - rect.x))
-                update()
-              }
-              const onClick = e => {
-                if (e.detail !== 2) return
-                Data.sidebarWidth = null
-                update()
-              }
-
-              content.props.children.splice(
-                sidebarIndex + 1, 0,
-                React.createElement(ResizeHandler, { onResize, onClick })
-              )
-              Patcher.after(content.props.children[sidebarIndex], 'type', (self, props, value) => {
-                value.props.style = { width: getCurrentWidth() + 'px' }
-              })
+            content.props.children.splice(
+              sidebarIndex + 1, 0,
+              React.createElement(ResizeHandler, { onResize, onClick })
+            )
+            Patcher.after(content.props.children[sidebarIndex], 'type', (self, props, value) => {
+              value.props.style = { width: getCurrentWidth() + 'px' }
             })
           })
 
@@ -849,7 +863,7 @@ module.exports = (() => {
         }
 
         clearStyle () {
-          PluginUtilities.removeStyle(this.styleName)
+          DOM.removeStyle(this.styleName)
         }
 
         constructor () {
@@ -876,72 +890,79 @@ module.exports = (() => {
 
           const settingsSnapshot = JSON.parse(JSON.stringify(this.settings))
 
-          const node = Settings.SettingPanel.build(
-            () => {},
+          const settings = this.settings
+          const saveSettings = this.saveSettings.bind(this)
 
-            new Settings.SettingField(
-              'Last message',
-              null,
-              () => {},
-              new Settings.SettingPanel(
-                () => {},
+          function Switch (props) {
+            const [value, setValue] = React.useState(props.value)
 
-                new Settings.Switch(
-                  'Enable Last message',
-                  'Shows the most recent message for each channel in the channel list.',
-                  this.settings.lastMessage.enabled,
-                  e => {
-                    this.settings.lastMessage.enabled = e
-                    this.saveSettings()
-                  }
-                ),
+            return React.createElement(Common.FormSwitch, {
+              ...props,
+              value,
+              onChange: e => {
+                props.onChange(e)
+                setValue(e)
+                saveSettings()
+              }
+            })
+          }
 
-                new Settings.Switch(
-                  'Enable role color',
-                  'Paints author\'s username according to color of their role.',
-                  this.settings.lastMessage.roleColors,
-                  e => {
-                    this.settings.lastMessage.roleColors = e
-                    this.saveSettings()
-                  }
-                )
-
-              ).getElement()
-            ),
-
-            new Settings.SettingField(
-              'Redesign',
-              null,
-              () => {},
-              new Settings.Switch(
-                'Enable Redesign',
-                'Brings channel list redesign from the new mobile UI.',
-                this.settings.redesign.enabled,
-                e => {
-                  this.settings.redesign.enabled = e
-                  this.saveSettings()
-                }
-              ).getElement()
-            ),
-
-            new Settings.SettingField(
-              'Resizer',
-              null,
-              () => {},
-              new Settings.Switch(
-                'Enable Resizer',
-                'Allows you to alter the sidebar width by dragging its right edge.',
-                this.settings.resizer.enabled,
-                e => {
-                  this.settings.resizer.enabled = e
-                  this.saveSettings()
-                }
-              ).getElement()
+          function Settings () {
+            return React.createElement(
+              React.Fragment, {},
+              [
+                React.createElement(Common.FormSection, {
+                  title: 'Last message',
+                  className: `${Selectors.Margins.marginBottom20} ${Selectors.Margins.marginTop8}`,
+                  children: [
+                    React.createElement(Switch, {
+                      children: 'Enable Last message',
+                      note: 'Shows the most recent message for each channel in the channel list.',
+                      value: settings.lastMessage.enabled,
+                      onChange: e => settings.lastMessage.enabled = e
+                    }),
+                    React.createElement(Switch, {
+                      children: 'Enable role color',
+                      note: 'Paints author\'s username according to color of their role.',
+                      value: settings.lastMessage.roleColors,
+                      onChange: e => settings.lastMessage.roleColors = e
+                    })
+                  ]
+                }),
+                React.createElement(Common.FormSection, {
+                  title: 'Redesign',
+                  className: Selectors.Margins.marginBottom20,
+                  children: React.createElement(Switch, {
+                    children: 'Enable Redesign',
+                    note: 'Brings channel list redesign from the new mobile UI.',
+                    value: settings.redesign.enabled,
+                    onChange: e => settings.redesign.enabled = e
+                  })
+                }),
+                React.createElement(Common.FormSection, {
+                  title: 'Resizer',
+                  children: React.createElement(Switch, {
+                    children: 'Enable Resizer',
+                    note: 'Allows you to alter the sidebar width by dragging its right edge.',
+                    value: settings.resizer.enabled,
+                    onChange: e => settings.resizer.enabled = e
+                  })
+                })
+              ]
             )
+          }
 
+          const node = document.createElement('div')
+
+          DOMTools.onAdded(node, () =>
+            ReactDOM.render(React.createElement(Settings), node)
           )
+          DOMTools.onRemoved(node, () => {
+            ReactDOM.unmountComponentAtNode(node)
 
-          DOMTools.onMountChange(node, () => !deepEqual(settingsSnapshot, this.settings) && setTimeout(() => forceAppUpdate('Settings changed')), false)
+            if (!deepEqual(settingsSnapshot, this.settings))
+              setTimeout(() => forceAppUpdate('Settings changed'))
+          })
 
           return node
         }
