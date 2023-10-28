@@ -1,4 +1,4 @@
-![SyncedBD](https://user-images.githubusercontent.com/52377180/162033207-118f11ff-27f5-4aca-9a27-584b94c0bc07.gif)
+![PasscodeLock](https://user-images.githubusercontent.com/52377180/162033207-118f11ff-27f5-4aca-9a27-584b94c0bc07.gif)
 
 # [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
 Protect your Discord with a passcode.
