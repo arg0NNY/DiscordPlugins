@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.4.3
+ * @version 1.4.4
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.3",
+            "version": "1.4.4",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,7 +31,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed Lock Discord button not showing up in the toolbar."
+                    "Plugin has been fixed and adjusted for the latest Discord update.",
+                    "Keybind setting might not work until BD fixes it. Until that, you can use keybind you have previously set up, or change it directly in the config file."
                 ]
             }
         ]
@@ -69,10 +70,13 @@ module.exports = (() => {
     } : (([Plugin, Api]) => {
         const plugin = (Plugin, Api) => {
             const {
+                DOM
+            } = BdApi;
+
+            const {
                 Patcher,
                 DiscordModules,
                 WebpackModules,
-                PluginUtilities,
                 Settings,
                 DOMTools,
                 Toasts,
@@ -87,14 +91,6 @@ module.exports = (() => {
                 ButtonData,
                 VoiceInfo
             } = DiscordModules;
-
-            function getMangled(filter) {
-                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
-                return target ? [
-                    target,
-                    Object.keys(target).find(k => filter(target[k]))
-                ] : [];
-            }
 
             const Data = new Proxy({}, {
                 get (_, k) {
@@ -190,17 +186,16 @@ module.exports = (() => {
             const hashCheck = async ({ string, salt, iterations }, hashed) => await pbkdf2(string, salt, iterations) === hashed;
 
             const Button = ButtonData;
-            const HeaderBar = getMangled(m => m?.Title && m?.Caret && m?.toString?.().includes('toolbar'));
+            const HeaderBar = WebpackModules.getByProps('Divider', 'Icon', 'default');
             const Tooltip = BdApi.Components.Tooltip;
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
-            const Markdown = WebpackModules.getModule(m => m.rules);
-            const Anchor = WebpackModules.getModule(m => m?.toString?.().includes('noreferrer noopener') && m?.toString?.().includes('focusProps'), {searchExports: true});
-            const LanguageStore = WebpackModules.getModule(m => m.Messages && m.Messages.IMAGE && m);
+            const Markdown = WebpackModules.getByProps('rules');
+            const Common = WebpackModules.getByProps('Shakeable', 'List');
+            const { Anchor } = Common;
+            const LanguageStore = WebpackModules.getModule(m => m.Messages?.IMAGE);
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
-
-            const playSound = getMangled(m => typeof m === 'function' && m.toString?.().includes('getSoundpack'));
-
-            const { getVoiceChannelId } = WebpackModules.getByProps("getVoiceChannelId");
+            const SoundActions = WebpackModules.getByProps('playSound', 'createSound');
+            const { getVoiceChannelId } = WebpackModules.getByProps('getVoiceChannelId');
 
             // Help translate the plugin on the Crowdin page: https://crwd.in/betterdiscord-passcodelock
             const Locale = new class {
@@ -898,11 +893,8 @@ module.exports = (() => {
 
                 onStart() {
                     if (!this.KeybindRecorder) {
-                        this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.cleanUp);
-                        this.KeybindStore = {
-                            toCombo: WebpackModules.getModule(m => m.toString && m.toString().includes("numpad plus"), { searchExports: true }),
-                            toString: WebpackModules.getModule(m => m.toString && m.toString().includes('"UNK"'), { searchExports: true })
-                        };
+                        this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.handleComboChange);
+                        this.KeybindStore = WebpackModules.getByProps('toCombo', 'toString');
                     }
 
                     this.injectCSS();
@@ -920,7 +912,7 @@ module.exports = (() => {
                 }
 
                 patchPlaySound() {
-                    Patcher.instead(...playSound, (_, props, original) => {
+                    Patcher.instead(SoundActions, 'playSound', (_, props, original) => {
                         if (!props[0]?.endsWith('deafen') || !VoiceProtector.willPlaySound) return original(...props);
                         VoiceProtector.willPlaySound = false;
                         return false;
@@ -928,7 +920,7 @@ module.exports = (() => {
                 }
 
                 async patchHeaderBar() {
-                    Patcher.after(...HeaderBar, (self, props, value) => {
+                    Patcher.after(HeaderBar, 'default', (self, props, value) => {
                         const toolbar = Utilities.findInReactTree(value, i => i?.className === Selectors.HeaderBar.toolbar)?.children?.props?.children;
                         if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return;
 
@@ -955,7 +947,7 @@ module.exports = (() => {
                 }
 
                 injectCSS() {
-                    PluginUtilities.addStyle(this.getName()+'-style', `
+                    DOM.addStyle(this.getName()+'-style', `
 .PCL--layout {
     --main-color: #dcddde;
 
@@ -1142,7 +1134,7 @@ module.exports = (() => {
                 }
 
                 clearCSS() {
-                    PluginUtilities.removeStyle(this.getName()+'-style');
+                    DOM.removeStyle(this.getName()+'-style');
                 }
 
                 onStop() {
