@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.3.5
+ * @version 1.4.0
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,17 +21,25 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.3.5",
+            "version": "1.4.0",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
         "changelog": [
             {
+                "type": "improved",
+                "title": "Improvements",
+                "items": [
+                    "Added support for stage voices.",
+                    "Got rid of manual messages handling in favour of Discord's internal one."
+                ]
+            },
+            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed popup showing nothing due to Discord's changes."
+                    "Plugin has been fixed and adjusted for the latest Discord update."
                 ]
             }
         ],
@@ -183,7 +191,7 @@ module.exports = (() => {
         }
 
         load() {
-            BdApi.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
+            BdApi.UI.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
                 confirmText: "Download Now",
                 cancelText: "Cancel",
                 onConfirm: () => {
@@ -203,19 +211,19 @@ module.exports = (() => {
     } : (([Plugin, Api]) => {
         const plugin = (Plugin, Api) => {
             const {
+                DOM,
+                Webpack: { Filters }
+            } = BdApi;
+            const {
                 Patcher,
                 WebpackModules,
                 DiscordModules,
-                PluginUtilities,
                 Popouts,
                 Toasts,
-                Utilities,
-                Settings,
-                ReactTools
+                Utilities
             } = Api;
             const {
                 React,
-                ReactDOM,
                 MessageActions,
                 MessageStore,
                 ChannelStore,
@@ -224,22 +232,10 @@ module.exports = (() => {
                 GuildPermissions
             } = DiscordModules;
 
-            function getMangled(filter) {
-                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
-                return target ? [
-                    target,
-                    Object.keys(target).find(k => filter(target[k]))
-                ] : [];
-            }
-
             const Dispatcher = WebpackModules.getByProps('_subscriptions', '_waitQueue');
 
-            const ChannelTypes = WebpackModules.getModule(m => typeof m === 'object' && 'GUILD_TEXT' in m, {searchExports: true});
-            const MessageTypes = WebpackModules.getModule(m => typeof m === 'object' && 'REPLY' in m, {searchExports: true});
-
-            const ActionTypes = {
-                MESSAGE_CREATE: 'MESSAGE_CREATE'
-            };
+            const ChannelTypes = WebpackModules.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true });
+            const MessageTypes = WebpackModules.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true });
 
             const Selectors = {
                 Messages: WebpackModules.getByProps('message', 'cozyMessage'),
@@ -249,7 +245,7 @@ module.exports = (() => {
                 Popout: WebpackModules.getByProps('messagesPopoutWrap'),
                 ChannelItem: {
                     ...WebpackModules.getByProps('containerDefault', 'channelInfo'),
-                    ...WebpackModules.getByProps('mainContent', 'notInteractive')
+                    ...WebpackModules.getByProps('link', 'notInteractive')
                 },
                 Channel: WebpackModules.getByProps('channel', 'interactive'),
                 Typing: WebpackModules.getByProps('typing', 'ellipsis'),
@@ -261,168 +257,99 @@ module.exports = (() => {
             const MESSAGE_GROUP_INTERVAL = 420000;
             let displayedSettingsNotice = false;
 
-            const ChannelItem = getMangled(m => typeof m === 'function' && m?.toString?.().includes('notInteractive'));
-            const Anchor = WebpackModules.getModule(m => m?.toString?.().includes('noreferrer noopener') && m?.toString?.().includes('focusProps'), {searchExports: true});
-            const Chat = WebpackModules.getModule(m => m.type?.toString().includes('showingQuarantineBanner'));
-            const DMItemRenderer = getMangled(m => m?.toString?.().match(/{return\(0,.+\.children\)\(.+\(.+\.id\)\)}/));
-            const Clickable = WebpackModules.getModule(m => m?.defaultProps && m?.toString?.().includes('handleKeyPress'), {searchExports: true});
+            const Common = WebpackModules.getByProps('Shakeable', 'List');
+            const ChannelItem = WebpackModules.getByProps('ChannelItemIcon');
             const AppearanceSettingsStore = WebpackModules.getByProps('fontSize', 'fontScale');
             const VoiceChannelActions = WebpackModules.getByProps('updateChatOpen');
-            const useStateFromStores = WebpackModules.getModule(m => m.toString?.().includes("useStateFromStores"));
-            const ThemeStore = WebpackModules.getModule(m => m.theme);
-            const ThemeContext = WebpackModules.getModule(m => m?.toString?.().includes(".DARK") && m?.toString?.().includes("primaryColor") && m?.toString?.().includes("Provider"), {searchExports: true});
+            const { default: MessageComponent, ThreadStarterChatMessage: ThreadStarterMessage } = WebpackModules.getByProps('ThreadStarterChatMessage');
+            const EmptyMessage = WebpackModules.getByString('SYSTEM_DM_EMPTY_MESSAGE', 'BEGINNING_CHANNEL_WELCOME');
+            const FluxTypingUsers = WebpackModules.getByString('getTypingUsers', 'isBypassSlowmode');
+            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
 
-            let MessageComponent = null;
-            let EmptyMessage = null;
-            let ThreadStartedMessage = null;
-            let FluxTypingUsers = null;
-            function attemptGettingModules(channel, needThreadStarter = false) {
-                function getModule(rootNode, className, filter) {
-                    return ReactTools.getComponents(rootNode.getElementsByClassName(className)[0])
-                    .find(c => filter(c));
+            function ChannelsPreviewPopout({ channel }) {
+                const messages = useStateFromStores([MessageStore], () => MessageStore.getMessages(channel.id).toArray().slice(-MESSAGES_FETCHING_LIMIT));
+
+                let currentGroupId = null;
+
+                function getPreviousMessage(message) {
+                    const index = messages.indexOf(message);
+                    if (index === 0) return null;
+
+                    return messages[index - 1];
                 }
 
-                return new Promise(resolve => {
-                    if (MessageComponent && EmptyMessage && FluxTypingUsers && (ThreadStartedMessage || !needThreadStarter)) return resolve();
+                function getGroupId(message) {
+                    const INTERVAL = MESSAGE_GROUP_INTERVAL / 1000;
+                    const Types = MessageTypes;
+                    const previousMessage = getPreviousMessage(message);
+                    if (!previousMessage) return currentGroupId = message.id;
 
-                    const elem = document.createElement('div');
-                    ReactDOM.render(
-                        React.createElement(function () {
-                            const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme);
-                            return React.createElement(ThemeContext, { theme },
-                                React.createElement(Chat, { channel })
-                            );
-                        }),
-                        elem,
-                        () => {
-                            if (!MessageComponent) MessageComponent = getModule(elem, Selectors.Messages.messageListItem, m => m?.toString?.().includes('message'));
-                            if (!EmptyMessage) EmptyMessage = getModule(elem, Selectors.EmptyMessage.container, m => m?.toString?.().includes('showingBanner'));
-                            if (!FluxTypingUsers) FluxTypingUsers = ReactTools.getReactInstance(document.getElementsByClassName(Selectors.Chat.form)[0])?.memoizedProps?.children?.[2]?.type;
-                            if (!ThreadStartedMessage) ThreadStartedMessage = getModule(elem, Selectors.Messages.quotedChatMessage, m => m?.toString?.().includes('THREAD_STARTER_MESSAGE'));
-
-                            ReactDOM.unmountComponentAtNode(elem);
-                            resolve();
-                        }
-                    );
-                })
-            }
-
-            class ChannelsPreviewPopout extends React.Component {
-                constructor(props) {
-                    super(props);
-
-                    this.state = {
-                        newMessages: []
-                    };
+                    return message.author.id !== previousMessage.author.id
+                    || message.type !== Types.DEFAULT
+                    || ![Types.DEFAULT, Types.REPLY].includes(previousMessage.type)
+                    || Math.abs(previousMessage.timestamp.unix() - message.timestamp.unix()) > INTERVAL
+                    || !message.timestamp.isSame(previousMessage.timestamp, 'day')
+                      ? currentGroupId = message.id : currentGroupId;
                 }
 
-                messageCreated(e) {
-                    if (this.props.channel.id !== e.channelId) return;
-
-                    this.setState({
-                        newMessages: [...this.state.newMessages, MessageStore.getMessage(e.channelId, e.message.id)]
-                    });
-                }
-
-                componentDidMount() {
-                    this.messageCreateHandler = e => this.messageCreated(e);
-
-                    Dispatcher.subscribe(ActionTypes.MESSAGE_CREATE, this.messageCreateHandler);
-                }
-
-                componentWillUnmount() {
-                    Dispatcher.unsubscribe(ActionTypes.MESSAGE_CREATE, this.messageCreateHandler);
-                }
-
-                render() {
-                    const {
-                        channel
-                    } = this.props;
-
-                    const messages = [...this.props.messages, ...this.state.newMessages].slice(-MESSAGES_FETCHING_LIMIT);
-
-                    let currentGroupId = null;
-
-                    function getPreviousMessage(message) {
-                        const index = messages.indexOf(message);
-                        if (index === 0) return null;
-
-                        return messages[index - 1];
-                    }
-
-                    function getGroupId(message) {
-                        const INTERVAL = MESSAGE_GROUP_INTERVAL / 1000;
-                        const Types = MessageTypes;
-                        const previousMessage = getPreviousMessage(message);
-                        if (!previousMessage) return currentGroupId = message.id;
-
-                        return message.author.id !== previousMessage.author.id
-                        || message.type !== Types.DEFAULT
-                        || ![Types.DEFAULT, Types.REPLY].includes(previousMessage.type)
-                        || Math.abs(previousMessage.timestamp.unix() - message.timestamp.unix()) > INTERVAL
-                        || !message.timestamp.isSame(previousMessage.timestamp, 'day')
-                            ? currentGroupId = message.id : currentGroupId;
-                    }
-
-                    function buildDateDivider(timestamp) {
-                        const formatted = timestamp.format('LL');
-
-                        return React.createElement(
-                            'div',
-                            {
-                                className: `${Selectors.Messages.divider} ${Selectors.Messages.hasContent} ${Selectors.MessageDividers.divider} ${Selectors.MessageDividers.hasContent}`,
-                                role: 'separator',
-                                'aria-label': formatted
-                            },
-                            React.createElement('span', {className: Selectors.MessageDividers.content}, formatted)
-                        );
-                    }
-
-                    const messagesElements = [];
-                    if (MessageComponent)
-                        messages.forEach(message => {
-                            if (message.type === MessageTypes.THREAD_STARTER_MESSAGE && !ThreadStartedMessage) return;
-
-                            if (settings.appearance.dateDividers) {
-                                const previousMessage = getPreviousMessage(message);
-                                if (!previousMessage || !message.timestamp.isSame(previousMessage.timestamp, 'day'))
-                                    messagesElements.push(buildDateDivider(message.timestamp));
-                            }
-
-                            messagesElements.push(React.createElement(message.type === MessageTypes.THREAD_STARTER_MESSAGE ? ThreadStartedMessage : MessageComponent, {
-                                channel: channel,
-                                message: message,
-                                groupId: getGroupId(message),
-                                id: `chat-messages-${message.id}`,
-                                compact: settings.appearance.displayMode === 'compact'
-                            }));
-                        });
-
-                    if (EmptyMessage && messagesElements.filter(m => !!m.props?.message).length < MESSAGES_FETCHING_LIMIT)
-                        messagesElements.unshift(React.createElement(EmptyMessage, {
-                            channel
-                        }));
-
-                    const messageGroupSpacing = settings.appearance.groupSpacingSync ? (AppearanceSettingsStore.messageGroupSpacing ?? 16) : settings.appearance.groupSpacing;
+                function buildDateDivider(timestamp) {
+                    const formatted = timestamp.format('LL');
 
                     return React.createElement(
-                        'div',
-                        {
-                            id: 'ChannelsPreview',
-                            className: `group-spacing-${messageGroupSpacing} ${Selectors.Popout.messagesPopoutWrap} show`
-                        },
-                        React.createElement(
-                            'div',
-                            {
-                                id: 'ChannelsPreview-container'
-                            },
-                            [
-                                ...messagesElements,
-                                ...(FluxTypingUsers && settings.appearance.typingUsers !== false ? [React.createElement(FluxTypingUsers, {channel})] : [])
-                            ]
-                        )
+                      'div',
+                      {
+                          className: `${Selectors.Messages.divider} ${Selectors.Messages.hasContent} ${Selectors.MessageDividers.divider} ${Selectors.MessageDividers.hasContent}`,
+                          role: 'separator',
+                          'aria-label': formatted
+                      },
+                      React.createElement('span', {className: Selectors.MessageDividers.content}, formatted)
                     );
                 }
+
+                const messagesElements = [];
+                if (MessageComponent)
+                    messages.forEach(message => {
+                        if (message.type === MessageTypes.THREAD_STARTER_MESSAGE && !ThreadStarterMessage) return;
+
+                        if (settings.appearance.dateDividers) {
+                            const previousMessage = getPreviousMessage(message);
+                            if (!previousMessage || !message.timestamp.isSame(previousMessage.timestamp, 'day'))
+                                messagesElements.push(buildDateDivider(message.timestamp));
+                        }
+
+                        messagesElements.push(React.createElement(message.type === MessageTypes.THREAD_STARTER_MESSAGE ? ThreadStarterMessage : MessageComponent, {
+                            channel: channel,
+                            message: message,
+                            groupId: getGroupId(message),
+                            id: `chat-messages-${message.id}`,
+                            compact: settings.appearance.displayMode === 'compact'
+                        }));
+                    });
+
+                if (EmptyMessage && messagesElements.filter(m => !!m.props?.message).length < MESSAGES_FETCHING_LIMIT)
+                    messagesElements.unshift(React.createElement(EmptyMessage, {
+                        channel
+                    }));
+
+                const messageGroupSpacing = settings.appearance.groupSpacingSync ? (AppearanceSettingsStore.messageGroupSpacing ?? 16) : settings.appearance.groupSpacing;
+
+                return React.createElement(
+                  'div',
+                  {
+                      id: 'ChannelsPreview',
+                      className: `group-spacing-${messageGroupSpacing} ${Selectors.Popout.messagesPopoutWrap} show`
+                  },
+                  React.createElement(
+                    'div',
+                    {
+                        id: 'ChannelsPreview-container'
+                    },
+                    [
+                        ...messagesElements,
+                        ...(FluxTypingUsers && settings.appearance.typingUsers !== false ? [React.createElement(FluxTypingUsers, {channel})] : [])
+                    ]
+                  )
+                );
             }
 
             const PopoutManager = new class {
@@ -484,8 +411,6 @@ module.exports = (() => {
 
                     const messages = MessageStore.getMessages(channel.id).toArray().slice(0, MESSAGES_FETCHING_LIMIT)
                     const storedChannel = ChannelStore.getChannel(channel.id);
-
-                    await attemptGettingModules(channel, messages.some(m => m.type === MessageTypes.THREAD_STARTER_MESSAGE));
 
                     const parentChannelElem = event.target.closest(`.${Selectors.ChannelItem.containerDefault}`) ?? event.target.closest(`.${Selectors.Channel.channel}`);
 
@@ -550,8 +475,8 @@ module.exports = (() => {
 
                         const channel = props.channel;
                         if (channel && [ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT, ChannelTypes.DM, ChannelTypes.GROUP_DM,
-                            ChannelTypes.PUBLIC_THREAD, ChannelTypes.PRIVATE_THREAD, ChannelTypes.GUILD_VOICE].includes(channel.type)) {
-                            if (channel.type === ChannelTypes.GUILD_VOICE && !GuildPermissions.can(DiscordPermissions.CONNECT, channel)) return
+                            ChannelTypes.PUBLIC_THREAD, ChannelTypes.PRIVATE_THREAD, ChannelTypes.GUILD_VOICE, ChannelTypes.GUILD_STAGE_VOICE].includes(channel.type)) {
+                            if ([ChannelTypes.GUILD_VOICE, ChannelTypes.GUILD_STAGE_VOICE].includes(channel.type)  && !GuildPermissions.can(DiscordPermissions.CONNECT, channel)) return
 
                             props.onMouseLeave = wrap(() => PopoutManager.leave());
 
@@ -561,6 +486,7 @@ module.exports = (() => {
                                     break;
                                 case 'mwheel':
                                     props.onMouseDown = wrap(e => {
+                                        e.preventDefault()
                                         if (e.button === 1) PopoutManager.open(e, channel);
                                     });
                                     break;
@@ -578,37 +504,30 @@ module.exports = (() => {
                         }, 0);
                     };
 
-                    Patcher.before(...ChannelItem, before);
-                    Patcher.after(...ChannelItem, after);
+                    Patcher.before(ChannelItem, 'default', before);
+                    Patcher.after(ChannelItem, 'default', after);
 
                     // For DMs
-                    Patcher.before(...DMItemRenderer, (self, props) => {
-                        if (!props[0]?.children?.toString?.().includes('LEAVE_GROUP_DM')) return
+                    Patcher.after(Common, 'Interactive', (self, [props], value) => {
+                        const e = Utilities.findInTree(value, e => e?.props?.to);
+                        if (!e || !e.props?.to?.includes || !e.props?.to?.includes('/channels/@me/')) return;
 
-                        Patcher.after(props[0], 'children', (self, props, value) => {
-                            const interactive = value.props?.children;
-                            if (!interactive) return;
+                        modifyOnClick(props);
 
-                            const e = Utilities.findInTree(interactive, e => e?.props?.to);
-                            if (!e || !e.props?.to?.includes || !e.props?.to?.includes('/channels/@me/')) return;
-
-                            modifyOnClick(interactive.props);
-
-                            e.props.selected = interactive.props.selected;
-                            e.props.channel = ChannelStore.getChannel(e.props.to.split('@me/')[1]);
-                            before(e, [e.props]);
+                        e.props.selected = props.selected;
+                        e.props.channel = ChannelStore.getChannel(e.props.to.split('@me/')[1]);
+                        before(e, [e.props]);
 
 
-                            if (settings.trigger.displayOn !== 'mwheel') return;
-                            setTimeout(() => {
-                                e.props.innerRef.current.onauxclick = e => e.preventDefault();
-                            });
-                        })
-                    })
+                        if (settings.trigger.displayOn !== 'mwheel') return;
+                        setTimeout(() => {
+                            e.props.innerRef.current.onauxclick = e => e.preventDefault();
+                        });
+                    });
 
                     // For threads
-                    Patcher.before(Clickable.prototype, 'render', (self) => {
-                        if (self.props?.className !== Selectors.ChannelItem.mainContent) return;
+                    Patcher.before(Common.Clickable.prototype, 'render', (self) => {
+                        if (self.props?.className !== Selectors.ChannelItem.link) return;
                         const { props } = self;
                         const itemId = props['data-list-item-id']?.split('_');
                         const channel = ChannelStore.getChannel(itemId?.[itemId.length - 1]);
@@ -642,7 +561,7 @@ module.exports = (() => {
                 }
 
                 css() {
-                    PluginUtilities.addStyle('ChannelsPreviewStyles', `
+                    DOM.addStyle('ChannelsPreviewStyles', `
 #ChannelsPreview {
   pointer-events: none;
   background: var(--background-primary);
@@ -697,7 +616,7 @@ module.exports = (() => {
                 }
 
                 clearCss() {
-                    PluginUtilities.removeStyle('ChannelsPreviewStyles');
+                    DOM.removeStyle('ChannelsPreviewStyles');
                 }
 
                 onStop() {
@@ -726,17 +645,17 @@ module.exports = (() => {
 
                     const element = panel.getElement();
                     element.id = this.getSettingsPanelId();
-                    element.prepend(new Settings.SettingField(null, React.createElement(DiscordModules.TextElement, {
-                        children: [
-                            'Not your language? Help translate the plugin on the ',
-                            React.createElement(Anchor, {
-                                children: 'Crowdin page',
-                                href: 'https://crwd.in/betterdiscord-channelspreview'
-                            }),
-                            '.'
-                        ],
-                        className: `${DiscordModules.TextElement.Colors.STANDARD} ${DiscordModules.TextElement.Sizes.SIZE_14}`
-                    }), () => {}, document.createElement('div')).inputWrapper);
+                    // element.prepend(new Settings.SettingField(null, React.createElement(DiscordModules.TextElement, {
+                    //     children: [
+                    //         'Not your language? Help translate the plugin on the ',
+                    //         React.createElement(Anchor, {
+                    //             children: 'Crowdin page',
+                    //             href: 'https://crwd.in/betterdiscord-channelspreview'
+                    //         }),
+                    //         '.'
+                    //     ],
+                    //     className: `${DiscordModules.TextElement.Colors.STANDARD} ${DiscordModules.TextElement.Sizes.SIZE_14}`
+                    // }), () => {}, document.createElement('div')).inputWrapper);
 
                     return element;
                 }
