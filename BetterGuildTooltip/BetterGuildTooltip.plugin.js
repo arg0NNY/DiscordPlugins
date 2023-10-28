@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.0.2
+ * @version 1.0.3
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.2",
+            "version": "1.0.3",
             "description": "Displays an online and total member count in the guild tooltip.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js"
@@ -47,7 +47,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed plugin not working."
+                    "Plugin has been fixed and adjusted for the latest Discord update."
                 ]
             }
         ]
@@ -64,7 +64,7 @@ module.exports = (() => {
         getVersion() { return config.info.version; }
 
         load() {
-            BdApi.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
+            BdApi.UI.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
                 confirmText: "Download Now",
                 cancelText: "Cancel",
                 onConfirm: () => {
@@ -92,14 +92,6 @@ module.exports = (() => {
                 GuildChannelsStore
             } = DiscordModules;
 
-            function getMangled(filter) {
-                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
-                return target ? [
-                    target,
-                    Object.keys(target).find(k => filter(target[k]))
-                ] : [];
-            }
-
             const Dispatcher = WebpackModules.getByProps('_subscriptions', '_waitQueue');
 
             const ActionTypes = {
@@ -110,7 +102,7 @@ module.exports = (() => {
                 ONLINE_GUILD_MEMBER_COUNT_UPDATE: 'ONLINE_GUILD_MEMBER_COUNT_UPDATE'
             };
 
-            const useStateFromStores = WebpackModules.getModule(m => m?.toString?.().includes('useStateFromStores'), {searchExports: true});
+            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
 
             const Selectors = {
                 Guild: WebpackModules.getByProps('statusOffline', 'guildDetail')
@@ -118,7 +110,7 @@ module.exports = (() => {
 
             const GuildInfoStore = WebpackModules.getByProps('getGuild', 'hasFetchFailed');
             const GuildActions = WebpackModules.getByProps('preload', 'closePrivateChannel');
-            const GuildTooltip = getMangled(m => ['includeActivity', 'onBlur'].every(s => m?.toString?.().includes(s)));
+            const GuildTooltip = WebpackModules.getByProps('GuildTooltipText');
 
             const memberCounts = new Map();
             const onlineMemberCounts = new Map();
@@ -270,7 +262,7 @@ module.exports = (() => {
                 }
 
                 patchGuildTooltip() {
-                    Patcher.after(...GuildTooltip, (self, _, value) => {
+                    Patcher.after(GuildTooltip, 'default', (self, _, value) => {
                         if (!this.settings.displayOnline && !this.settings.displayTotal) return;
 
                         Patcher.after(value.props.text, 'type', (self, _, value) => {
