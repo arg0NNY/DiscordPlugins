@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.5
+ * @version 1.1.0
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,18 +21,27 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.5",
+            "version": "1.1.0",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
         },
-        "changelog": [{
-            "type": "fixed",
-            "title": "Fixed",
-            "items": [
-                "Fixed an error occurring when the `In voice` tag was displayed."
-            ]
-        }],
+        "changelog": [
+            {
+                "type": "improved",
+                "title": "Improvements",
+                "items": [
+                    "Revamped `In voice` tag display method. It now toggles itself as soon as user connects or disconnects from the voice chat you're in, without waiting for message to rerender."
+                ]
+            },
+            {
+                "type": "fixed",
+                "title": "Fixed",
+                "items": [
+                    "Plugin has been fixed and adjusted for the latest Discord update."
+                ]
+            }
+        ],
         "defaultConfig": [
             {
                 type: 'textbox',
@@ -55,12 +64,12 @@ module.exports = (() => {
         getVersion() { return config.info.version; }
 
         load() {
-            BdApi.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
+            BdApi.UI.showConfirmationModal("Library Missing", `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
                 confirmText: "Download Now",
                 cancelText: "Cancel",
                 onConfirm: () => {
                     require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
-                        if (error) return require("electron").shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
+                        if (error) return require("electron").shell.openExternal("https://betterdiscord.app/Download?id=9");
                         await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
                     });
                 }
@@ -80,16 +89,9 @@ module.exports = (() => {
             const {
                 React,
                 UserStore,
-                ChannelStore
+                ChannelStore,
+                SelectedChannelStore
             } = DiscordModules;
-
-            function getMangled(filter) {
-                const target = WebpackModules.getModule(m => Object.values(m).some(filter), {searchGetters: false});
-                return target ? [
-                    target,
-                    Object.keys(target).find(k => filter(target[k]))
-                ] : [];
-            }
 
             const Selectors = {
                 BotTag: {
@@ -100,11 +102,32 @@ module.exports = (() => {
 
             const UNIQUE_TAG = 'InMyVoiceTag';
 
-            const {getVoiceChannelId} = WebpackModules.getByProps("getVoiceChannelId");
-            const VoiceChannelStore = WebpackModules.getByProps("getVoiceStatesForChannel");
+            const VoiceChannelStore = WebpackModules.getByProps('getVoiceStatesForChannel');
+            const MessageHeader = WebpackModules.getByProps('UsernameDecorationTypes');
+            const BotTag = WebpackModules.getModule(m => m?.default?.Types?.SYSTEM_DM);
+            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
 
-            const MessageHeader = getMangled(m => m?.toString && m.toString().includes('roleDot') && m.toString().includes('preload'));
-            const BotTag = getMangled(m => m?.toString && m.toString().includes('BOT_TAG_BOT'));
+            function isInMyVoice(user) {
+                const voiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
+                const currentUser = useStateFromStores([UserStore], () => UserStore.getCurrentUser());
+                const channel = useStateFromStores([ChannelStore], () => voiceChannelId && ChannelStore.getChannel(voiceChannelId));
+                const voiceState = useStateFromStores([VoiceChannelStore], () => channel && VoiceChannelStore.getVoiceStatesForChannel(channel));
+
+                if (currentUser.id === user.id || !channel) return false;
+
+                const values = Object.values(voiceState);
+                return values.findIndex(x => x.user?.id === user.id) !== -1;
+            }
+
+            function InVoiceTag ({ user }) {
+                if (!isInMyVoice(user)) return null
+
+                return React.createElement(BotTag.default, {
+                    className: `${Selectors.BotTag.botTagCozy} ${UNIQUE_TAG}`,
+                    useRemSizes: true,
+                    type: 'IN_VOICE'
+                })
+            }
 
             return class InMyVoice extends Plugin {
                 onStart() {
@@ -117,23 +140,18 @@ module.exports = (() => {
                 }
 
                 patchMessages() {
-                    Patcher.before(...MessageHeader, (self, props) => {
+                    Patcher.before(MessageHeader, 'default', (self, props) => {
                         const { decorations, message } = props[0];
                         if (!decorations || typeof decorations[1] !== 'object' || !'length' in decorations[1]) return
 
-                        const author = message.author;
-                        if (!this.isInMyVoice(author)) return;
-
-                        decorations[1].unshift(React.createElement(BotTag[0][BotTag[1]], {
-                            className: `${Selectors.BotTag.botTagCozy} ${UNIQUE_TAG}`,
-                            useRemSizes: true,
-                            type: 'IN_VOICE'
-                        }));
+                        decorations[1].unshift(
+                          React.createElement(InVoiceTag, { user: message.author })
+                        );
                     });
                 }
 
                 patchBotTags() {
-                    Patcher.after(...BotTag, (self, _, value) => {
+                    Patcher.after(BotTag, 'default', (self, _, value) => {
                         if (!value.props?.className?.includes(UNIQUE_TAG)) return;
 
                         const TagContainer = Utilities.findInReactTree(value, e => e.children?.some(c => typeof c?.props?.children === 'string'));
@@ -163,15 +181,6 @@ module.exports = (() => {
                             d: 'M3 10v4c0 .55.45 1 1 1h3l3.29 3.29c.63.63 1.71.18 1.71-.71V6.41c0-.89-1.08-1.34-1.71-.71L7 9H4c-.55 0-1 .45-1 1zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 4.45v.2c0 .38.25.71.6.85C17.18 6.53 19 9.06 19 12s-1.82 5.47-4.4 6.5c-.36.14-.6.47-.6.85v.2c0 .63.63 1.07 1.21.85C18.6 19.11 21 15.84 21 12s-2.4-7.11-5.79-8.4c-.58-.23-1.21.22-1.21.85z'
                         })
                     );
-                }
-
-                isInMyVoice(user) {
-                    const voiceChannelId = getVoiceChannelId();
-                    const currentUser = UserStore.getCurrentUser();
-                    if(currentUser.id === user.id || !voiceChannelId) return false;
-                    const voiceState = VoiceChannelStore.getVoiceStatesForChannel(voiceChannelId);                    
-                    const values = Object.values(voiceState);
-                    return values.findIndex(x => x.userId === user.id) !== -1;
                 }
 
                 onStop() {
