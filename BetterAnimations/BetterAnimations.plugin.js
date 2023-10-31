@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.15
+ * @version 1.1.16
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.15",
+            "version": "1.1.16",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin has been fixed and adjusted for the latest Discord update."
+                    "Fixed animation type selector often not displayed."
                 ]
             }
         ]
@@ -141,7 +141,7 @@ module.exports = (() => {
                 Animations: WebpackModules.getByProps('translate', 'fade'),
                 User: {
                     ...WebpackModules.getByProps('avatar', 'details'),
-                    Settings: WebpackModules.getByProps('banner', 'bannerNormal')
+                    get Settings () { return WebpackModules.getByProps('banner', 'bannerNormal') ?? { avatarUploaderInner: 'avatarUploaderInner_c81617' } }
                 },
                 Members: WebpackModules.getByProps('members', 'hiddenMembers'),
                 EmojiPicker: WebpackModules.getByProps('emojiPickerHasTabWrapper', 'emojiPicker'),
@@ -153,7 +153,8 @@ module.exports = (() => {
                 Sticker: WebpackModules.getByProps('stickerName', 'sticker'),
                 Sizes: WebpackModules.getByProps('size10', 'size12'),
                 Colors: WebpackModules.getByProps('colorHeaderPrimary', 'colorWhite'),
-                VideoOptions: WebpackModules.getByProps('backgroundOptionRing'),
+                _VideoOptions: null,
+                get VideoOptions () { return this._VideoOptions ?? (this._VideoOptions = WebpackModules.getByProps('backgroundOptionRing')) ?? { backgroundOptionRing: 'backgroundOptionRing__1f209' } },
                 StudentHubs: WebpackModules.getByProps('footerDescription', 'scroller')
             };
 
