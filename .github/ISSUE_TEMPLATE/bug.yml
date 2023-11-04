@@ -1,0 +1,99 @@
+name: Bug Report
+description: Found something that shouldn't be? Report it here by filling out this form.
+labels: ["bug"]
+body: 
+- type: markdown
+  attributes:
+    value: |
+      Thank you for taking the time to file this issue. Please search existing/closed issues before opening a new one to confirm that this hasn't been solved already.
+      ---
+- type: dropdown
+  id: plugin
+  attributes:
+    label: "Plugin:"
+    description: Which plugin is this bug related to? You can select multiple plugins.
+    multiple: true
+    options:
+      - "🔒 PasscodeLock"
+      - "👀 ChannelsPreview"
+      - "🎞️ BetterAnimations"
+      - "📑 BetterGuildTooltip"
+      - "🔊 InMyVoice"
+      - "🎨 FreeThemes"
+      - "📜 BetterChannelList"
+      - "⭕ Other/Unrelated"
+  validations:
+    required: true
+- type: markdown
+  attributes:
+    value: |
+      ---
+      ### System Information
+- type: input
+  id: bdversion
+  attributes: 
+    label: What version of BetterDiscord are you using?
+    description: You can find this by going to User Settings -> Updates.
+    placeholder: "e. g. 1.0.0"
+  validations:
+    required: true
+- type: input
+  id: pluginversion
+  attributes: 
+    label: What version of the selected plugin(s) are you using (if applicable)?
+    description: You can find this by going to User Settings -> Plugins and looking for the plugin name.
+    placeholder: "e. g. 1.1.12"
+  validations:
+    required: false
+- type: dropdown
+  id: clienttype
+  attributes: 
+    label: What client are you using?
+    description: If you're unsure, simply select "Stable".
+    multiple: false
+    options:
+      - "🔵 Stable"
+      - "🔷 PTB"
+      - "🟠 Canary"
+  validations:
+    required: true
+- type: markdown
+  attributes:
+    value: |
+      ---
+      ### Description
+- type: textarea
+  id: description
+  attributes:
+    label: Describe the bug
+    description: | 
+      Please provide a clear and detailed description of the bug. If applicable, include the error message you received when loading the plugin.
+      Here are some questions to guide you: 
+      What happens exactly? 
+      What did you expect to happen instead? 
+      What steps could one take to reproduce this issue?
+    placeholder: | 
+      Hint: You can attach screenshots by dragging images into this area.
+  validations:
+    required: true
+- type: textarea
+  id: comments
+  attributes:
+    label: Additional comments
+    description: Is there anything else you'd like to add?
+  validations:
+    required: false
+- type: markdown
+  attributes:
+    value: |
+      ---
+      ### Other
+- type: checkboxes
+  attributes:
+    label: "I have read and agree to the following:"
+    description: "Please check all that apply."
+    options:
+      - label: "I have searched existing/closed issues to confirm that this hasn't been solved already."
+        required: true
+      - label: "I've already tried to disable all other plugins (or themes) to confirm this issue is related to the plugin.\nThis isn't necessarily required"
+        required: false
