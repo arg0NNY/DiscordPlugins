@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.16
+ * @version 1.1.17
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.16",
+            "version": "1.1.17",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed animation type selector often not displayed."
+                    "Completely fixed animation type selector often not displayed.",
+                    "Slightly optimized switching animations performance."
                 ]
             }
         ]
@@ -119,44 +120,81 @@ module.exports = (() => {
             const Button = ButtonData;
             const UserPopout = WebpackModules.getModule(m => m?.type?.toString?.().includes('Unexpected missing user'), {searchExports: true});
 
-            const Selectors = {
-                Chat: WebpackModules.getByProps('chat', 'channelName'),
-                Messages: WebpackModules.getByProps('scroller', 'messages'),
-                Layout: WebpackModules.getByProps('base', 'content'),
-                ChannelsList: WebpackModules.getByProps('scroller', 'unread'),
-                PeopleTab: WebpackModules.getByProps('container', 'peopleColumn'),
-                ApplicationStore: WebpackModules.getByProps('applicationStore', 'marketingHeader'),
-                PeopleList: WebpackModules.getByProps('peopleList', 'searchBar'),
-                FriendsActivity: WebpackModules.getByProps('scroller', 'header', 'container'),
-                PageContainer: WebpackModules.getByProps('headerBar', 'homeWrapper'),
-                Pages: WebpackModules.getByProps('pageWrapper', 'searchPage'),
-                Content: WebpackModules.getByProps('content', 'fade'),
-                Sidebar: WebpackModules.getByProps('contentRegion', 'sidebar'),
-                Settings: {
-                    ...WebpackModules.getByProps('contentContainer', 'optionContainer'),
-                    ...WebpackModules.getByProps('messageContainer', 'colorPicker'),
-                    ...WebpackModules.getByProps('contentWidth', 'stickyHeader'),
-                    Sidebar: WebpackModules.getByProps('addRole', 'sidebar')
-                },
-                Animations: WebpackModules.getByProps('translate', 'fade'),
-                User: {
-                    ...WebpackModules.getByProps('avatar', 'details'),
-                    get Settings () { return WebpackModules.getByProps('banner', 'bannerNormal') ?? { avatarUploaderInner: 'avatarUploaderInner_c81617' } }
-                },
-                Members: WebpackModules.getByProps('members', 'hiddenMembers'),
-                EmojiPicker: WebpackModules.getByProps('emojiPickerHasTabWrapper', 'emojiPicker'),
-                StickerPicker: WebpackModules.getAllByProps('listWrapper', 'loadingIndicator')?.filter(m => !m?.gridNoticeWrapper)[0],
-                GifPicker: WebpackModules.getByProps('searchBar', 'backButton'),
-                Popout: WebpackModules.getByProps('disabledPointerEvents', 'layer'),
-                ThreadSidebar: WebpackModules.getByProps('container', 'resizeHandle'),
-                Stickers: WebpackModules.getByProps('grid', 'uploadCard'),
-                Sticker: WebpackModules.getByProps('stickerName', 'sticker'),
-                Sizes: WebpackModules.getByProps('size10', 'size12'),
-                Colors: WebpackModules.getByProps('colorHeaderPrimary', 'colorWhite'),
-                _VideoOptions: null,
-                get VideoOptions () { return this._VideoOptions ?? (this._VideoOptions = WebpackModules.getByProps('backgroundOptionRing')) ?? { backgroundOptionRing: 'backgroundOptionRing__1f209' } },
-                StudentHubs: WebpackModules.getByProps('footerDescription', 'scroller')
-            };
+            function buildSelectors (selectors) {
+                const result = {};
+                Object.entries(selectors).forEach(([key, selector]) => {
+                    let getter, defaultValue;
+                    if (Array.isArray(selector)) [getter, defaultValue] = selector;
+                    else getter = selector;
+
+                    let memoized = null;
+                    Object.defineProperty(result, key, {
+                        get: () => {
+                            if (memoized === null) {
+                                memoized = getter();
+                                if (!memoized || !Object.keys(memoized).length) setTimeout(() => memoized = null, 5000);
+                            }
+                            return Object.assign(defaultValue ?? {}, memoized);
+                        }
+                    })
+                })
+                return result;
+            }
+
+            const Selectors = buildSelectors({
+                Chat: () => WebpackModules.getByProps('chat', 'channelName'),
+                Messages: () => WebpackModules.getByProps('scroller', 'messages'),
+                Layout: () => WebpackModules.getByProps('base', 'content'),
+                ChannelsList: () => WebpackModules.getByProps('scroller', 'unread'),
+                PeopleTab: () => WebpackModules.getByProps('container', 'peopleColumn'),
+                ApplicationStore: () => WebpackModules.getByProps('applicationStore', 'marketingHeader'),
+                PeopleList: () => WebpackModules.getByProps('peopleList', 'searchBar'),
+                FriendsActivity: () => WebpackModules.getByProps('scroller', 'header', 'container'),
+                PageContainer: () => WebpackModules.getByProps('headerBar', 'homeWrapper'),
+                Pages: () => WebpackModules.getByProps('pageWrapper', 'searchPage'),
+                Content: () => WebpackModules.getByProps('content', 'fade'),
+                Sidebar: [
+                    () => WebpackModules.getByProps('contentRegion', 'sidebar'),
+                    {
+                        contentRegion: 'contentRegion__0bec1',
+                        contentRegionScroller: 'contentRegionScroller__86c79',
+                        standardSidebarView: 'standardSidebarView__1129a'
+                    }
+                ],
+                Settings: [
+                    () => ({
+                        ...WebpackModules.getByProps('contentContainer', 'optionContainer'),
+                        ...WebpackModules.getByProps('messageContainer', 'colorPicker')
+                    }),
+                    { scroller: 'scroller__79060', contentContainer: 'contentContainer__23092' }
+                ],
+                SettingsSidebar: [
+                    () => WebpackModules.getByProps('addRole', 'sidebar'),
+                    { sidebar: 'sidebar_bdf6b7' }
+                ],
+                Animations: () => WebpackModules.getByProps('translate', 'fade'),
+                Members: () => WebpackModules.getByProps('members', 'hiddenMembers'),
+                EmojiPicker: () => WebpackModules.getByProps('emojiPickerHasTabWrapper', 'emojiPicker'),
+                StickerPicker: () => WebpackModules.getAllByProps('listWrapper', 'loadingIndicator')?.filter(m => !m?.gridNoticeWrapper)[0],
+                GifPicker: () => WebpackModules.getByProps('searchBar', 'backButton'),
+                Popout: () => WebpackModules.getByProps('disabledPointerEvents', 'layer'),
+                ThreadSidebar: () => WebpackModules.getByProps('container', 'resizeHandle'),
+                Stickers: [
+                    () => WebpackModules.getByProps('grid', 'uploadCard'),
+                    { grid: 'grid_da1263' }
+                ],
+                Sticker: [
+                    () => WebpackModules.getByProps('stickerName', 'sticker'),
+                    { sticker: 'sticker_c2f81a', wrapper: 'wrapper__93f27', content: 'content__59691', stickerName: 'stickerName_e362ee' }
+                ],
+                Sizes: () => WebpackModules.getByProps('size10', 'size12'),
+                Colors: () => WebpackModules.getByProps('colorHeaderPrimary', 'colorWhite'),
+                VideoOptions: [
+                    () => WebpackModules.getByProps('backgroundOptionRing'),
+                    { backgroundOptionRing: 'backgroundOptionRing__1f209' }
+                ],
+                StudentHubs: () => WebpackModules.getByProps('footerDescription', 'scroller')
+            });
 
             const PARENT_NODE_CLASSNAME = 'BetterAnimations-parentNode';
             const CLONED_NODE_CLASSNAME = 'BetterAnimations-clonedNode';
@@ -570,7 +608,14 @@ module.exports = (() => {
                     this.clonedNode.style.pointerEvents = 'none';
                     this.clonedNode.classList.add(CLONED_NODE_CLASSNAME);
                     ['top', 'left', 'width', 'height'].forEach(p => this.clonedNode.style[p] = rect[p] + 'px');
-                    this.scrollSelectors.forEach(s => this.node.querySelector(`.${s}`) ? Array.from(this.clonedNode.querySelectorAll(`.${s}`)).forEach((e, i) => e.scrollTop = this.node.querySelectorAll(`.${s}`)[i].scrollTop) : null);
+
+                    const query = this.scrollSelectors.map(s => '.'+s).join(', ')
+                    const scrollers = Array.from(this.node.querySelectorAll(query))
+                    if (scrollers.length) {
+                        const clonedScrollers = Array.from(this.clonedNode.querySelectorAll(query))
+                        clonedScrollers.forEach((e, i) => e.scrollTop = scrollers[i].scrollTop)
+                    }
+                    // this.scrollSelectors.forEach(s => this.node.querySelector(`.${s}`) ? Array.from(this.clonedNode.querySelectorAll(`.${s}`)).forEach((e, i) => e.scrollTop = this.node.querySelectorAll(`.${s}`)[i].scrollTop) : null);
                 }
 
                 animate(params = {}) {
@@ -1197,16 +1242,12 @@ module.exports = (() => {
                                 background: var(--background-tertiary) !important;
                             }
 
-                            .${Selectors.Settings.contentContainer}, .${Selectors.Settings.Sidebar.sidebar} {
+                            .${Selectors.Settings.contentContainer}, .${Selectors.SettingsSidebar.sidebar} {
                                 background: var(--background-primary) !important;
                             } */
 
                             .${CLONED_NODE_CLASSNAME}.${Selectors.Sidebar.contentRegion} *, .${CLONED_NODE_CLASSNAME}.${Selectors.Settings.contentContainer} * {
                                 box-sizing: border-box !important;
-                            }
-
-                            .${CLONED_NODE_CLASSNAME} .${Selectors.User.avatar}, .${CLONED_NODE_CLASSNAME} .${Selectors.User.Settings.avatarUploaderInner} {
-                                box-sizing: content-box !important;
                             }
 
 
