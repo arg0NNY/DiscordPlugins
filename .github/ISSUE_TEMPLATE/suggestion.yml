@@ -1,0 +1,39 @@
+name: Suggestion
+description: Have an idea? Tell us here.
+labels: ["enhancement"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thank you for trying to improve our plugins. Please search existing/closed issues before opening a new one to confirm that this hasn't been suggested already.
+      ---
+- type: dropdown
+  id: plugin
+  attributes:
+    label: "Plugin:"
+    description: Is this related to a specific plugin? **It doesn't have to be**, it could also be related to the Discord/Issue Forms for example. You can select multiple plugins.
+    multiple: true
+    options:
+      - "🔒 PasscodeLock"
+      - "👀 ChannelsPreview"
+      - "🎞️ BetterAnimations"
+      - "📑 BetterGuildTooltip"
+      - "🔊 InMyVoice"
+      - "🎨 FreeThemes"
+      - "📜 BetterChannelList"
+      - "⭕ Other/Unrelated"
+  validations:
+    required: true
+- type: markdown
+  attributes:
+    value: |
+      ---
+      ### Suggestion
+- type: textarea
+  id: suggestion
+  attributes:
+    label: "Suggestion:"
+    description: "Go wild (and into detail)!"
+    placeholder: "e. g. I think this plugin should be able to do X..."
+  validations:
+    required: true
