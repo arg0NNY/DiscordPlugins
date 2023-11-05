@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.1
+ * @version 1.0.2
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.0.1",
+      "version": "1.0.2",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -38,8 +38,8 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed plugin crashing due to Discord's changes.",
-          "Minor style fixes."
+          "Fixed huge performance hog in the plugin styles.",
+          "Fixed plugin not removing patches properly when stopped."
         ]
       }
     ]
@@ -693,9 +693,7 @@ module.exports = (() => {
               height: 100%;
               width: 5px;
               z-index: 150;
-            }
-            body:has(.BCL--resize-handler--dragging) *, .BCL--resize-handler {
-              cursor: ew-resize !important;
+              cursor: ew-resize;
             }
             .BCL--resize-handler::before {
               content: '';
@@ -860,6 +858,8 @@ module.exports = (() => {
 
           Object.entries(DispatcherSubscriptions)
             .forEach(s => Dispatcher.unsubscribe(...s))
+
+          forceAppUpdate('Plugin disabled')
         }
 
         clearStyle () {
