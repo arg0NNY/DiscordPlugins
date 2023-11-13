@@ -3,7 +3,8 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.4.4
+ * @donate https://donationalerts.com/r/arg0nny
+ * @version 1.4.5
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -21,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.4",
+            "version": "1.4.5",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -31,8 +32,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin has been fixed and adjusted for the latest Discord update.",
-                    "Keybind setting might not work until BD fixes it. Until that, you can use keybind you have previously set up, or change it directly in the config file."
+                    "Fixed keybind setting missing from the plugin settings.",
+                    "Messages in the selected channel are no longer marked as read when Discord is locked."
                 ]
             }
         ]
@@ -89,7 +90,9 @@ module.exports = (() => {
                 ModalActions,
                 ConfirmationModal,
                 ButtonData,
-                VoiceInfo
+                VoiceInfo,
+                WindowInfo,
+                Dispatcher
             } = DiscordModules;
 
             const Data = new Proxy({}, {
@@ -196,6 +199,8 @@ module.exports = (() => {
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
             const SoundActions = WebpackModules.getByProps('playSound', 'createSound');
             const { getVoiceChannelId } = WebpackModules.getByProps('getVoiceChannelId');
+            const KeybindStore = WebpackModules.getByProps('toCombo', 'toString');
+            const { getMainWindowId } = WebpackModules.getByProps('getMainWindowId');
 
             // Help translate the plugin on the Crowdin page: https://crwd.in/betterdiscord-passcodelock
             const Locale = new class {
@@ -816,6 +821,37 @@ module.exports = (() => {
 
             }();
 
+            const WindowFocusMocker = new class {
+
+                constructor () {
+                    this.stop()
+                }
+
+                _dispatch (focused) {
+                    const execute = v => Dispatcher.dispatch({
+                        type: 'WINDOW_FOCUS',
+                        windowId: getMainWindowId(),
+                        focused: v
+                    })
+                    // Toggle for store to register update
+                    execute(!focused)
+                    execute(focused)
+                }
+
+                mock (focused) {
+                    this.mocking = true
+                    this.mockValue = focused
+                    this._dispatch(focused)
+                }
+
+                stop () {
+                    this.mocking = false
+                    this.mockValue = null
+                    this._dispatch(true)
+                }
+
+            }
+
             return class PasscodeLock extends Plugin {
                 static Types = {
                     FOUR_DIGIT: '4-digit',
@@ -880,10 +916,12 @@ module.exports = (() => {
 
                 disableInteractions() {
                     Keybinds.disable();
+                    WindowFocusMocker.mock(false);
                 }
 
                 enableInteractions() {
                     Keybinds.enable();
+                    WindowFocusMocker.stop();
                     document.onkeydown = null;
                 }
 
@@ -892,13 +930,9 @@ module.exports = (() => {
                 }
 
                 onStart() {
-                    if (!this.KeybindRecorder) {
-                        this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.handleComboChange);
-                        this.KeybindStore = WebpackModules.getByProps('toCombo', 'toString');
-                    }
-
                     this.injectCSS();
                     this.patchPlaySound();
+                    this.patchWindowInfo();
                     this.patchHeaderBar();
                     this.patchSettingsButton();
                     this.enableAutolock();
@@ -917,6 +951,13 @@ module.exports = (() => {
                         VoiceProtector.willPlaySound = false;
                         return false;
                     });
+                }
+
+                patchWindowInfo() {
+                    Patcher.instead(WindowInfo, 'isFocused', (self, props, original) => {
+                        if (WindowFocusMocker.mocking) return WindowFocusMocker.mockValue
+                        return original(...props)
+                    })
                 }
 
                 async patchHeaderBar() {
@@ -1220,6 +1261,10 @@ module.exports = (() => {
                 }
 
                 getSettingsPanel() {
+                    if (!this.KeybindRecorder) {
+                        this.KeybindRecorder = WebpackModules.getModule(m => m.prototype?.handleComboChange);
+                    }
+
                     const Buttons = (...props) => {
                         class Panel extends React.Component {
                             render() {
@@ -1383,9 +1428,9 @@ module.exports = (() => {
 
                         new Settings.SettingField(Locale.current.LOCK_KEYBIND_SETTING, null, () => {}, props => {
                             return React.createElement(this.KeybindRecorder, {
-                                defaultValue: this.KeybindStore.toCombo(this.keybindSetting.replace("control", "ctrl")),
+                                defaultValue: KeybindStore.toCombo(this.keybindSetting.replace("control", "ctrl")),
                                 onChange: (e) => {
-                                    const keybindString = this.KeybindStore.toString(e).toLowerCase().replace("ctrl", "control");
+                                    const keybindString = KeybindStore.toString(e).toLowerCase().replace("ctrl", "control");
 
                                     KeybindListener.unlisten(this.keybind);
                                     this.keybindSetting = keybindString;
@@ -1456,15 +1501,15 @@ module.exports = (() => {
                         if (typeof (keybindToLoad) === typeof (defaultKeybind)) {
                             keybindToLoad = keybindToLoad.toLowerCase().replace("control", "ctrl");
                             //Does it go into a combo? (i.e.: is it the correct format?)
-                            if (this.KeybindStore.toCombo(keybindToLoad))
+                            if (KeybindStore.toCombo(keybindToLoad))
                                 return keybindToLoad.replace("ctrl", "control");
                             else
                                 return defaultKeybind;
                         }
                         else
                             //If it's not a string, check if it's a combo.
-                        if (this.KeybindStore.toString(keybindToLoad))
-                            return this.KeybindStore.toString(keybindToLoad).toLowerCase().replace("ctrl", "control");
+                        if (KeybindStore.toString(keybindToLoad))
+                            return KeybindStore.toString(keybindToLoad).toLowerCase().replace("ctrl", "control");
                     }
                     catch (e) { return defaultKeybind; }
                 }
