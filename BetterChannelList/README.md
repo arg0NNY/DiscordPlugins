@@ -17,4 +17,4 @@
 [status-official-badge]: https://img.shields.io/badge/status-official-brightgreen
 
 [betterchannellist-download-link]: https://arg0nny.github.io/bd/download/?id=BetterChannelList
-[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.0.2-blue
+[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.0.3-blue

@@ -3,7 +3,8 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.0.2
+ * @donate https://donationalerts.com/r/arg0nny
+ * @version 1.0.3
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -21,25 +22,17 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.0.2",
+      "version": "1.0.3",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
     },
     "changelog": [
       {
-        "type": "improved",
-        "title": "Improvements",
-        "items": [
-          "Moved away from ZeresPluginLibrary settings components in favour of Discord's with intention to get rid of library dependency in the further updates."
-        ]
-      },
-      {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed huge performance hog in the plugin styles.",
-          "Fixed plugin not removing patches properly when stopped."
+          "Fixed an issue that caused the same emoji icon to appear for all the channels."
         ]
       }
     ]
@@ -141,6 +134,7 @@ module.exports = (() => {
       const GuildBanner = WebpackModules.getModule(m => m?.type?.toString?.().includes('guildBanner'))
       const ActiveThreadsStore = WebpackModules.getModule(Filters.byStoreName('ActiveThreadsStore'))
       const AppView = WebpackModules.getModule(m => Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY')(m?.default))
+      const DevToolsDesignTogglesStore = WebpackModules.getModule(Filters.byStoreName('DevToolsDesignTogglesStore'))
 
       const Selectors = {
         ChannelItem: WebpackModules.getByProps('unread', 'link'),
@@ -230,7 +224,7 @@ module.exports = (() => {
             hasMoreBefore: true,
             isAfter: true,
             isBefore: false,
-            isStale: false,
+            isStale: true,
             limit: 1,
             messages: [message]
           })
@@ -568,11 +562,18 @@ module.exports = (() => {
           Object.entries(DispatcherSubscriptions)
             .forEach(s => Dispatcher.subscribe(...s))
 
+          this.enableDiscordInternalEmojiIconModules()
           this.patchChannelItem()
           this.patchScrollerProvider()
           this.injectResizer()
 
           forceAppUpdate('Plugin enabled')
+        }
+
+        enableDiscordInternalEmojiIconModules () {
+          Patcher.after(DevToolsDesignTogglesStore, 'get', (self, [type]) => {
+            if (type === 'enable_channel_emojis') return true
+          })
         }
 
         get styleName () {
