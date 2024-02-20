@@ -7,10 +7,10 @@
  
 ```
 
-## [BetterChannelList](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList) ![Status][status-review-badge] ![Version][betterchannellist-version-badge]
+## [BetterChannelList](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList) ![Status][status-official-badge] ![Version][betterchannellist-version-badge] ![Downloads][betterchannellist-downloads-badge] ![Likes][betterchannellist-likes-badge]
 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
 
-[![Download][download-badge]][betterchannellist-download-link] ![View][unavailable-badge]
+[![Download][download-badge]][betterchannellist-download-link] [![View][view-badge]][betterchannellist-view-link]
 
 
 ## [PasscodeLock](https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock) ![Status][status-official-badge] ![Version][passcodelock-version-badge] ![Downloads][passcodelock-downloads-badge] ![Likes][passcodelock-likes-badge]
@@ -121,4 +121,7 @@ SOFTWARE.
 [betterguildtooltip-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27BetterGuildTooltip%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 
 [betterchannellist-download-link]: https://arg0nny.github.io/bd/download/?id=BetterChannelList
-[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.0.3-blue
+[betterchannellist-view-link]: https://betterdiscord.app/plugin/BetterChannelList
+[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.0.4-blue
+[betterchannellist-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27BetterChannelList%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
+[betterchannellist-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27BetterChannelList%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
