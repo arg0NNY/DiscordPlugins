@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.4.0
+ * @version 1.4.1
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,25 +21,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.0",
+            "version": "1.4.1",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
         "changelog": [
             {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Added support for stage voices.",
-                    "Got rid of manual messages handling in favour of Discord's internal one."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin has been fixed and adjusted for the latest Discord update."
+                    "Fixed popout not displaying due to Discord's changes."
                 ]
             }
         ],
@@ -265,6 +257,7 @@ module.exports = (() => {
             const EmptyMessage = WebpackModules.getByString('SYSTEM_DM_EMPTY_MESSAGE', 'BEGINNING_CHANNEL_WELCOME');
             const FluxTypingUsers = WebpackModules.getByString('getTypingUsers', 'isBypassSlowmode');
             const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
+            const DateUtils = WebpackModules.getByProps('dateFormat', 'isSameDay');
 
             function ChannelsPreviewPopout({ channel }) {
                 const messages = useStateFromStores([MessageStore], () => MessageStore.getMessages(channel.id).toArray().slice(-MESSAGES_FETCHING_LIMIT));
@@ -279,7 +272,6 @@ module.exports = (() => {
                 }
 
                 function getGroupId(message) {
-                    const INTERVAL = MESSAGE_GROUP_INTERVAL / 1000;
                     const Types = MessageTypes;
                     const previousMessage = getPreviousMessage(message);
                     if (!previousMessage) return currentGroupId = message.id;
@@ -287,13 +279,13 @@ module.exports = (() => {
                     return message.author.id !== previousMessage.author.id
                     || message.type !== Types.DEFAULT
                     || ![Types.DEFAULT, Types.REPLY].includes(previousMessage.type)
-                    || Math.abs(previousMessage.timestamp.unix() - message.timestamp.unix()) > INTERVAL
-                    || !message.timestamp.isSame(previousMessage.timestamp, 'day')
+                    || Math.abs(previousMessage.timestamp - message.timestamp) > MESSAGE_GROUP_INTERVAL
+                    || !DateUtils.isSameDay(message.timestamp, previousMessage.timestamp)
                       ? currentGroupId = message.id : currentGroupId;
                 }
 
                 function buildDateDivider(timestamp) {
-                    const formatted = timestamp.format('LL');
+                    const formatted = DateUtils.dateFormat(timestamp, 'LL');
 
                     return React.createElement(
                       'div',
@@ -313,7 +305,7 @@ module.exports = (() => {
 
                         if (settings.appearance.dateDividers) {
                             const previousMessage = getPreviousMessage(message);
-                            if (!previousMessage || !message.timestamp.isSame(previousMessage.timestamp, 'day'))
+                            if (!previousMessage || !DateUtils.isSameDay(message.timestamp, previousMessage.timestamp))
                                 messagesElements.push(buildDateDivider(message.timestamp));
                         }
 
