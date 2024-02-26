@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 224538553944637440
  * @invite M8DBtcZjXD
- * @version 1.4.1
+ * @version 1.4.2
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.1",
+            "version": "1.4.2",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed popout not displaying due to Discord's changes."
+                    "Fixed potential lag while scrolling through direct messages when the mode was set to Mouse wheel click."
                 ]
             }
         ],
@@ -513,7 +513,7 @@ module.exports = (() => {
 
                         if (settings.trigger.displayOn !== 'mwheel') return;
                         setTimeout(() => {
-                            e.props.innerRef.current.onauxclick = e => e.preventDefault();
+                            if (e.props?.innerRef?.current) e.props.innerRef.current.onauxclick = e => e.preventDefault();
                         });
                     });
 
