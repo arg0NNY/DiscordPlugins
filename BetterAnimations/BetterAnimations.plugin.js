@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.17
+ * @version 1.1.18
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.17",
+            "version": "1.1.18",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,8 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Completely fixed animation type selector often not displayed.",
-                    "Slightly optimized switching animations performance."
+                    "Fixed settings being non-interactive."
                 ]
             }
         ]
@@ -156,9 +155,9 @@ module.exports = (() => {
                 Sidebar: [
                     () => WebpackModules.getByProps('contentRegion', 'sidebar'),
                     {
-                        contentRegion: 'contentRegion__0bec1',
-                        contentRegionScroller: 'contentRegionScroller__86c79',
-                        standardSidebarView: 'standardSidebarView__1129a'
+                        contentRegion: 'contentRegion__08eba',
+                        contentRegionScroller: 'contentRegionScroller__9ae20',
+                        standardSidebarView: 'standardSidebarView__12528'
                     }
                 ],
                 Settings: [
@@ -166,11 +165,11 @@ module.exports = (() => {
                         ...WebpackModules.getByProps('contentContainer', 'optionContainer'),
                         ...WebpackModules.getByProps('messageContainer', 'colorPicker')
                     }),
-                    { scroller: 'scroller__79060', contentContainer: 'contentContainer__23092' }
+                    { scroller: 'scroller_bcb155', contentContainer: 'contentContainer__50662' }
                 ],
                 SettingsSidebar: [
                     () => WebpackModules.getByProps('addRole', 'sidebar'),
-                    { sidebar: 'sidebar_bdf6b7' }
+                    { sidebar: 'sidebar__37984' }
                 ],
                 Animations: () => WebpackModules.getByProps('translate', 'fade'),
                 Members: () => WebpackModules.getByProps('members', 'hiddenMembers'),
@@ -181,17 +180,17 @@ module.exports = (() => {
                 ThreadSidebar: () => WebpackModules.getByProps('container', 'resizeHandle'),
                 Stickers: [
                     () => WebpackModules.getByProps('grid', 'uploadCard'),
-                    { grid: 'grid_da1263' }
+                    { grid: 'grid_d33a08' }
                 ],
                 Sticker: [
                     () => WebpackModules.getByProps('stickerName', 'sticker'),
-                    { sticker: 'sticker_c2f81a', wrapper: 'wrapper__93f27', content: 'content__59691', stickerName: 'stickerName_e362ee' }
+                    { sticker: 'sticker_fd0aff', wrapper: 'wrapper_d9a30a', content: 'content__25fd1', stickerName: 'stickerName__6fab0' }
                 ],
                 Sizes: () => WebpackModules.getByProps('size10', 'size12'),
                 Colors: () => WebpackModules.getByProps('colorHeaderPrimary', 'colorWhite'),
                 VideoOptions: [
                     () => WebpackModules.getByProps('backgroundOptionRing'),
-                    { backgroundOptionRing: 'backgroundOptionRing__1f209' }
+                    { backgroundOptionRing: 'backgroundOptionRing__45698' }
                 ],
                 StudentHubs: () => WebpackModules.getByProps('footerDescription', 'scroller')
             });

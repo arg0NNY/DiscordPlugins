@@ -98,7 +98,7 @@ SOFTWARE.
 
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
-[betteranimations-version-badge]: https://img.shields.io/badge/version-1.1.17-blue
+[betteranimations-version-badge]: https://img.shields.io/badge/version-1.1.18-blue
 [betteranimations-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27BetterAnimations%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [betteranimations-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27BetterAnimations%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 
