@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.4.6
+ * @version 1.4.7
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.6",
+            "version": "1.4.7",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed lock screen sometimes failed to be properly displayed on Discord startup."
+                    "Fixed a settings button being inaccessible when enabling the plugin."
                 ]
             }
         ]
@@ -1202,7 +1202,7 @@ module.exports = (() => {
                             this.settingsButton = { node, patchedNode };
                         }
                     };
-                    callback(document.querySelector(selector));
+                    setTimeout(() => callback(document.querySelector(selector)));
 
                     this.observer = new DOMTools.DOMObserver();
                     this.observer.subscribeToQuerySelector(e => callback(e.addedNodes[0]), selector, this, false);
