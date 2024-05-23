@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.4.7
+ * @version 1.4.8
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.7",
+            "version": "1.4.8",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed a settings button being inaccessible when enabling the plugin."
+                    "Fixed crashing upon loading servers/channels."
                 ]
             }
         ]
@@ -187,13 +187,12 @@ module.exports = (() => {
 
             const hashCheck = async ({ string, salt, iterations }, hashed) => await pbkdf2(string, salt, iterations) === hashed;
 
-            const Button = ButtonData;
             const HeaderBar = WebpackModules.getByProps('Divider', 'Icon', 'default');
             const Tooltip = BdApi.Components.Tooltip;
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
             const Markdown = WebpackModules.getByProps('rules');
             const Common = WebpackModules.getByProps('Shakeable', 'List');
-            const { Anchor } = Common;
+            const { Anchor, Button } = Common;
             const LanguageStore = WebpackModules.getModule(m => m.Messages?.IMAGE);
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
             const SoundActions = WebpackModules.getByProps('playSound', 'createSound');
