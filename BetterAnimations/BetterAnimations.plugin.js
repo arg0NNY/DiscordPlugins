@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.18
+ * @version 1.1.19
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.18",
+            "version": "1.1.19",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -31,7 +31,14 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed settings being non-interactive."
+                    "Fixed an error preventing settings from opening."
+                ]
+            },
+            {
+                "type": "progress",
+                "title": "Stay tuned",
+                "items": [
+                  "Big changes are underway..."
                 ]
             }
         ]
@@ -85,8 +92,7 @@ module.exports = (() => {
                 UserSettingsWindow,
                 GuildSettingsWindow,
                 ChannelSettingsWindow,
-                UserStore,
-                ButtonData
+                UserStore
             } = DiscordModules;
 
             function getMangled(filter) {
@@ -112,11 +118,10 @@ module.exports = (() => {
             }
 
             const Common = WebpackModules.getByProps('Shakeable', 'List');
-            const { ReferencePositionLayer, Anchor } = Common;
+            const { ReferencePositionLayer, Button } = Common;
             const ChannelIntegrationsSettingsWindow = WebpackModules.getByProps('setSection', 'saveWebhook');
             // const {PreloadedUserSettingsActionCreators} = WebpackModules.getByProps('PreloadedUserSettingsActionCreators');
             const { Route: RouteWithImpression } = WebpackModules.getByProps('Route', 'Router');
-            const Button = ButtonData;
             const UserPopout = WebpackModules.getModule(m => m?.type?.toString?.().includes('Unexpected missing user'), {searchExports: true});
 
             function buildSelectors (selectors) {
