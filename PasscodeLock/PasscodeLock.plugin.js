@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.4.8
+ * @version 1.4.9
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.8",
+            "version": "1.4.9",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed crashing upon loading servers/channels."
+                    "Updated to work in the latest release of Discord."
                 ]
             }
         ]
@@ -70,8 +70,10 @@ module.exports = (() => {
     } : (([Plugin, Api]) => {
         const plugin = (Plugin, Api) => {
             const {
-                DOM
+                DOM,
+                Webpack
             } = BdApi;
+            const { Filters } = Webpack;
 
             const {
                 Patcher,
@@ -187,7 +189,7 @@ module.exports = (() => {
 
             const hashCheck = async ({ string, salt, iterations }, hashed) => await pbkdf2(string, salt, iterations) === hashed;
 
-            const HeaderBar = WebpackModules.getByProps('Divider', 'Icon', 'default');
+            const HeaderBar = Webpack.getWithKey(Filters.byStrings('toolbar', 'hamburger'));
             const Tooltip = BdApi.Components.Tooltip;
             const Keybinds = WebpackModules.getByProps('combokeys', 'disable');
             const Markdown = WebpackModules.getByProps('rules');
@@ -195,10 +197,12 @@ module.exports = (() => {
             const { Anchor, Button } = Common;
             const LanguageStore = WebpackModules.getModule(m => m.Messages?.IMAGE);
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
-            const SoundActions = WebpackModules.getByProps('playSound', 'createSound');
+            const playSound = Webpack.getWithKey(Filters.byStrings('getSoundpack', 'play'));
             const { getVoiceChannelId } = WebpackModules.getByProps('getVoiceChannelId');
-            const KeybindStore = WebpackModules.getByProps('toCombo', 'toString');
-            const { getMainWindowId } = WebpackModules.getByProps('getMainWindowId');
+            const KeybindStore = {
+                toCombo: Webpack.getModule(Filters.byStrings('numpad plus'), { searchExports: true }),
+                toString: Webpack.getModule(Filters.byStrings('KEYBOARD_MODIFIER_KEY', 'UNK'), { searchExports: true })
+            };
 
             // Help translate the plugin on the Crowdin page: https://crwd.in/betterdiscord-passcodelock
             const Locale = new class {
@@ -818,7 +822,7 @@ module.exports = (() => {
                 _dispatch (focused) {
                     const execute = v => Dispatcher.dispatch({
                         type: 'WINDOW_FOCUS',
-                        windowId: getMainWindowId(),
+                        windowId: window.__DISCORD_WINDOW_ID,
                         focused: v
                     })
                     // Toggle for store to register update
@@ -934,7 +938,7 @@ module.exports = (() => {
                 }
 
                 patchPlaySound() {
-                    Patcher.instead(SoundActions, 'playSound', (_, props, original) => {
+                    Patcher.instead(...playSound, (_, props, original) => {
                         if (!props[0]?.endsWith('deafen') || !VoiceProtector.willPlaySound) return original(...props);
                         VoiceProtector.willPlaySound = false;
                         return false;
@@ -949,7 +953,7 @@ module.exports = (() => {
                 }
 
                 async patchHeaderBar() {
-                    Patcher.after(HeaderBar, 'default', (self, props, value) => {
+                    Patcher.after(...HeaderBar, (self, props, value) => {
                         const toolbar = Utilities.findInReactTree(value, i => i?.className === Selectors.HeaderBar.toolbar)?.children?.props?.children;
                         if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return;
 
@@ -1158,6 +1162,10 @@ module.exports = (() => {
 .PCL--delay--visible ~ * {
     opacity: 0;
     pointer-events: none;
+}
+
+.PCL--settings {
+    color: var(--header-primary);
 }
 `);
                 }
@@ -1468,6 +1476,8 @@ module.exports = (() => {
                         }), () => {}, document.createElement('div'))
 
                     );
+
+                    settingsNode.classList.add('PCL--settings')
 
                     DOMTools.onMountChange(settingsNode, () => KeybindListener.stop(), true);
                     DOMTools.onMountChange(settingsNode, () => KeybindListener.start(), false);
