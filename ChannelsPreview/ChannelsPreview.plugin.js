@@ -256,11 +256,11 @@ module.exports = (() => {
             const { default: MessageComponent, ThreadStarterChatMessage: ThreadStarterMessage } = WebpackModules.getByProps('ThreadStarterChatMessage');
             const EmptyMessage = WebpackModules.getByString('SYSTEM_DM_EMPTY_MESSAGE', 'BEGINNING_CHANNEL_WELCOME');
             const FluxTypingUsers = WebpackModules.getByString('getTypingUsers', 'isBypassSlowmode');
-            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
+            const { useSyncExternalStore } = WebpackModules.getByProps('useSyncExternalStore');
             const DateUtils = WebpackModules.getByProps('dateFormat', 'isSameDay');
 
             function ChannelsPreviewPopout({ channel }) {
-                const messages = useStateFromStores([MessageStore], () => MessageStore.getMessages(channel.id).toArray().slice(-MESSAGES_FETCHING_LIMIT));
+                const messages = useSyncExternalStore([MessageStore], () => MessageStore.getMessages(channel.id).toArray().slice(-MESSAGES_FETCHING_LIMIT));
 
                 let currentGroupId = null;
 
