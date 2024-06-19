@@ -113,7 +113,7 @@ module.exports = (() => {
       const ChannelTypes = WebpackModules.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
       const MessageTypes = WebpackModules.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
       const LocaleStore = WebpackModules.getModule(m => m.Messages?.IMAGE)
-      const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores')
+      const { useSyncExternalStore } = WebpackModules.getByProps('useSyncExternalStore')
       const ForumPostAuthor = WebpackModules.getByString('FORUM_POST_AUTHOR')
       const buildMessageReplyContent = WebpackModules.getModule(Filters.byStrings('REPLY_QUOTE_MESSAGE_BLOCKED'), { searchExports: true })
       const buildMessageContent = WebpackModules.getByString('parseInlineReply')
@@ -316,10 +316,10 @@ module.exports = (() => {
       }
 
       function ChannelLastMessage ({ channel, unread, muted, noColor }) {
-        const message = useStateFromStores([MessageStore], () => MessageStore.getMessages(channel.id)?.last())
-        const author = useStateFromStores([UserStore], () => message?.author && UserStore.getUser(message.author.id))
+        const message = useSyncExternalStore([MessageStore], () => MessageStore.getMessages(channel.id)?.last())
+        const author = useSyncExternalStore([UserStore], () => message?.author && UserStore.getUser(message.author.id))
 
-        const isAuthorBlocked = useStateFromStores([RelationshipStore], () => author && RelationshipStore.isBlocked(author.id))
+        const isAuthorBlocked = useSyncExternalStore([RelationshipStore], () => author && RelationshipStore.isBlocked(author.id))
 
         const messageContent = buildLastMessageContent(channel, message)
 
@@ -467,7 +467,7 @@ module.exports = (() => {
       function ChannelVoiceBadge ({ channel, locked, connected, selected }) {
         const getLockedLabel = () => LocaleStore.Messages.CHANNEL_TOOLTIP_VOICE_LOCKED.match(/\((.+)\)/)?.[1] ?? LocaleStore.Messages.JOIN
 
-        const voiceStates = useStateFromStores([SortedVoiceStateStore], () => SortedVoiceStateStore.getVoiceStatesForChannel(channel))
+        const voiceStates = useSyncExternalStore([SortedVoiceStateStore], () => SortedVoiceStateStore.getVoiceStatesForChannel(channel))
         const formatCount = n => n.toString().padStart(2, '0')
 
         const hasUserLimit = channel.userLimit > 0 && channel.userLimit !== 10000
@@ -545,7 +545,7 @@ module.exports = (() => {
       }
 
       function ForumActivePostsCount ({ channel, unread }) {
-        const count = useStateFromStores([ActiveThreadsStore], () => Object.keys(
+        const count = useSyncExternalStore([ActiveThreadsStore], () => Object.keys(
           ActiveThreadsStore.getThreadsForParent(channel.guild_id, channel.id)
         ).length)
 
