@@ -105,13 +105,13 @@ module.exports = (() => {
             const VoiceChannelStore = WebpackModules.getByProps('getVoiceStatesForChannel');
             const MessageHeader = WebpackModules.getByProps('UsernameDecorationTypes');
             const BotTag = WebpackModules.getModule(m => m?.default?.Types?.SYSTEM_DM);
-            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
+            const { useSyncExternalStore } = WebpackModules.getByProps('useSyncExternalStore');
 
             function isInMyVoice(user) {
-                const voiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
-                const currentUser = useStateFromStores([UserStore], () => UserStore.getCurrentUser());
-                const channel = useStateFromStores([ChannelStore], () => voiceChannelId && ChannelStore.getChannel(voiceChannelId));
-                const voiceState = useStateFromStores([VoiceChannelStore], () => channel && VoiceChannelStore.getVoiceStatesForChannel(channel));
+                const voiceChannelId = useSyncExternalStore([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
+                const currentUser = useSyncExternalStore([UserStore], () => UserStore.getCurrentUser());
+                const channel = useSyncExternalStore([ChannelStore], () => voiceChannelId && ChannelStore.getChannel(voiceChannelId));
+                const voiceState = useSyncExternalStore([VoiceChannelStore], () => channel && VoiceChannelStore.getVoiceStatesForChannel(channel));
 
                 if (currentUser.id === user.id || !channel) return false;
 
