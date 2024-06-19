@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.0.3
+ * @version 1.1.0
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.0.3",
+            "version": "1.1.0",
             "description": "Displays an online and total member count in the guild tooltip.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js"
@@ -47,7 +47,15 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin has been fixed and adjusted for the latest Discord update."
+                    "Updated to work in the latest release of Discord."
+                ]
+            },
+            {
+                "type": "improved",
+                "title": "Improvements",
+                "items": [
+                    "Added support for the new interactive guild tooltips.",
+                    "Added number formatting for better readability."
                 ]
             }
         ]
@@ -80,6 +88,11 @@ module.exports = (() => {
     } : (([Plugin, Api]) => {
         const plugin = (Plugin, Api) => {
             const {
+                Webpack
+            } = BdApi;
+            const { Filters } = Webpack;
+
+            const {
                 WebpackModules,
                 Patcher,
                 DiscordModules
@@ -102,7 +115,7 @@ module.exports = (() => {
                 ONLINE_GUILD_MEMBER_COUNT_UPDATE: 'ONLINE_GUILD_MEMBER_COUNT_UPDATE'
             };
 
-            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
+            const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true });
 
             const Selectors = {
                 Guild: WebpackModules.getByProps('statusOffline', 'guildDetail')
@@ -110,7 +123,8 @@ module.exports = (() => {
 
             const GuildInfoStore = WebpackModules.getByProps('getGuild', 'hasFetchFailed');
             const GuildActions = WebpackModules.getByProps('preload', 'closePrivateChannel');
-            const GuildTooltip = WebpackModules.getByProps('GuildTooltipText');
+            const GuildTooltip = Webpack.getWithKey(Filters.byStrings('guild_tooltip'));
+            const GuildPopout = Webpack.getWithKey(Filters.byStrings('GUILD_POPOUT_INVITES_PAUSED'));
 
             const memberCounts = new Map();
             const onlineMemberCounts = new Map();
@@ -170,6 +184,10 @@ module.exports = (() => {
             });
 
 
+            function formatNumber (number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+
             function GuildTooltipCounters(props) {
                 MemberCountsStore.initialize();
 
@@ -187,7 +205,9 @@ module.exports = (() => {
                     'div',
                     {
                         className: Selectors.Guild.guildDetail,
-                        style: {
+                        style: props.isPopout ? {
+                            fontWeight: '600'
+                        } : {
                             marginTop: '5px',
                             marginBottom: '5px'
                         }
@@ -213,7 +233,7 @@ module.exports = (() => {
                                     {
                                         className: Selectors.Guild.count
                                     },
-                                    membersOnline ?? presenceCount
+                                    formatNumber(membersOnline ?? presenceCount)
                                 )] : []),
                             ...(totalDisplayed ? [React.createElement(
                                 'i',
@@ -226,7 +246,7 @@ module.exports = (() => {
                                     {
                                         className: Selectors.Guild.count
                                     },
-                                    memberCount ?? members
+                                    formatNumber(memberCount ?? members)
                                 )] : [])
                         ]
                     )
@@ -262,18 +282,19 @@ module.exports = (() => {
                 }
 
                 patchGuildTooltip() {
-                    Patcher.after(GuildTooltip, 'default', (self, _, value) => {
+                    const callback = (index, props = {}) => (self, [{ guild }], value) => {
                         if (!this.settings.displayOnline && !this.settings.displayTotal) return;
+                        if (this.settings.displayOnline && !onlineMemberCounts.has(guild.id)) this.preloadGuild(guild);
+                        value.props.children.splice(index, 0, React.createElement(GuildTooltipCounters, { guild, settings: this.settings, ...props }));
+                    };
 
-                        Patcher.after(value.props.text, 'type', (self, _, value) => {
-                            const guild = _[0].guild;
+                    Patcher.after(...GuildTooltip, (self, _, value) => {
+                        if (!this.settings.displayOnline && !this.settings.displayTotal) return;
+                        if (!value?.props?.text?.type) return
 
-                            if (this.settings.displayOnline && !onlineMemberCounts.has(guild.id)) this.preloadGuild(guild);
-
-                            value.props.children.splice(1, 0, React.createElement(GuildTooltipCounters, { guild, settings: this.settings }));
-                        });
-
+                        Patcher.after(value.props.text, 'type', callback(1));
                     });
+                    Patcher.after(...GuildPopout, callback(2, { isPopout: true }));
                 }
 
                 onStop() {
