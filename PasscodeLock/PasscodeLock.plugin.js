@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.4.9
+ * @version 1.4.10
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.9",
+            "version": "1.4.10",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,7 +32,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Updated to work in the latest release of Discord."
+                    "Updated to work in the latest release of Discord.",
+                    "Fixed a bug where the plugin would not unlock after a restart."
                 ]
             }
         ]
@@ -934,7 +935,7 @@ module.exports = (() => {
                     this.keybind = this.keybindSetting.split('+');
                     KeybindListener.listen(this.keybind, () => this.onLockKeybind());
 
-                    if (this.settings.lockOnStartup || Data.locked) this.lock();
+                    if (this.settings.lockOnStartup || Data.locked) setTimeout(this.lock.bind(this));
                 }
 
                 patchPlaySound() {
