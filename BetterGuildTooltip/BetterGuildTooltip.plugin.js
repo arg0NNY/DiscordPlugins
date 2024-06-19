@@ -102,7 +102,7 @@ module.exports = (() => {
                 ONLINE_GUILD_MEMBER_COUNT_UPDATE: 'ONLINE_GUILD_MEMBER_COUNT_UPDATE'
             };
 
-            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
+            const { useSyncExternalStore } = WebpackModules.getByProps('useSyncExternalStore');
 
             const Selectors = {
                 Guild: WebpackModules.getByProps('statusOffline', 'guildDetail')
@@ -173,10 +173,10 @@ module.exports = (() => {
             function GuildTooltipCounters(props) {
                 MemberCountsStore.initialize();
 
-                const { presenceCount, memberCount } = useStateFromStores([GuildInfoStore], () =>
+                const { presenceCount, memberCount } = useSyncExternalStore([GuildInfoStore], () =>
                     GuildInfoStore.getGuild(props.guild.id) ?? {}
                 )
-                const { members, membersOnline } = useStateFromStores([MemberCountsStore], () =>
+                const { members, membersOnline } = useSyncExternalStore([MemberCountsStore], () =>
                     MemberCountsStore.getMemberCounts(props.guild.id)
                 );
 
