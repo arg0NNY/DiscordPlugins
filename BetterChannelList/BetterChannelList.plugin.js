@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.0.5
+ * @version 1.0.6
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.0.5",
+      "version": "1.0.6",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed incorrect display of custom emojis as channel icons."
+          "Updated to work in the latest release of Discord."
         ]
       }
     ]
@@ -65,9 +65,10 @@ module.exports = (() => {
   } : (([Plugin, Api]) => {
     const plugin = (Plugin, Api) => {
       const {
-        Webpack: { Filters },
+        Webpack,
         DOM
       } = new BdApi(config.info.name)
+      const { Filters } = Webpack
 
       const {
         Patcher,
@@ -108,34 +109,37 @@ module.exports = (() => {
 
       const { getSocket } = WebpackModules.getByProps('getSocket')
       const Common = WebpackModules.getByProps('Shakeable', 'List')
-      const ChannelItem = WebpackModules.getByProps('ChannelItemIcon')
-      const { ChannelItemIcon } = ChannelItem
+      const ChannelItem = Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))
+      const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
       const ChannelTypes = WebpackModules.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
       const MessageTypes = WebpackModules.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
       const LocaleStore = WebpackModules.getModule(m => m.Messages?.IMAGE)
-      const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores')
+      const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
       const ForumPostAuthor = WebpackModules.getByString('FORUM_POST_AUTHOR')
       const buildMessageReplyContent = WebpackModules.getModule(Filters.byStrings('REPLY_QUOTE_MESSAGE_BLOCKED'), { searchExports: true })
       const buildMessageContent = WebpackModules.getByString('parseInlineReply')
-      const List = WebpackModules.getByProps('ListNavigatorProvider')
-      const { astToString } = WebpackModules.getByProps('astToString')
+      const ListNavigatorProvider = Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))
+      const astToString = Webpack.getByRegex(/"string"==typeof \w+\.content\?\w+\.push\(\w+\.content\):null/, { searchExports: true })
       const JoinMessages = WebpackModules.getByProps('getSystemMessageUserJoin')
-      const { useNullableMessageAuthor } = WebpackModules.getByProps('useNullableMessageAuthor')
-      const { getRoleSubscriptionPurchaseSystemMessageAstFormattedContent } = WebpackModules.getByProps('getRoleSubscriptionPurchaseSystemMessageAstFormattedContent')
-      const { getApplicationSubscriptionSystemMessageASTContent } = WebpackModules.getByProps('getApplicationSubscriptionSystemMessageASTContent')
-      const {
-        getPrivateChannelIntegrationAddedSystemMessageASTContent,
-        getPrivateChannelIntegrationRemovedSystemMessageASTContent
-      } = WebpackModules.getByProps('getPrivateChannelIntegrationAddedSystemMessageASTContent')
-      const Emoji = WebpackModules.getByString('allowAnimatedEmoji', 'AnimateEmoji')
-      const { useTheme } = WebpackModules.getByProps('useTheme')
-      const ColorUtils = WebpackModules.getByProps('hexWithOpacity', 'rgbToHex')
-      const SortedVoiceStateStore = WebpackModules.getModule(Filters.byStoreName('SortedVoiceStateStore'))
-      const isLimited = WebpackModules.getByString('canEveryoneRole', 'permissionOverwrites')
-      const GuildBanner = WebpackModules.getModule(m => m?.type?.toString?.().includes('guildBanner'))
-      const ActiveThreadsStore = WebpackModules.getModule(Filters.byStoreName('ActiveThreadsStore'))
-      const AppView = WebpackModules.getModule(m => Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY')(m?.default))
-      const DevToolsDesignTogglesStore = WebpackModules.getModule(Filters.byStoreName('DevToolsDesignTogglesStore'))
+      const useNullableMessageAuthor = Webpack.getModule(Filters.byStrings('getNickname', 'author.bot'), { searchExports: true })
+      const getRoleSubscriptionPurchaseSystemMessageAstFormattedContent = Webpack.getModule(m => Filters.byStrings('roleSubscriptionData', 'astFormat')(m) && !Filters.byStrings('SUBSCRIPTION_RENEW_WITH_DURATION_MOBILE')(m), { searchExports: true })
+      const getApplicationSubscriptionSystemMessageASTContent = Webpack.getModule(Filters.byStrings('SYSTEM_MESSAGE_APPLICATION_SUBSCRIPTION_PURCHASE_MOBILE'), { searchExports: true })
+      const getPrivateChannelIntegrationAddedSystemMessageASTContent = Webpack.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_ADDED_MOBILE'), { searchExports: true })
+      const getPrivateChannelIntegrationRemovedSystemMessageASTContent = Webpack.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_REMOVED_MOBILE'), { searchExports: true })
+      const Emoji = Webpack.getModule(Filters.byStrings('allowAnimatedEmoji', 'isFocused'), { searchExports: true })
+      const ThemeStore = Webpack.getStore('ThemeStore')
+      const ColorUtils = {
+        hexWithOpacity (color, opacity) {
+          const _opacity = Math.round(Math.min(Math.max(opacity ?? 1, 0), 1) * 255);
+          return color + _opacity.toString(16).toUpperCase();
+        }
+      }
+      const SortedVoiceStateStore = Webpack.getStore('SortedVoiceStateStore')
+      const isLimited = WebpackModules.getByString('permissionOverwrites', 'VIEW_CHANNEL', 'CONNECT')
+      const GuildBanner = WebpackModules.getModule(m => Filters.byStrings('guildBanner')(m?.type))
+      const ActiveThreadsStore = Webpack.getStore('ActiveThreadsStore')
+      const AppView = Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))
+      const DevToolsDesignTogglesStore = Webpack.getStore('DevToolsDesignTogglesStore')
 
       const Selectors = {
         ChannelItem: WebpackModules.getByProps('unread', 'link'),
@@ -150,7 +154,7 @@ module.exports = (() => {
         DirectMessages: WebpackModules.getByProps('activity', 'channel'),
         GuildHeader: WebpackModules.getByProps('bannerImage', 'bannerImg'),
         Margins: DiscordClasses.Margins,
-        SidebarFooter: WebpackModules.getByProps('nameTag', 'godlike')
+        SidebarFooter: WebpackModules.getByProps('nameTag', 'avatarWrapper')
       }
 
       function deepEqual (x, y) {
@@ -400,7 +404,7 @@ module.exports = (() => {
 
       function useChannelEmoji (channel) {
         const name = channel.iconEmoji?.name ?? '🌐'
-        const theme = useTheme()
+        const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme)
 
         return {
           color: ColorUtils.hexWithOpacity(
@@ -741,7 +745,7 @@ module.exports = (() => {
         }
 
         patchChannelItem () {
-          Patcher.after(ChannelItem, 'default', (self, [{ channel, guild, muted, selected, unread, locked, connected }], value) => {
+          Patcher.after(...ChannelItem, (self, [{ channel, guild, muted, selected, unread, locked, connected }], value) => {
             const link = Utilities.findInReactTree(value, byClassName(Selectors.ChannelItem.link))
             if (!link) return
 
@@ -794,7 +798,7 @@ module.exports = (() => {
 
         patchScrollerProvider () {
           let guildChannels
-          Patcher.after(List, 'ListNavigatorProvider', (self, props, value) => {
+          Patcher.after(...ListNavigatorProvider, (self, props, value) => {
             if (value.props?.value?.id !== 'channels') return
 
             const scroller = Utilities.findInReactTree(value, m => m.props?.guildChannels)
@@ -820,7 +824,7 @@ module.exports = (() => {
         }
 
         injectResizer () {
-          Patcher.after(AppView, 'default', (self, props, value) => {
+          Patcher.after(...AppView, (self, props, value) => {
             if (!this.settings.resizer.enabled) return
 
             const base = Utilities.findInReactTree(value, byClassName(Selectors.Base.base))
