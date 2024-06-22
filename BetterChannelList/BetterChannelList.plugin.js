@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.0.6
+ * @version 1.1.0
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,17 +22,33 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.0.6",
+      "version": "1.1.0",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
     },
     "changelog": [
       {
+        "type": "added",
+        "title": "What's new",
+        "items": [
+          "Added the ability to manually edit the channel emoji icons.",
+          "Added the ability to change the emoji icon size: Medium, Small and Tiny."
+        ]
+      },
+      {
+        "type": "improved",
+        "title": "Improvements",
+        "items": [
+          "Settings for the disabled modules now have a disabled state.",
+          "Voice channel badges are now using a monospace font to make their size consistent."
+        ]
+      },
+      {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Updated to work in the latest release of Discord."
+          "Fixed broken styles for the disabled state of the forum channels."
         ]
       }
     ]
@@ -66,12 +82,14 @@ module.exports = (() => {
     const plugin = (Plugin, Api) => {
       const {
         Webpack,
-        DOM
+        DOM,
+        ContextMenu,
+        Patcher,
+        UI
       } = new BdApi(config.info.name)
       const { Filters } = Webpack
 
       const {
-        Patcher,
         WebpackModules,
         DiscordModules,
         Logger,
@@ -89,7 +107,8 @@ module.exports = (() => {
         React,
         ReactDOM,
         RelationshipStore,
-        MessageStore
+        MessageStore,
+        Flux
       } = DiscordModules
 
       const Data = new Proxy({}, {
@@ -107,9 +126,17 @@ module.exports = (() => {
       const SIDEBAR_MIN_WIDTH = 190
       const SIDEBAR_MAX_WIDTH = 640
 
+      const EmojiIconSizes = {
+        TINY: 'tiny',
+        SMALL: 'small',
+        MEDIUM: 'medium'
+      }
+
       const { getSocket } = WebpackModules.getByProps('getSocket')
       const Common = WebpackModules.getByProps('Shakeable', 'List')
-      const ChannelItem = Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))
+      const { Button } = Common
+      const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
+      const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))]
       const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
       const ChannelTypes = WebpackModules.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
       const MessageTypes = WebpackModules.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
@@ -118,7 +145,7 @@ module.exports = (() => {
       const ForumPostAuthor = WebpackModules.getByString('FORUM_POST_AUTHOR')
       const buildMessageReplyContent = WebpackModules.getModule(Filters.byStrings('REPLY_QUOTE_MESSAGE_BLOCKED'), { searchExports: true })
       const buildMessageContent = WebpackModules.getByString('parseInlineReply')
-      const ListNavigatorProvider = Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))
+      const ListNavigatorProvider = [...Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))]
       const astToString = Webpack.getByRegex(/"string"==typeof \w+\.content\?\w+\.push\(\w+\.content\):null/, { searchExports: true })
       const JoinMessages = WebpackModules.getByProps('getSystemMessageUserJoin')
       const useNullableMessageAuthor = Webpack.getModule(Filters.byStrings('getNickname', 'author.bot'), { searchExports: true })
@@ -138,8 +165,13 @@ module.exports = (() => {
       const isLimited = WebpackModules.getByString('permissionOverwrites', 'VIEW_CHANNEL', 'CONNECT')
       const GuildBanner = WebpackModules.getModule(m => Filters.byStrings('guildBanner')(m?.type))
       const ActiveThreadsStore = Webpack.getStore('ActiveThreadsStore')
-      const AppView = Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))
+      const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
       const DevToolsDesignTogglesStore = Webpack.getStore('DevToolsDesignTogglesStore')
+      const EmojiPicker = Webpack.getModule(m => Filters.byStrings('pickerIntention')(m?.type?.render))
+      const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RELATED_EMOJI', 'SOUNDBOARD'), { searchExports: true })
+      const Alert = Webpack.getByStrings('messageType', 'CircleExclamationPointIcon')
+      const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
+      const Flex = Webpack.getByKeys('Child', 'Direction')
 
       const Selectors = {
         ChannelItem: WebpackModules.getByProps('unread', 'link'),
@@ -154,7 +186,9 @@ module.exports = (() => {
         DirectMessages: WebpackModules.getByProps('activity', 'channel'),
         GuildHeader: WebpackModules.getByProps('bannerImage', 'bannerImg'),
         Margins: DiscordClasses.Margins,
-        SidebarFooter: WebpackModules.getByProps('nameTag', 'avatarWrapper')
+        SidebarFooter: WebpackModules.getByProps('nameTag', 'avatarWrapper'),
+        FormSwitch: WebpackModules.getByProps('dividerDefault', 'note'),
+        Diversity: WebpackModules.getByProps('diversitySelectorOptions')
       }
 
       function deepEqual (x, y) {
@@ -249,6 +283,67 @@ module.exports = (() => {
         TRUNCATE_MESSAGES: updateChannel,
         MESSAGE_PREVIEWS_LOADED: handleMessagePreviewsLoaded
       }
+
+      const OpenedEmojiPickerStore = (() => {
+        let currentChannelId = null
+
+        function handleEmojiPickerOpen ({ channelId }) {
+          currentChannelId = channelId
+        }
+
+        function handleEmojiPickerClose () {
+          currentChannelId = null
+        }
+
+        return new class OpenedEmojiPickerStore extends Flux.Store {
+          getChannelId () {
+            return currentChannelId
+          }
+        }(Dispatcher, {
+          'BCL__EMOJI_PICKER_OPEN': handleEmojiPickerOpen,
+          'BCL__EMOJI_PICKER_CLOSE': handleEmojiPickerClose
+        })
+      })()
+
+      const ChannelEmojiIconStore = (() => {
+        const DATA_KEY = 'emojiIconOverrides'
+        let emojis = {}
+
+        function saveData () {
+          Data[DATA_KEY] = emojis
+        }
+
+        function handleEmojiIconSet ({ channelId, emoji }) {
+          emojis[channelId] = emoji
+          saveData()
+        }
+
+        function handleEmojiIconDelete ({ channelId }) {
+          delete emojis[channelId]
+          saveData()
+        }
+
+        function handleEmojiIconReset () {
+          emojis = {}
+          saveData()
+        }
+
+        return new class ChannelEmojiIconStore extends Flux.Store {
+          initialize () {
+            emojis = Data[DATA_KEY] ?? {}
+          }
+          getEmoji (channelId) {
+            return emojis[channelId]
+          }
+          hasAnyEmoji () {
+            return Object.keys(emojis).length > 0
+          }
+        }(Dispatcher, {
+          'BCL__EMOJI_ICON_SET': handleEmojiIconSet,
+          'BCL__EMOJI_ICON_DELETE': handleEmojiIconDelete,
+          'BCL__EMOJI_ICON_RESET': handleEmojiIconReset
+        })
+      })()
 
       function buildLastMessageContent (channel, message) {
         const format = astToString
@@ -403,7 +498,8 @@ module.exports = (() => {
       }
 
       function useChannelEmoji (channel) {
-        const name = channel.iconEmoji?.name ?? '🌐'
+        const override = useStateFromStores([ChannelEmojiIconStore], () => ChannelEmojiIconStore.getEmoji(channel.id))
+        const name = override ?? channel.iconEmoji?.name ?? '🌐'
         const theme = useStateFromStores([ThemeStore], () => ThemeStore.theme)
 
         return {
@@ -412,15 +508,18 @@ module.exports = (() => {
             theme === 'dark' ? .2 : .16
           ),
           emojiName: name,
-          emojiId: channel.iconEmoji?.id
+          emojiId: !override ? channel.iconEmoji?.id : undefined
         }
       }
-      function ChannelEmojiIcon ({ channel }) {
+      function ChannelEmojiIcon ({ channel, size = EmojiIconSizes.MEDIUM }) {
         const { color, emojiName, emojiId } = useChannelEmoji(channel)
 
         return React.createElement(
           'div',
-          { className: 'BCL--channel-icon', style: { '--bcl-channel-icon-bg': color } },
+          {
+            className: `BCL--channel-icon BCL--channel-icon--${size}`,
+            style: { '--bcl-channel-icon-bg': color }
+          },
           React.createElement(
             Emoji,
             { emojiId, emojiName, animated: false }
@@ -568,7 +667,7 @@ module.exports = (() => {
 
       return class BetterChannelList extends Plugin {
         willRenderLastMessage (channelId) {
-          return this.settings.lastMessage.enabled && !!MessageStore.getMessages(channelId)?.last()
+          return channelId && this.settings.lastMessage.enabled && !!MessageStore.getMessages(channelId)?.last()
         }
 
         onStart () {
@@ -581,6 +680,7 @@ module.exports = (() => {
             .forEach(s => Dispatcher.subscribe(...s))
 
           this.enableDiscordInternalEmojiIconModules()
+          this.patchContextMenu()
           this.patchChannelItem()
           this.patchScrollerProvider()
           this.injectResizer()
@@ -599,6 +699,7 @@ module.exports = (() => {
         }
 
         injectStyle () {
+          //language=CSS
           DOM.addStyle(this.styleName, `
             .BCL--last-message {
               pointer-events: none;
@@ -613,7 +714,7 @@ module.exports = (() => {
             .BCL--last-message * {
               font-weight: 500 !important;
             }
-            .${Selectors.ChannelItem.wrapper}.${Selectors.ChannelItem.modeMuted}:not(:hover) .BCL--last-message * {
+            .${Selectors.ChannelItem.wrapper}.${Selectors.ChannelItem.modeMuted}:not(:hover) :is(.BCL--last-message, .BCL--last-message *) {
               color: var(--interactive-muted) !important;
             }
             
@@ -648,6 +749,24 @@ module.exports = (() => {
               width: 20px;
               height: 20px;
             }
+            .BCL--channel-icon--${EmojiIconSizes.TINY} {
+              width: 20px;
+              height: 20px;
+              padding: 4px;
+              margin: -4px 0;
+            }
+            .BCL--channel-icon--${EmojiIconSizes.TINY} .emoji {
+              width: 14px;
+              height: 14px;
+            }
+            .BCL--channel-icon--${EmojiIconSizes.SMALL} {
+              width: 30px;
+              height: 30px;
+            }
+            .BCL--channel-icon--${EmojiIconSizes.SMALL} .emoji {
+              width: 16px;
+              height: 16px;
+            }
             .${Selectors.ChannelItem.wrapper}.${Selectors.ChannelItem.modeMuted}:not(:hover) .BCL--channel-icon {
               opacity: .3;
             }
@@ -670,6 +789,7 @@ module.exports = (() => {
               font-size: 12px;
               font-weight: 500;
               margin: -5px 0 -5px 4px;
+              font-family: var(--font-code);
             }
             .BCL--voice-badge .${Selectors.ChannelItem.iconContainer} {
               margin-right: 0 !important;
@@ -728,6 +848,27 @@ module.exports = (() => {
               transition-delay: .1s;
             }
             
+            .BCL--emoji-picker-header {
+              display: flex;
+              align-items: stretch;
+              flex-direction: column;
+              gap: 12px;
+            }
+            .BCL--emoji-picker-header .${Selectors.Diversity.diversitySelectorOptions} {
+              top: 66px;
+            }
+            .BCL--emoji-picker-header-content {
+              display: flex;
+              align-items: center;
+            }
+            .BCL--emoji-picker + * {
+              top: 112px;
+            }
+            
+            .BCL--disabled {
+              opacity: .6
+            }
+            
             /* Discord's style fixes */
             /* ===================== */
             
@@ -744,10 +885,77 @@ module.exports = (() => {
           `)
         }
 
+        patchContextMenu () {
+          this.contextMenuPatches = [
+            ContextMenu.patch('channel-context', (self, { channel }) => {
+              if (!this.settings.redesign.enabled) return
+
+              const isOverride = !!ChannelEmojiIconStore.getEmoji(channel.id)
+              const onEdit = () => Dispatcher.dispatch({ type: 'BCL__EMOJI_PICKER_OPEN', channelId: channel.id })
+
+              self.props.children.push(ContextMenu.buildMenuChildren([
+                {
+                  type: 'group',
+                  items: [{
+                    type: isOverride ? 'submenu' : 'text',
+                    label: isOverride ? 'Emoji Icon' : 'Edit Emoji Icon',
+                    action: onEdit,
+                    items: [
+                      {
+                        label: 'Edit',
+                        action: onEdit
+                      },
+                      {
+                        label: 'Reset',
+                        action: () => Dispatcher.dispatch({ type: 'BCL__EMOJI_ICON_DELETE', channelId: channel.id })
+                      }
+                    ]
+                  }]
+                }
+              ]))
+            })
+          ]
+        }
+
         patchChannelItem () {
-          Patcher.after(...ChannelItem, (self, [{ channel, guild, muted, selected, unread, locked, connected }], value) => {
+          function useEmojiPickerState (channel) {
+            const openedEmojiPickerChannelId = useStateFromStores([OpenedEmojiPickerStore], () => OpenedEmojiPickerStore.getChannelId())
+            const isEmojiPickerOpen = openedEmojiPickerChannelId === channel.id
+
+            return {
+              openedEmojiPickerChannelId,
+              isEmojiPickerOpen
+            }
+          }
+
+          let isPatched = false
+          Patcher.after(...ChannelItemParent, (self, [{ channel }], value) => {
+            const { isEmojiPickerOpen } = useEmojiPickerState(channel)
+            value.props.forceClosePopout = isEmojiPickerOpen
+
+            if (isPatched) return
+            isPatched = true
+
+            Patcher.after(value.type.DecoratedComponent.prototype, 'render', ({ props }, args, value) => {
+              if (props.forceClosePopout) {
+                const popout = Utilities.findInReactTree(value, m => m?.renderPopout)
+                if (popout) popout.shouldShow = false
+              }
+            })
+          })
+
+          Patcher.instead(...ChannelItem, (self, [props], original) => {
+            const { channel, guild, muted: _muted, selected: _selected, unread, locked, connected } = props
+
+            const { openedEmojiPickerChannelId, isEmojiPickerOpen } = useEmojiPickerState(channel)
+
+            const muted = openedEmojiPickerChannelId ? !isEmojiPickerOpen : _muted
+            const selected = openedEmojiPickerChannelId ? isEmojiPickerOpen : _selected
+
+            const value = original({ ...props, muted, selected })
+
             const link = Utilities.findInReactTree(value, byClassName(Selectors.ChannelItem.link))
-            if (!link) return
+            if (!link) return value
 
             const { children } = link.props
 
@@ -761,9 +969,9 @@ module.exports = (() => {
              * Channel item redesign
              */
             // TODO: Add support for threads/posts
-            if (!this.settings.redesign.enabled) return
+            if (!this.settings.redesign.enabled) return value
 
-            if (channel.type === ChannelTypes.GUILD_FORUM)
+            if (this.settings.redesign.iconSize === EmojiIconSizes.MEDIUM && channel.type === ChannelTypes.GUILD_FORUM)
               children.push(
                 React.createElement(ForumActivePostsCount, { channel, unread })
               )
@@ -771,7 +979,7 @@ module.exports = (() => {
             // Emoji icon
             link.props.className += ' BCL--channel-wrapper' + (muted ? ' BCL--channel-wrapper--muted' : '')
             link.props.children = [
-              React.createElement(ChannelEmojiIcon, { channel }),
+              React.createElement(ChannelEmojiIcon, { channel, size: this.settings.redesign.iconSize }),
               React.createElement('div', { className: 'BCL--channel-info', children })
             ]
 
@@ -793,6 +1001,41 @@ module.exports = (() => {
                 React.createElement(ChannelNameIcons, { channel, locked })
               ]
             }
+
+            // Emoji picker
+            const _children = value.props.children
+            value.props.children = React.createElement(Common.Popout, {
+              renderPopout: ({ closePopout }) => React.createElement(EmojiPicker, {
+                className: 'BCL--emoji-picker',
+                headerClassName: 'BCL--emoji-picker-header',
+                closePopout,
+                pickerIntention: EmojiPickerIntentions.SOUNDBOARD,
+                onNavigateAway: closePopout,
+                onSelectEmoji: emoji => {
+                  Dispatcher.dispatch({ type: 'BCL__EMOJI_ICON_SET', channelId: channel.id, emoji: emoji.surrogates })
+                  closePopout()
+                },
+                renderHeader: header => React.createElement(React.Fragment, {
+                  children: [
+                    React.createElement(Alert, {
+                      messageType: AlertMessageTypes.WARNING,
+                      children: 'Icon changes locally. Only you will see this change.'
+                    }),
+                    React.createElement('div', {
+                      className: 'BCL--emoji-picker-header-content',
+                      children: header
+                    })
+                  ]
+                })
+              }),
+              position: 'right',
+              spacing: 16,
+              shouldShow: isEmojiPickerOpen,
+              onRequestClose: () => Dispatcher.dispatch({ type: 'BCL__EMOJI_PICKER_CLOSE' }),
+              children: () => _children
+            })
+
+            return value
           })
         }
 
@@ -814,7 +1057,10 @@ module.exports = (() => {
                 const [section, row] = props
                 if (section !== 0) {
                   const { channel } = guildChannels.getChannelFromSectionRow(section, row) ?? {}
-                  if (channel && (this.settings.redesign.enabled || this.willRenderLastMessage(channel.id))) result += 20
+                  const emojiIconSize = this.settings.redesign.enabled && this.settings.redesign.iconSize
+
+                  if (this.willRenderLastMessage(channel?.id) || emojiIconSize === EmojiIconSizes.MEDIUM) result += 20
+                  else if (emojiIconSize === EmojiIconSizes.SMALL) result += 10
                 }
 
                 return result
@@ -872,6 +1118,7 @@ module.exports = (() => {
         }
 
         onStop() {
+          this.contextMenuPatches?.forEach(p => p())
           Patcher.unpatchAll()
           this.clearStyle()
 
@@ -894,7 +1141,8 @@ module.exports = (() => {
               roleColors: false
             },
             redesign: {
-              enabled: true
+              enabled: true,
+              iconSize: EmojiIconSizes.MEDIUM
             },
             resizer: {
               enabled: true
@@ -926,7 +1174,10 @@ module.exports = (() => {
             })
           }
 
-          function Settings () {
+          const Settings = () => {
+            const resetShown = useStateFromStores([ChannelEmojiIconStore], () => ChannelEmojiIconStore.hasAnyEmoji())
+            const [_, forceUpdate] = React.useReducer(x => x + 1, 0)
+
             return React.createElement(
               React.Fragment, {},
               [
@@ -938,25 +1189,105 @@ module.exports = (() => {
                       children: 'Enable Last message',
                       note: 'Shows the most recent message for each channel in the channel list.',
                       value: settings.lastMessage.enabled,
-                      onChange: e => settings.lastMessage.enabled = e
+                      onChange: e => {
+                        settings.lastMessage.enabled = e
+                        forceUpdate()
+                      }
                     }),
                     React.createElement(Switch, {
                       children: 'Enable role color',
                       note: 'Paints author\'s username according to color of their role.',
                       value: settings.lastMessage.roleColors,
-                      onChange: e => settings.lastMessage.roleColors = e
+                      onChange: e => settings.lastMessage.roleColors = e,
+                      disabled: !settings.lastMessage.enabled
                     })
                   ]
                 }),
                 React.createElement(Common.FormSection, {
                   title: 'Redesign',
                   className: Selectors.Margins.marginBottom20,
-                  children: React.createElement(Switch, {
-                    children: 'Enable Redesign',
-                    note: 'Brings channel list redesign from the new mobile UI.',
-                    value: settings.redesign.enabled,
-                    onChange: e => settings.redesign.enabled = e
-                  })
+                  children: [
+                    React.createElement(Switch, {
+                      children: 'Enable Redesign',
+                      note: 'Brings channel list redesign from the new mobile UI.',
+                      value: settings.redesign.enabled,
+                      onChange: e => {
+                        settings.redesign.enabled = e
+                        forceUpdate()
+                      }
+                    }),
+                    React.createElement(Common.FormSection, {
+                      className: Selectors.Margins.marginBottom20,
+                      children: [
+                        React.createElement(Common.FormTitle, {
+                          tag: Common.FormTitleTags.H3,
+                          className: Selectors.Margins.marginBottom8,
+                          children: 'Emoji Icons',
+                          disabled: !settings.redesign.enabled
+                        }),
+                        React.createElement(Flex, {
+                          children: [
+                            React.createElement(Flex.Child, {
+                              children: React.createElement(Alert, {
+                                messageType: AlertMessageTypes.INFO,
+                                children: 'You can edit the channel emoji icons using their context menu.',
+                                className: !settings.redesign.enabled ? 'BCL--disabled' : null
+                              })
+                            }),
+                            resetShown && React.createElement(Flex.Child, {
+                              wrap: true,
+                              style: { marginLeft: '0' },
+                              children: React.createElement(Button, {
+                                size: Button.Sizes.LARGE,
+                                color: Button.Colors.RED,
+                                look: Button.Looks.OUTLINED,
+                                children: 'Reset All Icons',
+                                onClick: () => this.openResetConfirmationModal(),
+                                disabled: !settings.redesign.enabled
+                              })
+                            })
+                          ]
+                        }),
+                        React.createElement(Common.FormDivider, {
+                          className: Selectors.FormSwitch.dividerDefault
+                        })
+                      ]
+                    }),
+                    React.createElement(Common.FormSection, {
+                      className: Selectors.Margins.marginBottom20,
+                      children: [
+                        React.createElement(Common.FormTitle, {
+                          tag: Common.FormTitleTags.H3,
+                          className: Selectors.Margins.marginBottom8,
+                          children: 'Icon Size',
+                          disabled: !settings.redesign.enabled
+                        }),
+                        React.createElement(Common.FormText, {
+                          type: Common.FormText.Types.DESCRIPTION,
+                          className: Selectors.Margins.marginBottom8,
+                          children: 'Controls the size of the channel emoji icons.',
+                          disabled: !settings.redesign.enabled
+                        }),
+                        React.createElement(Common.RadioGroup, {
+                          options: [
+                            { name: 'Medium', value: EmojiIconSizes.MEDIUM },
+                            { name: 'Small', value: EmojiIconSizes.SMALL },
+                            { name: 'Tiny', value: EmojiIconSizes.TINY }
+                          ],
+                          value: settings.redesign.iconSize,
+                          onChange: e => {
+                            settings.redesign.iconSize = e.value
+                            forceUpdate()
+                            saveSettings()
+                          },
+                          disabled: !settings.redesign.enabled
+                        }),
+                        React.createElement(Common.FormDivider, {
+                          className: Selectors.FormSwitch.dividerDefault
+                        })
+                      ]
+                    })
+                  ]
                 }),
                 React.createElement(Common.FormSection, {
                   title: 'Resizer',
@@ -984,6 +1315,18 @@ module.exports = (() => {
           })
 
           return node
+        }
+
+        openResetConfirmationModal () {
+          UI.showConfirmationModal(
+            'Are you sure?',
+            'All the channel emoji icons you\'ve edited will be reset to their default state. This cannot be undone.',
+            {
+              danger: true,
+              confirmText: 'Reset',
+              onConfirm: () => Dispatcher.dispatch({ type: 'BCL__EMOJI_ICON_RESET' })
+            }
+          )
         }
       }
     }
