@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.0
+ * @version 1.1.1
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,24 +21,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.0",
+            "version": "1.1.1",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
         },
         "changelog": [
             {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Revamped `In voice` tag display method. It now toggles itself as soon as user connects or disconnects from the voice chat you're in, without waiting for message to rerender."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Plugin has been fixed and adjusted for the latest Discord update."
+                    "Updated to work in the latest release of Discord."
                 ]
             }
         ],
@@ -95,7 +88,7 @@ module.exports = (() => {
 
             const Selectors = {
                 BotTag: {
-                    ...WebpackModules.getByProps('botTag', 'botTagCozy'),
+                    ...WebpackModules.getByProps('botTagCozy'),
                     botTagVerified: WebpackModules.getByProps('botTagVerified').botTagVerified
                 }
             };
@@ -103,9 +96,9 @@ module.exports = (() => {
             const UNIQUE_TAG = 'InMyVoiceTag';
 
             const VoiceChannelStore = WebpackModules.getByProps('getVoiceStatesForChannel');
-            const MessageHeader = WebpackModules.getByProps('UsernameDecorationTypes');
-            const BotTag = WebpackModules.getModule(m => m?.default?.Types?.SYSTEM_DM);
-            const { useStateFromStores } = WebpackModules.getByProps('useStateFromStores');
+            const MessageHeader = [...Webpack.getWithKey(Filters.byStrings('decorations', 'withMentionPrefix'))];
+            const BotTag = [...Webpack.getWithKey(m => m?.Types?.SYSTEM_DM)];
+            const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true });
 
             function isInMyVoice(user) {
                 const voiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
@@ -122,7 +115,7 @@ module.exports = (() => {
             function InVoiceTag ({ user }) {
                 if (!isInMyVoice(user)) return null
 
-                return React.createElement(BotTag.default, {
+                return React.createElement(BotTag[0][BotTag[1]], {
                     className: `${Selectors.BotTag.botTagCozy} ${UNIQUE_TAG}`,
                     useRemSizes: true,
                     type: 'IN_VOICE'
@@ -140,8 +133,7 @@ module.exports = (() => {
                 }
 
                 patchMessages() {
-                    Patcher.before(MessageHeader, 'default', (self, props) => {
-                        const { decorations, message } = props[0];
+                    Patcher.before(...MessageHeader, (self, [{ decorations, message }]) => {
                         if (!decorations || typeof decorations[1] !== 'object' || !'length' in decorations[1]) return
 
                         decorations[1].unshift(
@@ -151,7 +143,7 @@ module.exports = (() => {
                 }
 
                 patchBotTags() {
-                    Patcher.after(BotTag, 'default', (self, _, value) => {
+                    Patcher.after(...BotTag, (self, _, value) => {
                         if (!value.props?.className?.includes(UNIQUE_TAG)) return;
 
                         const TagContainer = Utilities.findInReactTree(value, e => e.children?.some(c => typeof c?.props?.children === 'string'));
@@ -171,7 +163,7 @@ module.exports = (() => {
                             viewBox: '0 0 28 28',
                             style: {
                                 position: 'relative',
-                                top: '1px',
+                                top: '2px',
                                 left: '2px',
                                 marginRight: '1px'
                             }
