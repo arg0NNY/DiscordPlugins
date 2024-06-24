@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.1
+ * @version 1.1.2
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.1",
+            "version": "1.1.2",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
@@ -78,6 +78,10 @@ module.exports = (() => {
                 Utilities,
                 DiscordModules
             } = Api;
+            
+            const {
+                Webpack
+            } = BdApi;
 
             const {
                 React,
@@ -96,9 +100,9 @@ module.exports = (() => {
             const UNIQUE_TAG = 'InMyVoiceTag';
 
             const VoiceChannelStore = WebpackModules.getByProps('getVoiceStatesForChannel');
-            const MessageHeader = [...Webpack.getWithKey(Filters.byStrings('decorations', 'withMentionPrefix'))];
+            const MessageHeader = [...Webpack.getWithKey(Webpack.Filters.byStrings('decorations', 'withMentionPrefix'))];
             const BotTag = [...Webpack.getWithKey(m => m?.Types?.SYSTEM_DM)];
-            const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true });
+            const useStateFromStores = Webpack.getModule(Webpack.Filters.byStrings('useStateFromStores'), { searchExports: true });
 
             function isInMyVoice(user) {
                 const voiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());

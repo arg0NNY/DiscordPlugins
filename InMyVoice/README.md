@@ -19,6 +19,6 @@ Shows if a person in the text chat is also in a voice chat that you're in.
 
 [inmyvoice-download-link]: https://arg0nny.github.io/bd/download/?id=InMyVoice
 [inmyvoice-view-link]: https://betterdiscord.app/plugin/InMyVoice
-[inmyvoice-version-badge]: https://img.shields.io/badge/version-1.1.1-blue
+[inmyvoice-version-badge]: https://img.shields.io/badge/version-1.1.2-blue
 [inmyvoice-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27InMyVoice%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [inmyvoice-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27InMyVoice%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
