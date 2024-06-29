@@ -1,4 +1,4 @@
-![BetterChannelList](https://github.com/arg0NNY/DiscordPlugins/assets/52377180/de4ddd67-f8e6-4256-95aa-0fd733513da9)
+![ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/assets/52377180/de4ddd67-f8e6-4256-95aa-0fd733513da9)
 
 # [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
 V2 is out! Allows you to view recent messages in channels without switching to them.
