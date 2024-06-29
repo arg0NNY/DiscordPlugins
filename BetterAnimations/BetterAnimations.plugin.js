@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.20
+ * @version 1.1.21
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.20",
+            "version": "1.1.21",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Updated to work in the latest release of Discord."
+                    "Fixed the settings being unresponsive."
                 ]
             },
             {
@@ -1289,6 +1289,51 @@ module.exports = (() => {
                             .${SETTINGS_CLASSNAME} :has(> .bd-switch) {
                                 color: var(--header-primary);
                             }
+                            .${SETTINGS_CLASSNAME} .${Selectors.Stickers.grid} {
+                                display: grid;
+                                grid-gap: 10px;
+                                grid-template-columns: repeat(4, 1fr);
+                                grid-template-rows: 120px;
+                                grid-auto-rows: 120px;
+                            }
+                            .${SETTINGS_CLASSNAME} .${Selectors.Sticker.wrapper} {
+                                background-color: var(--background-secondary);
+                                border-radius: 8px;
+                                display: flex;
+                                padding: 12px;
+                                position: relative;
+                                transition: background-color .125s;
+                                align-items: center;
+                                flex-direction: column;
+                                justify-content: center;
+                                margin-bottom: 0;
+                                cursor: pointer;
+                            }
+                            .${SETTINGS_CLASSNAME} .${Selectors.Sticker.wrapper}:hover {
+                                background-color: var(--background-secondary-alt);
+                            }
+                            .${SETTINGS_CLASSNAME} .${Selectors.Sticker.content} {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                max-width: 108px;
+                                transition: opacity .1s;
+                            }
+                            .${SETTINGS_CLASSNAME} .${Selectors.Sticker.sticker} {
+                                display: flex;
+                                justify-content: center;
+                                width: 90px;
+                                height: 60px;
+                                margin-bottom: 15px;
+                                position: relative;
+                                border-radius: 5px;
+                                margin-right: 0;
+                                overflow: hidden;
+                            }
+                            .${SETTINGS_CLASSNAME} .${Selectors.Sticker.stickerName} {
+                                text-align: center;
+                                white-space: wrap;
+                            }
                         `);
                 }
 
@@ -1509,13 +1554,6 @@ module.exports = (() => {
                                 'div',
                                 {
                                     className: Selectors.Sticker.sticker,
-                                    style: {
-                                        width: '90px',
-                                        height: '60px',
-                                        marginBottom: '15px',
-                                        position: 'relative',
-                                        borderRadius: '5px'
-                                    },
                                     ref: this.ref
                                 },
                                 [
@@ -1576,14 +1614,6 @@ module.exports = (() => {
                                 'div',
                                 {
                                     className: Selectors.Sticker.sticker,
-                                    style: {
-                                        width: '90px',
-                                        height: '60px',
-                                        marginBottom: '15px',
-                                        position: 'relative',
-                                        borderRadius: '5px',
-                                        overflow: 'hidden'
-                                    },
                                     ref: this.ref
                                 },
                                 [
@@ -1606,21 +1636,13 @@ module.exports = (() => {
                                     'div',
                                     {
                                         className: Selectors.Sticker.wrapper,
-                                        style: {
-                                            cursor: 'pointer'
-                                        },
                                         onClick: () => this.props.onClick(this.props.type.key)
                                     },
                                     [
                                         React.createElement(
                                             'div',
                                             {
-                                                className: Selectors.Sticker.content,
-                                                style: {
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center'
-                                                }
+                                                className: Selectors.Sticker.content
                                             },
                                             [
                                                 React.createElement(
@@ -1633,10 +1655,7 @@ module.exports = (() => {
                                                 React.createElement(
                                                     'div',
                                                     {
-                                                        className: `${Selectors.Colors.colorHeaderPrimary} ${Selectors.Sizes.size10} ${Selectors.Sticker.stickerName}`,
-                                                        style: {
-                                                            height: '12px'
-                                                        }
+                                                        className: `${Selectors.Colors.colorHeaderPrimary} ${Selectors.Sizes.size10} ${Selectors.Sticker.stickerName}`
                                                     },
                                                     this.props.type.name
                                                 )
@@ -1691,12 +1710,7 @@ module.exports = (() => {
                                 return React.createElement(
                                     'div',
                                     {
-                                        className: Selectors.Stickers.grid,
-                                        style: {
-                                            gridTemplateColumns: 'repeat(4, 1fr)',
-                                            gridTemplateRows: '120px',
-                                            gridAutoRows: '120px'
-                                        }
+                                        className: Selectors.Stickers.grid
                                     },
                                     buttons
                                 );
