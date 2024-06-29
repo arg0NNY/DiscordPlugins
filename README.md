@@ -26,7 +26,7 @@ Improves your whole Discord experience. Adds highly customizable switching anima
 
 
 ## [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
-Allows you to view recent messages in channels without switching to them.
+V2 is out! Allows you to view recent messages in channels without switching to them.
 
 [![Download][download-badge]][channelspreview-download-link] [![View][view-badge]][channelspreview-view-link]
 
@@ -110,7 +110,7 @@ SOFTWARE.
 
 [channelspreview-download-link]: https://arg0nny.github.io/bd/download/?id=ChannelsPreview
 [channelspreview-view-link]: https://betterdiscord.app/plugin/ChannelsPreview
-[channelspreview-version-badge]: https://img.shields.io/badge/version-1.4.3-blue
+[channelspreview-version-badge]: https://img.shields.io/badge/version-2.0.0-blue
 [channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=%24%5B%3F%28%40.name%3D%3D%27ChannelsPreview%27%29%5D.downloads&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 [channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=%24%5B%3F%28%40.name%3D%3D%27ChannelsPreview%27%29%5D.likes&url=https%3A%2F%2Fapi.betterdiscord.app%2Fv1%2Fstore%2Fplugins
 
