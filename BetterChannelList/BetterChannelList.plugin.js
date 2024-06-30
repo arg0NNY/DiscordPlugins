@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.0
+ * @version 1.1.1
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.0",
+      "version": "1.1.1",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,23 +32,7 @@ module.exports = (() => {
         "type": "added",
         "title": "What's new",
         "items": [
-          "Added the ability to manually edit the channel emoji icons.",
-          "Added the ability to change the emoji icon size: Medium, Small and Tiny."
-        ]
-      },
-      {
-        "type": "improved",
-        "title": "Improvements",
-        "items": [
-          "Settings for the disabled modules now have a disabled state.",
-          "Voice channel badges are now using a monospace font to make their size consistent."
-        ]
-      },
-      {
-        "type": "fixed",
-        "title": "Fixed",
-        "items": [
-          "Fixed broken styles for the disabled state of the forum channels."
+          "Added support for ChannelsPreview V2."
         ]
       }
     ]
@@ -1034,6 +1018,7 @@ module.exports = (() => {
               onRequestClose: () => Dispatcher.dispatch({ type: 'BCL__EMOJI_PICKER_CLOSE' }),
               children: () => _children
             })
+            value.props.children.children = _children // Allow other plugins to modify the children
 
             return value
           })
