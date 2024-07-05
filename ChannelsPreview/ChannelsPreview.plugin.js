@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.0.0
+ * @version 2.0.1
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -22,42 +22,17 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "2.0.0",
+            "version": "2.0.1",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
         },
         "changelog": [
             {
-                "type": "added",
-                "title": "What's new",
-                "items": [
-                    "Added the new trigger option: Shift + Hover.",
-                    "Added ability to scroll the previewed channel.",
-                    "Added ability to change how the NSFW channels should be handled: Show, Obscure media, Don't show.",
-                    "Added unread messages indicator in the preview."
-                ]
-            },
-            {
-                "type": "improved",
-                "title": "Improvements",
-                "items": [
-                    "Improved overall stability and performance.",
-                    "Switched to the Discord's native popout handling, which is a lot more reliable than ZeresPluginLibrary's.",
-                    "Preview now opens a lot faster than before in most cases.",
-                    "Switched to the Discord's native message stream builder, which means that the preview will display the chat a lot more accurately than before.",
-                    "Settings panel has been revamped and is now based on the native Discord components, which is a lot more reliable.",
-                    "Settings are now have a more pleasant structure.",
-                    "Switching servers is no more required to apply the changed settings."
-                ]
-            },
-            {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Fixed an often occurring issue where the chat would darken but the preview wouldn't show up.",
-                    "The messages are now fetched only if necessary instead of each time the preview is opened.",
-                    "Updated to work in the latest release of Discord."
+                    "Fixed settings being reset to default after restarting Discord."
                 ]
             }
         ]
@@ -740,6 +715,8 @@ module.exports = (() => {
                     function SettingsPanel () {
                         const [_, forceUpdate] = React.useReducer(x => x + 1, 0)
                         const onUpdate = React.useCallback(() => {
+                            plugin.saveSettings()
+                            settings = plugin.settings
                             Dispatcher.dispatch({ type: 'CP__FORCE_UPDATE' })
                             forceUpdate()
                         }, [])
@@ -764,13 +741,13 @@ module.exports = (() => {
                                                 { name: 'Shift + Hover', value: 'shift-hover' },
                                                 { name: 'Mouse Wheel Click', value: 'mwheel' }
                                             ],
-                                            value: settings.trigger.displayOn,
+                                            value: plugin.settings.trigger.displayOn,
                                             onChange: ({ value }) => {
-                                                settings.trigger.displayOn = value
+                                                plugin.settings.trigger.displayOn = value
                                                 onUpdate()
                                             }
                                         }),
-                                        ['hover', 'shift-hover'].includes(settings.trigger.displayOn)
+                                        ['hover', 'shift-hover'].includes(plugin.settings.trigger.displayOn)
                                         && React.createElement(Common.FormSection, {
                                             children: [
                                                 React.createElement(Common.FormTitle, {
@@ -783,9 +760,9 @@ module.exports = (() => {
                                                     children: 'The amount of time to hover before triggering the preview.'
                                                 }),
                                                 React.createElement(Common.Slider, {
-                                                    initialValue: settings.trigger.hoverDelay,
+                                                    initialValue: plugin.settings.trigger.hoverDelay,
                                                     onValueChange: value => {
-                                                        settings.trigger.hoverDelay = value
+                                                        plugin.settings.trigger.hoverDelay = value
                                                         onUpdate()
                                                     },
                                                     defaultValue: plugin.defaultSettings.trigger.hoverDelay,
@@ -821,9 +798,9 @@ module.exports = (() => {
                                             children: 'Sets the maximum amount of messages to fetch and display in the preview.'
                                         }),
                                         React.createElement(Common.Slider, {
-                                            initialValue: settings.appearance.messagesCount,
+                                            initialValue: plugin.settings.appearance.messagesCount,
                                             onValueChange: value => {
-                                                settings.appearance.messagesCount = value
+                                                plugin.settings.appearance.messagesCount = value
                                                 onUpdate()
                                             },
                                             defaultValue: plugin.defaultSettings.appearance.messagesCount,
@@ -832,7 +809,7 @@ module.exports = (() => {
                                             markers: [...Array(10).keys()].map(n => (n + 1) * 10),
                                             stickToMarkers: true
                                         }),
-                                        settings.appearance.messagesCount > 40 && React.createElement(Common.FormText, {
+                                        plugin.settings.appearance.messagesCount > 40 && React.createElement(Common.FormText, {
                                             className: DiscordClasses.Margins.marginTop8,
                                             type: Common.FormText.Types.ERROR,
                                             children: [
@@ -847,9 +824,9 @@ module.exports = (() => {
                                 }),
                                 React.createElement(Common.FormSwitch, {
                                     className: DiscordClasses.Margins.marginBottom20,
-                                    value: settings.appearance.typingUsers,
+                                    value: plugin.settings.appearance.typingUsers,
                                     onChange: value => {
-                                        settings.appearance.typingUsers = value
+                                        plugin.settings.appearance.typingUsers = value
                                         onUpdate()
                                     },
                                     children: 'Show typing users',
@@ -875,9 +852,9 @@ module.exports = (() => {
                                                     desc: 'Redirect scroll to the preview only while holding Shift.'
                                                 }
                                             ],
-                                            value: settings.behaviour.scroll,
+                                            value: plugin.settings.behaviour.scroll,
                                             onChange: ({ value }) => {
-                                                settings.behaviour.scroll = value
+                                                plugin.settings.behaviour.scroll = value
                                                 onUpdate()
                                             }
                                         }),
@@ -911,9 +888,9 @@ module.exports = (() => {
                                                     desc: 'Disable the preview for NSFW channels.'
                                                 }
                                             ],
-                                            value: settings.behaviour.nsfw,
+                                            value: plugin.settings.behaviour.nsfw,
                                             onChange: ({ value }) => {
-                                                settings.behaviour.nsfw = value
+                                                plugin.settings.behaviour.nsfw = value
                                                 onUpdate()
                                             }
                                         })
@@ -940,9 +917,9 @@ module.exports = (() => {
                                             children: 'Sets the height of the preview window relative to the Discord window.'
                                         }),
                                         React.createElement(Common.Slider, {
-                                            initialValue: settings.appearance.popoutHeight,
+                                            initialValue: plugin.settings.appearance.popoutHeight,
                                             onValueChange: value => {
-                                                settings.appearance.popoutHeight = value
+                                                plugin.settings.appearance.popoutHeight = value
                                                 onUpdate()
                                             },
                                             defaultValue: plugin.defaultSettings.appearance.popoutHeight,
@@ -971,23 +948,23 @@ module.exports = (() => {
                                         }),
                                         React.createElement(Common.FormSwitch, {
                                             children: 'Enable backdrop',
-                                            value: settings.appearance.darkenChat,
+                                            value: plugin.settings.appearance.darkenChat,
                                             onChange: value => {
-                                                settings.appearance.darkenChat = value
+                                                plugin.settings.appearance.darkenChat = value
                                                 onUpdate()
                                             },
                                             hideBorder: true
                                         }),
-                                        settings.appearance.darkenChat && React.createElement(Common.FormItem, {
+                                        plugin.settings.appearance.darkenChat && React.createElement(Common.FormItem, {
                                             children: [
                                                 React.createElement(Common.FormTitle, {
                                                     className: DiscordClasses.Margins.marginBottom20,
                                                     children: 'Dimming Level'
                                                 }),
                                                 React.createElement(Common.Slider, {
-                                                    initialValue: settings.appearance.darkenLevel,
+                                                    initialValue: plugin.settings.appearance.darkenLevel,
                                                     onValueChange: value => {
-                                                        settings.appearance.darkenLevel = value
+                                                        plugin.settings.appearance.darkenLevel = value
                                                         onUpdate()
                                                     },
                                                     defaultValue: plugin.defaultSettings.appearance.darkenLevel,
@@ -1016,9 +993,9 @@ module.exports = (() => {
                                                 { name: 'Cozy', value: 'cozy' },
                                                 { name: 'Compact', value: 'compact' }
                                             ],
-                                            value: settings.appearance.displayMode,
+                                            value: plugin.settings.appearance.displayMode,
                                             onChange: ({ value }) => {
-                                                settings.appearance.displayMode = value
+                                                plugin.settings.appearance.displayMode = value
                                                 onUpdate()
                                             }
                                         }),
@@ -1036,17 +1013,17 @@ module.exports = (() => {
                                         }),
                                         React.createElement(Common.FormSwitch, {
                                             children: 'Sync with app settings',
-                                            value: settings.appearance.groupSpacingSync,
+                                            value: plugin.settings.appearance.groupSpacingSync,
                                             onChange: value => {
-                                                settings.appearance.groupSpacingSync = value
+                                                plugin.settings.appearance.groupSpacingSync = value
                                                 onUpdate()
                                             },
                                             hideBorder: true
                                         }),
-                                        !settings.appearance.groupSpacingSync && React.createElement(Common.Slider, {
-                                            initialValue: settings.appearance.groupSpacing,
+                                        !plugin.settings.appearance.groupSpacingSync && React.createElement(Common.Slider, {
+                                            initialValue: plugin.settings.appearance.groupSpacing,
                                             onValueChange: value => {
-                                                settings.appearance.groupSpacing = value
+                                                plugin.settings.appearance.groupSpacing = value
                                                 onUpdate()
                                             },
                                             defaultValue: plugin.defaultSettings.appearance.groupSpacing,
