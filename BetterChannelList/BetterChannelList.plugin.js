@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.1
+ * @version 1.1.2
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,17 +22,17 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.1",
+      "version": "1.1.2",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
     },
     "changelog": [
       {
-        "type": "added",
-        "title": "What's new",
+        "type": "fixed",
+        "title": "Fixed",
         "items": [
-          "Added support for ChannelsPreview V2."
+          "Removed the blank space that appeared when the sidebar was hidden (in fullscreen mode)."
         ]
       }
     ]
@@ -865,6 +865,9 @@ module.exports = (() => {
             .${Selectors.SidebarFooter.avatarWrapper} {
               flex: 1;
               min-width: 0;
+            }
+            .${Selectors.Base.sidebar}.${Selectors.Base.hidden} {
+              display: none;
             }
           `)
         }
