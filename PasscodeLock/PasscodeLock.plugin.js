@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.4.10
+ * @version 1.4.11
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.10",
+            "version": "1.4.11",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,8 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Updated to work in the latest release of Discord.",
-                    "Fixed a bug where the plugin would not unlock after a restart."
+                    "Fixed notifications not being censored or hidden while locked."
                 ]
             }
         ]
@@ -204,6 +203,7 @@ module.exports = (() => {
                 toCombo: Webpack.getModule(Filters.byStrings('numpad plus'), { searchExports: true }),
                 toString: Webpack.getModule(Filters.byStrings('KEYBOARD_MODIFIER_KEY', 'UNK'), { searchExports: true })
             };
+            const NotificationModule = Webpack.getByKeys('showNotification', 'hasPermission')
 
             // Help translate the plugin on the Crowdin page: https://crwd.in/betterdiscord-passcodelock
             const Locale = new class {
@@ -564,12 +564,12 @@ module.exports = (() => {
 
                     // Manage notifications
                     if (this.props.type === PasscodeLocker.Types.DEFAULT) this.enableNotifications = this.props.plugin.settings.hideNotifications
-                        ? Patcher.instead(DiscordModules.NotificationModule, 'showNotification', () => false)
-                        : Patcher.before(DiscordModules.NotificationModule, 'showNotification', (self, params) => {
+                        ? Patcher.instead(NotificationModule, 'showNotification', () => ({ close: () => {} }))
+                        : Patcher.before(NotificationModule, 'showNotification', (self, params) => {
                             params[0] = Gifs.LOCKED_SHAKE;
                             params[1] = Locale.current.NEW_NOTIFICATION;
                             params[2] = Locale.current.NEW_NOTIFICATION_DESC;
-                            if (params[4].onClick) params[4].onClick = () => {};
+                            if (params[4]?.onClick) params[4].onClick = () => {};
                         });
 
                     // Props to https://github.com/253ping
