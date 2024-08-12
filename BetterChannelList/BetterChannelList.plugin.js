@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.2
+ * @version 1.1.3
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.2",
+      "version": "1.1.3",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Removed the blank space that appeared when the sidebar was hidden (in fullscreen mode)."
+          "Fixed settings appearing blank."
         ]
       }
     ]
@@ -153,7 +153,7 @@ module.exports = (() => {
       const DevToolsDesignTogglesStore = Webpack.getStore('DevToolsDesignTogglesStore')
       const EmojiPicker = Webpack.getModule(m => Filters.byStrings('pickerIntention')(m?.type?.render))
       const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RELATED_EMOJI', 'SOUNDBOARD'), { searchExports: true })
-      const Alert = Webpack.getByStrings('messageType', 'CircleExclamationPointIcon')
+      const Alert = Webpack.getByStrings('messageType', 'CircleWarningIcon')
       const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
       const Flex = Webpack.getByKeys('Child', 'Direction')
 
@@ -1218,7 +1218,7 @@ module.exports = (() => {
                             React.createElement(Flex.Child, {
                               children: React.createElement(Alert, {
                                 messageType: AlertMessageTypes.INFO,
-                                children: 'You can edit the channel emoji icons using their context menu.',
+                                children: 'Edit the channel emoji icons using their context menu.',
                                 className: !settings.redesign.enabled ? 'BCL--disabled' : null
                               })
                             }),
