@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
- * @version 1.1.2
+ * @version 1.1.3
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.2",
+            "version": "1.1.3",
             "description": "Shows if a person in the text chat is also in a voice chat you're in.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js"
@@ -31,7 +31,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Updated to work in the latest release of Discord."
+                    "Corrected the link to the library plugin."
                 ]
             }
         ],
@@ -61,7 +61,7 @@ module.exports = (() => {
                 confirmText: "Download Now",
                 cancelText: "Cancel",
                 onConfirm: () => {
-                    require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
+                    require("request").get("https://raw.githubusercontent.com/zerebos/BDPluginLibrary/master/release/0PluginLibrary.plugin.js", async (error, response, body) => {
                         if (error) return require("electron").shell.openExternal("https://betterdiscord.app/Download?id=9");
                         await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
                     });
@@ -78,7 +78,7 @@ module.exports = (() => {
                 Utilities,
                 DiscordModules
             } = Api;
-            
+
             const {
                 Webpack
             } = BdApi;
