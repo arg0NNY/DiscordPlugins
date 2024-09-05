@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.4
+ * @version 1.1.5
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.4",
+      "version": "1.1.5",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,9 +32,8 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed Discord crash when opening channel icon picker.",
-          "Fixed settings appearing blank.",
-          "Fixed calculating channel item height causing errors."
+          "Fixed Resizer losing its state when switching servers.",
+          "Corrected the link to the library plugin."
         ]
       }
     ]
@@ -55,7 +54,7 @@ module.exports = (() => {
         confirmText: "Download Now",
         cancelText: "Cancel",
         onConfirm: () => {
-          require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
+          require("request").get("https://raw.githubusercontent.com/zerebos/BDPluginLibrary/master/release/0PluginLibrary.plugin.js", async (error, response, body) => {
             if (error) return require("electron").shell.openExternal("https://betterdiscord.app/Download?id=9");
             await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
           });
@@ -1091,7 +1090,9 @@ module.exports = (() => {
               React.createElement(ResizeHandler, { onResize, onClick })
             )
             Patcher.after(content.props.children[sidebarIndex], 'type', (self, props, value) => {
-              value.props.style = { width: getCurrentWidth() + 'px' }
+              Patcher.after(value.props, 'children', (self, props, value) => {
+                value.props.style = { width: getCurrentWidth() + 'px' }
+              })
             })
           })
 
