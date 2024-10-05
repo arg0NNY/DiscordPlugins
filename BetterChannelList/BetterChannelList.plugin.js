@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.5
+ * @version 1.1.6
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.5",
+      "version": "1.1.6",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,8 +32,9 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed Resizer losing its state when switching servers.",
-          "Corrected the link to the library plugin."
+          "Fixed several causes of Discord crashing.",
+          "Fixed settings appearing blank.",
+          "Fixed last message icons not displaying."
         ]
       }
     ]
@@ -131,7 +132,7 @@ module.exports = (() => {
       const buildMessageReplyContent = WebpackModules.getModule(Filters.byStrings('REPLY_QUOTE_MESSAGE_BLOCKED'), { searchExports: true })
       const buildMessageContent = WebpackModules.getByString('parseInlineReply')
       const ListNavigatorProvider = [...Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))]
-      const astToString = Webpack.getByRegex(/"string"==typeof \w+\.content\?\w+\.push\(\w+\.content\):null/, { searchExports: true })
+      const astToString = Webpack.getByRegex(/return \w+\(\w+\)\.join\(""\)/, { searchExports: true })
       const JoinMessages = WebpackModules.getByProps('getSystemMessageUserJoin')
       const useNullableMessageAuthor = Webpack.getModule(Filters.byStrings('getNickname', 'author.bot'), { searchExports: true })
       const getRoleSubscriptionPurchaseSystemMessageAstFormattedContent = Webpack.getModule(m => Filters.byStrings('roleSubscriptionData', 'astFormat')(m) && !Filters.byStrings('SUBSCRIPTION_RENEW_WITH_DURATION_MOBILE')(m), { searchExports: true })
@@ -154,7 +155,7 @@ module.exports = (() => {
       const DevToolsDesignTogglesStore = Webpack.getStore('DevToolsDesignTogglesStore')
       const EmojiPicker = Webpack.getModule(m => Filters.byStrings('pickerIntention')(m?.type?.render))
       const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RELATED_EMOJI', 'SOUNDBOARD'), { searchExports: true })
-      const Alert = Webpack.getModule(Filters.byStrings('messageType', 'CircleWarningIcon'), { searchExports: true })
+      const Alert = Webpack.getModule(Filters.byStrings('messageType', 'iconDiv'), { searchExports: true })
       const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
       const Flex = Webpack.getByKeys('Child', 'Direction')
 
@@ -409,13 +410,14 @@ module.exports = (() => {
 
         if (!message) return null
 
-        const { contentPlaceholder, icon, renderedContent } = buildMessageReplyContent(
+        const { contentPlaceholder, leadingIcon, trailingIcon, renderedContent } = buildMessageReplyContent(
           message,
           messageContent,
           isAuthorBlocked,
           `${Selectors.ForumPost.messageContent} ${Selectors.ForumPostMessage.inlineFormat}`,
           {
-            iconClass: Selectors.ForumPost.messageContentIcon,
+            leadingIconClass: Selectors.ForumPost.messageContentLeadingIcon,
+            trailingIconClass: Selectors.ForumPost.messageContentTrailingIcon,
             iconSize: 16
           }
         )
@@ -477,7 +479,7 @@ module.exports = (() => {
                 renderColon: true
               }
             ),
-            [content, icon]
+            [leadingIcon, content, trailingIcon]
           ]
         )
       }
