@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.22
+ * @version 1.1.23
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.22",
+            "version": "1.1.23",
             "description": "Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterAnimations/BetterAnimations.plugin.js"
@@ -32,7 +32,8 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Corrected the link to the library plugin."
+                    "Fixed guild and channels animations not working.",
+                    "Fixed shop and message requests pages not being animated."
                 ]
             },
             {
@@ -207,7 +208,9 @@ module.exports = (() => {
                     () => WebpackModules.getByProps('backgroundOptionRing'),
                     { backgroundOptionRing: 'backgroundOptionRing_ad7d79' }
                 ],
-                StudentHubs: () => WebpackModules.getByProps('footerDescription', 'scroller')
+                StudentHubs: () => WebpackModules.getByProps('footerDescription', 'scroller'),
+                MessageRequests: () => WebpackModules.getByProps('messageRequestCoachmark', 'container'),
+                Shop: () => WebpackModules.getByProps('shop', 'shopScroll')
             });
 
             const PARENT_NODE_CLASSNAME = 'BetterAnimations-parentNode';
@@ -260,12 +263,11 @@ module.exports = (() => {
             }
             const Routes = [
                 new Route('Chat', [
-                    "/channels/:guildId/:channelId/threads/:threadId",
-                    "/channels/@me/:channelId",
-                    "/channels/:guildId/:channelId?/:messageId?",
-                    "/channels/:guildId/:channelId/threads/:threadId/:messageId?"
+                    "/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)/threads/:threadId/:messageId?",
+                    "/channels/@me/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)",
+                    "/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)?/:messageId?"
                 ], {
-                    element: `.${Selectors.Chat.chat}`,
+                    element: `.${Selectors.Chat.chat}:not(.${Selectors.MessageRequests.container})`,
                     scrollers: [DiscordClasses.MemberList.members.value, Selectors.Content.scrollerBase]
                 }),
                 new Route('Friends', '/channels/@me', {
@@ -281,6 +283,14 @@ module.exports = (() => {
                     scrollers: [Selectors.Pages.scroller, Selectors.Content.scrollerBase],
                     forceGuildChange: true
                 }),
+                new Route('MessageRequests', '/message-requests', {
+                    element: `.${Selectors.MessageRequests.container}`,
+                    scrollers: [Selectors.Content.scrollerBase]
+                }),
+                new Route('Shop', '/shop', {
+                    element: `.${Selectors.Shop.shop}`,
+                    scrollers: [Selectors.Content.scrollerBase]
+                })
             ];
 
             const Easing = {
