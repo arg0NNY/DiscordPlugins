@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.6
+ * @version 1.1.7
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.6",
+      "version": "1.1.7",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -133,6 +133,7 @@ module.exports = (() => {
       const buildMessageContent = WebpackModules.getByString('parseInlineReply')
       const ListNavigatorProvider = [...Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))]
       const astToString = Webpack.getByRegex(/return \w+\(\w+\)\.join\(""\)/, { searchExports: true })
+        ?? Webpack.getByRegex(/"string"==typeof \w+\.content\?\w+\.push\(\w+\.content\):null/, { searchExports: true })
       const JoinMessages = WebpackModules.getByProps('getSystemMessageUserJoin')
       const useNullableMessageAuthor = Webpack.getModule(Filters.byStrings('getNickname', 'author.bot'), { searchExports: true })
       const getRoleSubscriptionPurchaseSystemMessageAstFormattedContent = Webpack.getModule(m => Filters.byStrings('roleSubscriptionData', 'astFormat')(m) && !Filters.byStrings('SUBSCRIPTION_RENEW_WITH_DURATION_MOBILE')(m), { searchExports: true })
