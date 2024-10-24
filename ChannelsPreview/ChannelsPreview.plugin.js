@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.0.2
+ * @version 2.0.3
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "2.0.2",
+            "version": "2.0.3",
             "description": "Allows you to view recent messages in channels without switching to it.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Corrected the link to the library plugin."
+                    "Fixed some of the modules not injecting properly."
                 ]
             }
         ]
@@ -143,9 +143,6 @@ module.exports = (() => {
             const FluxTypingUsers = WebpackModules.getByString('getTypingUsers', 'isBypassSlowmode')
             const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
             const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
-            const LocaleStore = Webpack.getModule(m => m.Messages?.IMAGE)
-            const ThemeStore = Webpack.getStore('ThemeStore')
-            const { updateTheme } = Webpack.getByKeys('updateTheme')
             const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'MESSAGE_GROUP_BLOCKED')
             const ReadStateStore = Webpack.getStore('ReadStateStore')
             const ChannelStreamItemTypes = Webpack.getModule(Filters.byKeys('MESSAGE', 'DIVIDER'), { searchExports: true })
@@ -155,12 +152,8 @@ module.exports = (() => {
             const FocusRing = Webpack.getModule(m => Filters.byStrings('FocusRing', 'focusProps', '"li"')(m?.render), { searchExports: true })
 
             function forceAppUpdate () {
-                const locale = LocaleStore.getLocale()
-                Dispatcher.dispatch({ type: 'I18N_LOAD_START', locale })
-                setTimeout(() => {
-                    Dispatcher.dispatch({ type: 'I18N_LOAD_SUCCESS', locale })
-                    updateTheme(ThemeStore.theme)
-                })
+                Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
+                setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
             }
 
             const ReducerStore = (() => {
