@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.7
+ * @version 1.1.8
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.7",
+      "version": "1.1.8",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,9 +32,8 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed several causes of Discord crashing.",
-          "Fixed settings appearing blank.",
-          "Fixed last message icons not displaying."
+          "Fixed the cause of Discord crashing.",
+          "Fixed the Resizer not injecting properly."
         ]
       }
     ]
@@ -140,7 +139,7 @@ module.exports = (() => {
       const getApplicationSubscriptionSystemMessageASTContent = Webpack.getModule(Filters.byStrings('SYSTEM_MESSAGE_APPLICATION_SUBSCRIPTION_PURCHASE_MOBILE'), { searchExports: true })
       const getPrivateChannelIntegrationAddedSystemMessageASTContent = Webpack.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_ADDED_MOBILE'), { searchExports: true })
       const getPrivateChannelIntegrationRemovedSystemMessageASTContent = Webpack.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_REMOVED_MOBILE'), { searchExports: true })
-      const Emoji = Webpack.getModule(Filters.byStrings('allowAnimatedEmoji', 'isFocused'), { searchExports: true })
+      const Emoji = Webpack.getModule(Filters.byStrings('emojiId', 'emojiName', 'animated', 'shouldAnimate'), { searchExports: true })
       const ThemeStore = Webpack.getStore('ThemeStore')
       const ColorUtils = {
         hexWithOpacity (color, opacity) {
@@ -187,9 +186,8 @@ module.exports = (() => {
       }
 
       function forceAppUpdate (reason = null) {
-        const locale = LocaleStore.getLocale()
-        Dispatcher.dispatch({ type: 'I18N_LOAD_START', locale })
-        setTimeout(() => Dispatcher.dispatch({ type: 'I18N_LOAD_SUCCESS', locale }))
+        Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
+        setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
 
         Logger.log(`Forced app update.` + (reason ? ` Reason: ${reason}` : ''))
       }
