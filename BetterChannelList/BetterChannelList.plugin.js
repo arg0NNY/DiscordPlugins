@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.8
+ * @version 1.1.9
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,18 +22,17 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.8",
+      "version": "1.1.9",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
     },
     "changelog": [
       {
-        "type": "fixed",
-        "title": "Fixed",
+        "type": "added",
+        "title": "Added",
         "items": [
-          "Fixed the cause of Discord crashing.",
-          "Fixed the Resizer not injecting properly."
+          "Added option to disable lock icon next to private channels"
         ]
       }
     ]
@@ -594,11 +593,11 @@ module.exports = (() => {
         )
       }
 
-      function ChannelNameIcons ({ channel, locked }) {
+      function ChannelNameIcons({ channel, locked, limitedIconEnabled }) {
         return React.createElement(
           React.Fragment, {},
           [
-            !locked && isLimited(channel) && React.createElement(ChannelLimitedIcon),
+            !locked && isLimited(channel) && limitedIconEnabled && React.createElement(ChannelLimitedIcon),
             channel.isNSFW() && React.createElement(ChannelNsfwIcon)
           ]
         )
@@ -987,7 +986,7 @@ module.exports = (() => {
               const { children } = name.props
               name.props.children = [
                 React.createElement('span', { children }),
-                React.createElement(ChannelNameIcons, { channel, locked })
+                React.createElement(ChannelNameIcons, { channel, locked, limitedIconEnabled: this.settings.limitedIcon.enabled })
               ]
             }
 
@@ -1138,6 +1137,9 @@ module.exports = (() => {
             },
             resizer: {
               enabled: true
+            },
+            limitedIcon: {
+              enabled: true
             }
           }
 
@@ -1278,6 +1280,14 @@ module.exports = (() => {
                           className: Selectors.FormSwitch.dividerDefault
                         })
                       ]
+                    }),
+                    React.createElement(Switch, {
+                      children: 'Show Private Channel Icon',
+                      note: 'Shows the lock icon next to the channel name if the channel is private',
+                      value: settings.limitedIcon.enabled,
+                      onChange: e => {
+                        settings.limitedIcon.enabled = e;
+                      }
                     })
                   ]
                 }),
