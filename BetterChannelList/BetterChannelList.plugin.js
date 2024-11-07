@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.8
+ * @version 1.1.9
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,18 +22,24 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.8",
+      "version": "1.1.9",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
     },
     "changelog": [
       {
+        "type": "improved",
+        "title": "Improvements",
+        "items": [
+          "Moved to the more reliable Discord's internal message content rendering system."
+        ]
+      },
+      {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed the cause of Discord crashing.",
-          "Fixed the Resizer not injecting properly."
+          "Fixed the cause of Discord crashing."
         ]
       }
     ]
@@ -125,20 +131,11 @@ module.exports = (() => {
       const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
       const ChannelTypes = WebpackModules.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
       const MessageTypes = WebpackModules.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
-      const LocaleStore = WebpackModules.getModule(m => m.Messages?.IMAGE)
+      const { intl, t } = Webpack.getByKeys('intl', 't')
       const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
-      const ForumPostAuthor = WebpackModules.getByString('FORUM_POST_AUTHOR')
-      const buildMessageReplyContent = WebpackModules.getModule(Filters.byStrings('REPLY_QUOTE_MESSAGE_BLOCKED'), { searchExports: true })
-      const buildMessageContent = WebpackModules.getByString('parseInlineReply')
+      const ForumPostAuthor = Webpack.getByStrings('renderColon', 'author')
+      const buildMessageReplyContent = Webpack.getModule(Filters.byStrings('trailingIconClass', 'CHANNEL_PINNED_MESSAGE'), { searchExports: true })
       const ListNavigatorProvider = [...Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))]
-      const astToString = Webpack.getByRegex(/return \w+\(\w+\)\.join\(""\)/, { searchExports: true })
-        ?? Webpack.getByRegex(/"string"==typeof \w+\.content\?\w+\.push\(\w+\.content\):null/, { searchExports: true })
-      const JoinMessages = WebpackModules.getByProps('getSystemMessageUserJoin')
-      const useNullableMessageAuthor = Webpack.getModule(Filters.byStrings('getNickname', 'author.bot'), { searchExports: true })
-      const getRoleSubscriptionPurchaseSystemMessageAstFormattedContent = Webpack.getModule(m => Filters.byStrings('roleSubscriptionData', 'astFormat')(m) && !Filters.byStrings('SUBSCRIPTION_RENEW_WITH_DURATION_MOBILE')(m), { searchExports: true })
-      const getApplicationSubscriptionSystemMessageASTContent = Webpack.getModule(Filters.byStrings('SYSTEM_MESSAGE_APPLICATION_SUBSCRIPTION_PURCHASE_MOBILE'), { searchExports: true })
-      const getPrivateChannelIntegrationAddedSystemMessageASTContent = Webpack.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_ADDED_MOBILE'), { searchExports: true })
-      const getPrivateChannelIntegrationRemovedSystemMessageASTContent = Webpack.getModule(Filters.byStrings('PRIVATE_CHANNEL_INTEGRATION_REMOVED_MOBILE'), { searchExports: true })
       const Emoji = Webpack.getModule(Filters.byStrings('emojiId', 'emojiName', 'animated', 'shouldAnimate'), { searchExports: true })
       const ThemeStore = Webpack.getStore('ThemeStore')
       const ColorUtils = {
@@ -158,6 +155,8 @@ module.exports = (() => {
       const Alert = Webpack.getModule(Filters.byStrings('messageType', 'iconDiv'), { searchExports: true })
       const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
       const Flex = Webpack.getByKeys('Child', 'Direction')
+      const ReplyMessageHeader = Webpack.getByStrings('replyReference', 'isReplySpineClickable', 'showReplySpine')?.({ replyReference: {} })?.props?.children?.type?.type
+      const createMessage = Webpack.getByStrings('createMessage: author cannot be undefined')
 
       const Selectors = {
         ChannelItem: WebpackModules.getByProps('unread', 'link'),
@@ -331,72 +330,16 @@ module.exports = (() => {
       })()
 
       function buildLastMessageContent (channel, message) {
-        const format = astToString
-        const author = useNullableMessageAuthor(message)
+        const data = ReplyMessageHeader({
+          baseMessage: message ?? createMessage({ channelId: '1337', content: 'Placeholder message' }),
+          referencedMessage: {
+            state: 0,
+            message
+          },
+          channel
+        })
 
-        if (!message) return null
-
-        switch (message.type) {
-          case MessageTypes.USER_JOIN:
-            return format(
-              JoinMessages.getSystemMessageUserJoin(message.id)
-                .astFormat({
-                  username: author?.nick ?? message.author.username,
-                  usernameHook: e => e
-                })
-            )
-
-          case MessageTypes.ROLE_SUBSCRIPTION_PURCHASE:
-            return format(
-              getRoleSubscriptionPurchaseSystemMessageAstFormattedContent({
-                username: author?.nick ?? message.author.username,
-                guildId: channel.guild_id,
-                roleSubscriptionData: message.roleSubscriptionData
-              })
-            )
-
-          case MessageTypes.GUILD_APPLICATION_PREMIUM_SUBSCRIPTION:
-            return format(
-              getApplicationSubscriptionSystemMessageASTContent({
-                application: message.application,
-                username: author?.nick
-              })
-            )
-
-          case MessageTypes.PRIVATE_CHANNEL_INTEGRATION_ADDED:
-            return format(
-              getPrivateChannelIntegrationAddedSystemMessageASTContent({
-                application: message.application,
-                username: author?.nick
-              })
-            )
-
-          case MessageTypes.PRIVATE_CHANNEL_INTEGRATION_REMOVED:
-            return format(
-              getPrivateChannelIntegrationRemovedSystemMessageASTContent({
-                application: message.application,
-                username: author?.nick
-              })
-            )
-
-          case MessageTypes.GUILD_DEADCHAT_REVIVE_PROMPT:
-            return message?.content ?? LocaleStore.Messages.DEADCHAT_PROMPT_1
-        }
-
-        if (message.content)
-          return buildMessageContent(
-            message,
-            {
-              formatInline: true,
-              noStyleAndInteraction: true,
-              allowHeading: false,
-              allowList: false,
-              allowLinks: true,
-              disableAnimatedEmoji: true
-            }
-          ).content
-
-        return null
+        return message ? data.props.content : null
       }
 
       function ChannelLastMessage ({ channel, unread, muted, noColor }) {
@@ -431,7 +374,7 @@ module.exports = (() => {
               className: Selectors.ForumPost.blockedMessage,
               variant: 'text-sm/medium',
               color: 'text-muted',
-              children: LocaleStore.Messages.BLOCKED_MESSAGES.format({ count: 1 })
+              children: intl.format(t['+FcYMz'], { count: 1 }) // LocaleStore.Messages.BLOCKED_MESSAGES.format({ count: 1 })
             }
           )
         }
@@ -554,8 +497,6 @@ module.exports = (() => {
       }
 
       function ChannelVoiceBadge ({ channel, locked, connected, selected }) {
-        const getLockedLabel = () => LocaleStore.Messages.CHANNEL_TOOLTIP_VOICE_LOCKED.match(/\((.+)\)/)?.[1] ?? LocaleStore.Messages.JOIN
-
         const voiceStates = useStateFromStores([SortedVoiceStateStore], () => SortedVoiceStateStore.getVoiceStatesForChannel(channel))
         const formatCount = n => n.toString().padStart(2, '0')
 
@@ -645,7 +586,7 @@ module.exports = (() => {
             variant: 'text-sm/medium',
             color: unread ? 'header-secondary' : 'text-muted'
           },
-          LocaleStore.Messages.ACTIVE_FORUM_POST_COUNT.format({ count })
+          intl.format(t['z0qMLy'], { count }) // LocaleStore.Messages.ACTIVE_FORUM_POST_COUNT.format({ count })
         ) : null
       }
 
