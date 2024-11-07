@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.4.12
+ * @version 1.4.13
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.4.12",
+            "version": "1.4.13",
             "description": "Protect your Discord with a passcode.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/PasscodeLock/PasscodeLock.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Corrected the link to the library plugin."
+                    "Fixed the errors caused by Discord's new language system."
                 ]
             }
         ]
@@ -195,7 +195,7 @@ module.exports = (() => {
             const Markdown = WebpackModules.getByProps('rules');
             const Common = WebpackModules.getByProps('Shakeable', 'List');
             const { Anchor, Button } = Common;
-            const LanguageStore = WebpackModules.getModule(m => m.Messages?.IMAGE);
+            const LanguageStore = Webpack.getByKeys('getLocale', 'getDefaultLocale');
             const VoiceActions = WebpackModules.getByProps('toggleSelfDeaf', 'toggleSelfMute');
             const playSound = Webpack.getWithKey(Filters.byStrings('getSoundpack', 'play'));
             const { getVoiceChannelId } = WebpackModules.getByProps('getVoiceChannelId');
