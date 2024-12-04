@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.1.1
+ * @version 1.1.2
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
@@ -21,7 +21,7 @@ module.exports = (() => {
                     "github_username": 'arg0NNY'
                 }
             ],
-            "version": "1.1.1",
+            "version": "1.1.2",
             "description": "Displays an online and total member count in the guild tooltip.",
             github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip",
             github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js"
@@ -47,7 +47,7 @@ module.exports = (() => {
                 "type": "fixed",
                 "title": "Fixed",
                 "items": [
-                    "Corrected the link to the library plugin."
+                    "Fixed the member counts not displaying."
                 ]
             }
         ]
@@ -115,8 +115,7 @@ module.exports = (() => {
 
             const GuildInfoStore = WebpackModules.getByProps('getGuild', 'hasFetchFailed');
             const GuildActions = WebpackModules.getByProps('preload', 'closePrivateChannel');
-            const GuildTooltip = Webpack.getWithKey(Filters.byStrings('guild_tooltip'));
-            const GuildPopout = Webpack.getWithKey(Filters.byStrings('GUILD_POPOUT_INVITES_PAUSED'));
+            const GuildTooltip = [...Webpack.getWithKey(Filters.byStrings('listItemTooltip', 'guild'))];
 
             const memberCounts = new Map();
             const onlineMemberCounts = new Map();
@@ -286,7 +285,6 @@ module.exports = (() => {
 
                         Patcher.after(value.props.text, 'type', callback(1));
                     });
-                    Patcher.after(...GuildPopout, callback(2, { isPopout: true }));
                 }
 
                 onStop() {
