@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.9
+ * @version 1.1.10
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,19 +22,12 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.9",
+      "version": "1.1.10",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
     },
     "changelog": [
-      {
-        "type": "improved",
-        "title": "Improvements",
-        "items": [
-          "Moved to the more reliable Discord's internal message content rendering system."
-        ]
-      },
       {
         "type": "fixed",
         "title": "Fixed",
@@ -347,6 +340,7 @@ module.exports = (() => {
         const author = useStateFromStores([UserStore], () => message?.author && UserStore.getUser(message.author.id))
 
         const isAuthorBlocked = useStateFromStores([RelationshipStore], () => author && RelationshipStore.isBlocked(author.id))
+        const isAuthorIgnored = useStateFromStores([RelationshipStore], () => author && RelationshipStore.isIgnored(author.id))
 
         const messageContent = buildLastMessageContent(channel, message)
 
@@ -356,6 +350,7 @@ module.exports = (() => {
           message,
           messageContent,
           isAuthorBlocked,
+          isAuthorIgnored,
           `${Selectors.ForumPost.messageContent} ${Selectors.ForumPostMessage.inlineFormat}`,
           {
             leadingIconClass: Selectors.ForumPost.messageContentLeadingIcon,
