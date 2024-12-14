@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.1.10
+ * @version 1.1.11
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -22,7 +22,7 @@ module.exports = (() => {
           "github_username": 'arg0NNY'
         }
       ],
-      "version": "1.1.10",
+      "version": "1.1.11",
       "description": "3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.",
       github: "https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList",
       github_raw: "https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js"
@@ -32,7 +32,7 @@ module.exports = (() => {
         "type": "fixed",
         "title": "Fixed",
         "items": [
-          "Fixed the cause of Discord crashing."
+          "Fixed the Resizer not resizing the sidebar."
         ]
       }
     ]
@@ -1028,7 +1028,7 @@ module.exports = (() => {
             )
             Patcher.after(content.props.children[sidebarIndex], 'type', (self, props, value) => {
               Patcher.after(value.props, 'children', (self, props, value) => {
-                value.props.style = { width: getCurrentWidth() + 'px' }
+                value.ref = el => el?.style.setProperty('width', getCurrentWidth() + 'px', 'important')
               })
             })
           })
