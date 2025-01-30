@@ -110,7 +110,7 @@ SOFTWARE.
 
 [channelspreview-download-link]: https://arg0nny.github.io/bd/download/?id=ChannelsPreview
 [channelspreview-view-link]: https://betterdiscord.app/plugin/ChannelsPreview
-[channelspreview-version-badge]: https://img.shields.io/badge/version-2.1.0-blue
+[channelspreview-version-badge]: https://img.shields.io/badge/version-2.1.1-blue
 [channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/ChannelsPreview
 [channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/ChannelsPreview
 

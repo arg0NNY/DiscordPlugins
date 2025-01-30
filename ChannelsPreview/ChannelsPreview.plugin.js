@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.0
+ * @version 2.1.1
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,15 +15,15 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.0',
+    version: '2.1.1',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
+      type: 'fixed',
+      title: 'Fixes',
       items: [
-        'Completely removed dependency on ZeresPluginLibrary.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -78,7 +78,17 @@ const SUPPORTED_CHANNEL_TYPES = [
   ChannelTypes.GUILD_STAGE_VOICE
 ]
 
-const Common = Webpack.getByKeys('Shakeable', 'List')
+const [PinToBottomScrollerAuto] = Object.values(Webpack.getBySource('disableScrollAnchor', 'ResizeObserver'))
+const Popout = Webpack.getModule(m => Filters.byKeys('animation', 'autoInvert')(m?.defaultProps), { searchExports: true })
+const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
+const FormTitleTags = Webpack.getModule(Filters.byKeys('H1', 'LABEL', 'LEGEND'), { searchExports: true })
+const FormText = Webpack.getModule(m => Filters.byKeys('DESCRIPTION', 'ERROR')(m?.Types), { searchExports: true })
+const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
+const RadioGroup = Webpack.getModule(m => Filters.byKeys('NOT_SET', 'NONE')(m?.Sizes), { searchExports: true })
+const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
+const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
+const FormItem = Webpack.getModule(m => Filters.byStrings('titleId', 'errorId', 'setIsFocused')(m?.render), { searchExports: true })
+
 const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'))]
 const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('isMultiUserDM', 'getTypingUsers'))]
 const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('VoiceChannel', 'MANAGE_CHANNELS'))]
@@ -88,7 +98,7 @@ const ThreadChannelItem = Webpack.getModule(m => Filters.byStrings('thread', 'ge
 const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
 const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
 const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
-const EmptyMessage = Webpack.getByStrings('PencilIcon', 'parseTopic', 'buttonContainer')
+const EmptyMessage = Webpack.getByStrings('parseTopic', 'buttonContainer')
 const FluxTypingUsers = Webpack.getByStrings('getTypingUsers', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
@@ -98,11 +108,18 @@ const ChannelStreamItemTypes = Webpack.getModule(Filters.byKeys('MESSAGE', 'DIVI
 const MessageDivider = Webpack.getModule(m => Filters.byStrings('divider', 'isBeforeGroup')(m?.type?.render))
 const Attachment = [...Webpack.getWithKey(Filters.byStrings('getObscureReason', 'mosaicItemContent'))]
 const Embed = Webpack.getByPrototypeKeys('renderAuthor', 'renderMedia')
-const FocusRing = Webpack.getModule(m => Filters.byStrings('FocusRing', 'focusProps', '"li"')(m?.render), { searchExports: true })
+const FocusRing = Webpack.getModule(m => Filters.byStrings('focusProps', '"li"')(m?.render), { searchExports: true })
 
 function forceAppUpdate () {
   Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
   setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
+}
+
+function FormDivider ({ className, style }) {
+  return React.createElement('div', {
+    className: Utils.className('divider__46c3b', className),
+    style
+  })
 }
 
 const ReducerStore = (() => {
@@ -266,7 +283,7 @@ function PreviewDialog ({ channel, messages }) {
     },
     React.createElement(PreviewContext.Provider, {
       value: { channel },
-      children: React.createElement(Common.PinToBottomScrollerAuto, {
+      children: React.createElement(PinToBottomScrollerAuto, {
         ref: scrollerRef,
         className: 'CP__scroller',
         contentClassName: Selectors.Chat.scrollerContent,
@@ -301,7 +318,7 @@ function ChannelPopout ({ channel, selected, messages, children, shouldShow: _sh
     [channel.id]
   )
 
-  return React.createElement(Common.Popout, {
+  return React.createElement(Popout, {
     position: 'right',
     align: 'center',
     renderPopout: () => React.createElement(PreviewDialog, { channel, messages }),
@@ -715,17 +732,17 @@ module.exports = class ChannelsPreview {
       return React.createElement('div', {
         id: plugin.getSettingsPanelId(),
         children: [
-          React.createElement(Common.FormDivider, {
+          React.createElement(FormDivider, {
             className: `${Selectors.Margins.marginBottom20}`
           }),
-          React.createElement(Common.FormTitle, {
-            tag: Common.FormTitleTags.H1,
+          React.createElement(FormTitle, {
+            tag: FormTitleTags.H1,
             className: Selectors.Margins.marginBottom20,
             children: 'Trigger'
           }),
-          React.createElement(Common.FormSection, {
+          React.createElement(FormSection, {
             children: [
-              React.createElement(Common.RadioGroup, {
+              React.createElement(RadioGroup, {
                 className: Selectors.Margins.marginBottom20,
                 options: [
                   { name: 'Hover', value: 'hover' },
@@ -739,18 +756,18 @@ module.exports = class ChannelsPreview {
                 }
               }),
               ['hover', 'shift-hover'].includes(plugin.settings.trigger.displayOn)
-              && React.createElement(Common.FormSection, {
+              && React.createElement(FormSection, {
                 children: [
-                  React.createElement(Common.FormTitle, {
+                  React.createElement(FormTitle, {
                     className: Selectors.Margins.marginBottom4,
                     children: 'Hover Delay'
                   }),
-                  React.createElement(Common.FormText, {
+                  React.createElement(FormText, {
                     className: Selectors.Margins.marginBottom20,
-                    type: Common.FormText.Types.DESCRIPTION,
+                    type: FormText.Types.DESCRIPTION,
                     children: 'The amount of time to hover before triggering the preview.'
                   }),
-                  React.createElement(Common.Slider, {
+                  React.createElement(Slider, {
                     initialValue: plugin.settings.trigger.hoverDelay,
                     onValueChange: value => {
                       plugin.settings.trigger.hoverDelay = value
@@ -768,27 +785,27 @@ module.exports = class ChannelsPreview {
               })
             ]
           }),
-          React.createElement(Common.FormDivider, {
+          React.createElement(FormDivider, {
             className: `${Selectors.Margins.marginBottom40} ${Selectors.Margins.marginTop40}`
           }),
-          React.createElement(Common.FormTitle, {
-            tag: Common.FormTitleTags.H1,
+          React.createElement(FormTitle, {
+            tag: FormTitleTags.H1,
             className: Selectors.Margins.marginBottom20,
             children: 'Behavior'
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom4,
                 children: 'Message Count Limit'
               }),
-              React.createElement(Common.FormText, {
+              React.createElement(FormText, {
                 className: Selectors.Margins.marginBottom20,
-                type: Common.FormText.Types.DESCRIPTION,
+                type: FormText.Types.DESCRIPTION,
                 children: 'Sets the maximum amount of messages to fetch and display in the preview.'
               }),
-              React.createElement(Common.Slider, {
+              React.createElement(Slider, {
                 initialValue: plugin.settings.appearance.messagesCount,
                 onValueChange: value => {
                   plugin.settings.appearance.messagesCount = value
@@ -800,20 +817,20 @@ module.exports = class ChannelsPreview {
                 markers: [...Array(10).keys()].map(n => (n + 1) * 10),
                 stickToMarkers: true
               }),
-              plugin.settings.appearance.messagesCount > 40 && React.createElement(Common.FormText, {
+              plugin.settings.appearance.messagesCount > 40 && React.createElement(FormText, {
                 className: Selectors.Margins.marginTop8,
-                type: Common.FormText.Types.ERROR,
+                type: FormText.Types.ERROR,
                 children: [
                   React.createElement('b', { children: 'WARNING' }),
                   ': Rendering a lot of messages at once can cause performance issues and freezing.'
                 ]
               }),
-              React.createElement(Common.FormDivider, {
+              React.createElement(FormDivider, {
                 className: Selectors.Margins.marginTop20
               }),
             ]
           }),
-          React.createElement(Common.FormSwitch, {
+          React.createElement(FormSwitch, {
             className: Selectors.Margins.marginBottom20,
             value: plugin.settings.appearance.typingUsers,
             onChange: value => {
@@ -823,14 +840,14 @@ module.exports = class ChannelsPreview {
             children: 'Show typing users',
             note: 'Shows who\'s typing in the previewed channel.'
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom8,
                 children: 'Scrolling'
               }),
-              React.createElement(Common.RadioGroup, {
+              React.createElement(RadioGroup, {
                 options: [
                   {
                     name: 'Scroll',
@@ -849,19 +866,19 @@ module.exports = class ChannelsPreview {
                   onUpdate()
                 }
               }),
-              React.createElement(Common.FormDivider, {
+              React.createElement(FormDivider, {
                 className: Selectors.Margins.marginTop20
               }),
             ]
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom8,
                 children: 'NSFW'
               }),
-              React.createElement(Common.RadioGroup, {
+              React.createElement(RadioGroup, {
                 options: [
                   {
                     name: 'Show',
@@ -887,27 +904,27 @@ module.exports = class ChannelsPreview {
               })
             ]
           }),
-          React.createElement(Common.FormDivider, {
+          React.createElement(FormDivider, {
             className: `${Selectors.Margins.marginBottom40} ${Selectors.Margins.marginTop40}`
           }),
-          React.createElement(Common.FormTitle, {
-            tag: Common.FormTitleTags.H1,
+          React.createElement(FormTitle, {
+            tag: FormTitleTags.H1,
             className: Selectors.Margins.marginBottom20,
             children: 'Appearance'
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom4,
                 children: 'Preview Height'
               }),
-              React.createElement(Common.FormText, {
+              React.createElement(FormText, {
                 className: Selectors.Margins.marginBottom20,
-                type: Common.FormText.Types.DESCRIPTION,
+                type: FormText.Types.DESCRIPTION,
                 children: 'Sets the height of the preview window relative to the Discord window.'
               }),
-              React.createElement(Common.Slider, {
+              React.createElement(Slider, {
                 initialValue: plugin.settings.appearance.popoutHeight,
                 onValueChange: value => {
                   plugin.settings.appearance.popoutHeight = value
@@ -920,24 +937,24 @@ module.exports = class ChannelsPreview {
                 stickToMarkers: true,
                 onMarkerRender: m => m % 10 === 0 ? m + '%' : ''
               }),
-              React.createElement(Common.FormDivider, {
+              React.createElement(FormDivider, {
                 className: Selectors.Margins.marginTop20
               }),
             ]
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom8,
                 children: 'Backdrop'
               }),
-              React.createElement(Common.FormText, {
+              React.createElement(FormText, {
                 className: Selectors.Margins.marginBottom20,
-                type: Common.FormText.Types.DESCRIPTION,
+                type: FormText.Types.DESCRIPTION,
                 children: 'Darken the chat behind the preview for better contrast.'
               }),
-              React.createElement(Common.FormSwitch, {
+              React.createElement(FormSwitch, {
                 children: 'Enable backdrop',
                 value: plugin.settings.appearance.darkenChat,
                 onChange: value => {
@@ -946,13 +963,13 @@ module.exports = class ChannelsPreview {
                 },
                 hideBorder: true
               }),
-              plugin.settings.appearance.darkenChat && React.createElement(Common.FormItem, {
+              plugin.settings.appearance.darkenChat && React.createElement(FormItem, {
                 children: [
-                  React.createElement(Common.FormTitle, {
+                  React.createElement(FormTitle, {
                     className: Selectors.Margins.marginBottom20,
                     children: 'Dimming Level'
                   }),
-                  React.createElement(Common.Slider, {
+                  React.createElement(Slider, {
                     initialValue: plugin.settings.appearance.darkenLevel,
                     onValueChange: value => {
                       plugin.settings.appearance.darkenLevel = value
@@ -967,19 +984,19 @@ module.exports = class ChannelsPreview {
                   }),
                 ]
               }),
-              React.createElement(Common.FormDivider, {
+              React.createElement(FormDivider, {
                 className: Selectors.Margins.marginTop20
               })
             ]
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom8,
                 children: 'Message Display'
               }),
-              React.createElement(Common.RadioGroup, {
+              React.createElement(RadioGroup, {
                 options: [
                   { name: 'Cozy', value: 'cozy' },
                   { name: 'Compact', value: 'compact' }
@@ -990,19 +1007,19 @@ module.exports = class ChannelsPreview {
                   onUpdate()
                 }
               }),
-              React.createElement(Common.FormDivider, {
+              React.createElement(FormDivider, {
                 className: Selectors.Margins.marginTop20
               })
             ]
           }),
-          React.createElement(Common.FormItem, {
+          React.createElement(FormItem, {
             className: Selectors.Margins.marginBottom20,
             children: [
-              React.createElement(Common.FormTitle, {
+              React.createElement(FormTitle, {
                 className: Selectors.Margins.marginBottom20,
                 children: 'Space between Message Groups'
               }),
-              React.createElement(Common.FormSwitch, {
+              React.createElement(FormSwitch, {
                 children: 'Sync with app settings',
                 value: plugin.settings.appearance.groupSpacingSync,
                 onChange: value => {
@@ -1011,7 +1028,7 @@ module.exports = class ChannelsPreview {
                 },
                 hideBorder: true
               }),
-              !plugin.settings.appearance.groupSpacingSync && React.createElement(Common.Slider, {
+              !plugin.settings.appearance.groupSpacingSync && React.createElement(Slider, {
                 initialValue: plugin.settings.appearance.groupSpacing,
                 onValueChange: value => {
                   plugin.settings.appearance.groupSpacing = value
@@ -1024,7 +1041,7 @@ module.exports = class ChannelsPreview {
                 stickToMarkers: true,
                 onMarkerRender: m => m + 'px'
               }),
-              React.createElement(Common.FormDivider, {
+              React.createElement(FormDivider, {
                 className: Selectors.Margins.marginTop20
               })
             ]
