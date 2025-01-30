@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.0
+ * @version 1.2.1
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,22 +15,15 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.0',
+    version: '1.2.1',
     description: '3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
-      items: [
-        'Completely removed dependency on ZeresPluginLibrary.'
-      ]
-    },
-    {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the Resizer incorrectly resizing the sidebar.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -81,9 +74,17 @@ const EmojiIconSizes = {
   MEDIUM: 'medium'
 }
 
+const Button = Webpack.getModule(Filters.byKeys('Looks', 'Link'), { searchExports: true })
+const Text = Webpack.getModule(m => Filters.byStrings('WebkitLineClamp', 'data-text-variant')(m?.render), { searchExports: true })
+const Popout = Webpack.getModule(m => Filters.byKeys('animation', 'autoInvert')(m?.defaultProps), { searchExports: true })
+const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
+const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
+const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
+const FormTitleTags = Webpack.getModule(Filters.byKeys('H1', 'LABEL', 'LEGEND'), { searchExports: true })
+const FormText = Webpack.getModule(m => Filters.byKeys('DESCRIPTION', 'ERROR')(m?.Types), { searchExports: true })
+const RadioGroup = Webpack.getModule(m => Filters.byKeys('NOT_SET', 'NONE')(m?.Sizes), { searchExports: true })
+
 const { getSocket } = Webpack.getByKeys('getSocket')
-const Common = Webpack.getByKeys('Shakeable', 'List')
-const { Button } = Common
 const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
 const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))]
 const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
@@ -132,6 +133,13 @@ const Selectors = {
   SidebarFooter: Webpack.getByKeys('nameTag', 'avatarWrapper'),
   FormSwitch: Webpack.getByKeys('dividerDefault', 'note'),
   Diversity: Webpack.getByKeys('diversitySelectorOptions')
+}
+
+function FormDivider ({ className, style }) {
+  return React.createElement('div', {
+    className: Utils.className('divider__46c3b', className),
+    style
+  })
 }
 
 function deepEqual (x, y) {
@@ -332,7 +340,7 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
   let content
   if (isAuthorBlocked) {
     content = React.createElement(
-      Common.Text,
+      Text,
       {
         className: Selectors.ForumPost.blockedMessage,
         variant: 'text-sm/medium',
@@ -343,7 +351,7 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
   } else {
     content = renderedContent
       ? React.createElement(
-        Common.Text,
+        Text,
         {
           variant: 'text-sm/semibold',
           color,
@@ -352,7 +360,7 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
         }
       )
       : React.createElement(
-        Common.Text,
+        Text,
         {
           tag: 'span',
           variant: 'text-sm/medium',
@@ -364,7 +372,7 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
   }
 
   return React.createElement(
-    Common.Text,
+    Text,
     {
       className: `${Selectors.ForumPost.message} BCL--last-message ${muted ? 'BCL--last-message--muted' : ''} ${noColor ? 'BCL--last-message--no-color' : ''}`,
       variant: 'text-sm/semibold',
@@ -588,7 +596,7 @@ function ForumActivePostsCount ({ channel, unread }) {
   ).length)
 
   return count ? React.createElement(
-    Common.Text,
+    Text,
     {
       className: `${Selectors.ForumPost.message} BCL--last-message`,
       variant: 'text-sm/medium',
@@ -977,7 +985,7 @@ module.exports = class BetterChannelList {
 
       // Emoji picker
       const _children = value.props.children
-      value.props.children = React.createElement(Common.Popout, {
+      value.props.children = React.createElement(Popout, {
         renderPopout: ({ closePopout }) => React.createElement(EmojiPicker, {
           className: 'BCL--emoji-picker',
           headerClassName: 'BCL--emoji-picker-header',
@@ -1164,7 +1172,7 @@ module.exports = class BetterChannelList {
     function Switch (props) {
       const [value, setValue] = React.useState(props.value)
 
-      return React.createElement(Common.FormSwitch, {
+      return React.createElement(FormSwitch, {
         ...props,
         value,
         onChange: e => {
@@ -1187,7 +1195,7 @@ module.exports = class BetterChannelList {
       return React.createElement(
         React.Fragment, {},
         [
-          React.createElement(Common.FormSection, {
+          React.createElement(FormSection, {
             title: 'Last message',
             className: `${Selectors.Margins.marginBottom20} ${Selectors.Margins.marginTop8}`,
             children: [
@@ -1209,7 +1217,7 @@ module.exports = class BetterChannelList {
               })
             ]
           }),
-          React.createElement(Common.FormSection, {
+          React.createElement(FormSection, {
             title: 'Redesign',
             className: Selectors.Margins.marginBottom20,
             children: [
@@ -1222,11 +1230,11 @@ module.exports = class BetterChannelList {
                   forceUpdate()
                 }
               }),
-              React.createElement(Common.FormSection, {
+              React.createElement(FormSection, {
                 className: Selectors.Margins.marginBottom20,
                 children: [
-                  React.createElement(Common.FormTitle, {
-                    tag: Common.FormTitleTags.H3,
+                  React.createElement(FormTitle, {
+                    tag: FormTitleTags.H3,
                     className: Selectors.Margins.marginBottom8,
                     children: 'Emoji Icons',
                     disabled: !settings.redesign.enabled
@@ -1254,27 +1262,27 @@ module.exports = class BetterChannelList {
                       })
                     ]
                   }),
-                  React.createElement(Common.FormDivider, {
+                  React.createElement(FormDivider, {
                     className: Selectors.FormSwitch.dividerDefault
                   })
                 ]
               }),
-              React.createElement(Common.FormSection, {
+              React.createElement(FormSection, {
                 className: Selectors.Margins.marginBottom20,
                 children: [
-                  React.createElement(Common.FormTitle, {
-                    tag: Common.FormTitleTags.H3,
+                  React.createElement(FormTitle, {
+                    tag: FormTitleTags.H3,
                     className: Selectors.Margins.marginBottom8,
                     children: 'Icon Size',
                     disabled: !settings.redesign.enabled
                   }),
-                  React.createElement(Common.FormText, {
-                    type: Common.FormText.Types.DESCRIPTION,
+                  React.createElement(FormText, {
+                    type: FormText.Types.DESCRIPTION,
                     className: Selectors.Margins.marginBottom8,
                     children: 'Controls the size of the channel emoji icons.',
                     disabled: !settings.redesign.enabled
                   }),
-                  React.createElement(Common.RadioGroup, {
+                  React.createElement(RadioGroup, {
                     options: [
                       { name: 'Medium', value: EmojiIconSizes.MEDIUM },
                       { name: 'Small', value: EmojiIconSizes.SMALL },
@@ -1288,14 +1296,14 @@ module.exports = class BetterChannelList {
                     },
                     disabled: !settings.redesign.enabled
                   }),
-                  React.createElement(Common.FormDivider, {
+                  React.createElement(FormDivider, {
                     className: Selectors.FormSwitch.dividerDefault
                   })
                 ]
               })
             ]
           }),
-          React.createElement(Common.FormSection, {
+          React.createElement(FormSection, {
             title: 'Resizer',
             children: React.createElement(Switch, {
               children: 'Enable Resizer',
