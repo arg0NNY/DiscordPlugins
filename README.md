@@ -92,7 +92,7 @@ SOFTWARE.
 
 [passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
 [passcodelock-view-link]: https://betterdiscord.app/plugin/PasscodeLock
-[passcodelock-version-badge]: https://img.shields.io/badge/version-1.5.0-blue
+[passcodelock-version-badge]: https://img.shields.io/badge/version-1.5.1-blue
 [passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/PasscodeLock
 [passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/PasscodeLock
 

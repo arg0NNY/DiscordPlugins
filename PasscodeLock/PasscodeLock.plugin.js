@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.0
+ * @version 1.5.1
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,15 +15,15 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.0',
+    version: '1.5.1',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
+      type: 'fixed',
+      title: 'Fixes',
       items: [
-        'Completely removed dependency on ZeresPluginLibrary.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -152,8 +152,8 @@ const HeaderBar = Webpack.getWithKey(Filters.byStrings('toolbar', 'hamburger'))
 const Tooltip = Components.Tooltip
 const Keybinds = Webpack.getByKeys('combokeys', 'disable')
 const Markdown = Webpack.getByKeys('rules')
-const Common = Webpack.getByKeys('Shakeable', 'List')
-const { Button } = Common
+const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
+const Button = Webpack.getModule(Filters.byKeys('Looks', 'Link'), { searchExports: true })
 const LanguageStore = Webpack.getByKeys('getLocale', 'getDefaultLocale')
 const VoiceActions = Webpack.getByKeys('toggleSelfDeaf', 'toggleSelfMute')
 const playSound = Webpack.getWithKey(Filters.byStrings('getSoundpack', 'play'))
@@ -1499,7 +1499,7 @@ module.exports = class PasscodeLock {
           name: Locale.current.AUTOLOCK_SETTING,
           note: Locale.current.AUTOLOCK_DESC,
           inline: false,
-          children: React.createElement(Common.Slider, {
+          children: React.createElement(Slider, {
             minValue: -800,
             maxValue: 5 * 60 * 60,
             markers: [
