@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.0
+ * @version 1.2.1
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,22 +15,17 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.0',
+    version: '1.2.1',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
-      items: [
-        'Completely removed dependency on ZeresPluginLibrary.'
-      ]
-    },
-    {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed chat scroll position jumping when switching channels.'
+        'Fixed popouts not being animated when closed.',
+        'Fixed user popout occasionally not being animated when opened.',
+        'Updated to work in the latest release of Discord.'
       ]
     },
     {
@@ -73,12 +68,12 @@ const ActionTypes = {
   CHANNEL_SELECT: 'CHANNEL_SELECT',
 }
 
-const Common = Webpack.getByKeys('Shakeable', 'List')
-const { ReferencePositionLayer, Button } = Common
+const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
+const ReferencePositionLayer = Webpack.getModule(Filters.byPrototypeKeys('nudgeTopAlignment', 'getVerticalAlignmentStyle'), { searchExports: true })
 const ChannelIntegrationsSettingsWindow = Webpack.getByKeys('setSection', 'saveWebhook')
 // const {PreloadedUserSettingsActionCreators} = Webpack.getByKeys('PreloadedUserSettingsActionCreators');
 const RouteWithImpression = Webpack.getModule(m => Filters.byStrings('location', 'computedMatch', 'render')(m?.prototype?.render), { searchExports: true })
-const UserPopout = Webpack.getWithKey(Filters.byStrings('Unexpected missing user', 'originalFriendingEnabled'))
+const UserPopout = [...Webpack.getWithKey(Filters.byStrings('UserProfilePopoutWrapper: user cannot be undefined'))]
 
 function buildSelectors (selectors) {
   const result = {}
@@ -938,13 +933,14 @@ class RevealAnimator {
     return selector.slice(0, -2)
   }
 
-  constructor (type, element, { needsCopy, scrollSelectors } = {}) {
+  constructor (type, element, { needsCopy, scrollSelectors, copyTo } = {}) {
     if (!RevealAnimator.TYPES.hasOwnProperty(type)) return Logger.err('Invalid animation type.')
 
     this.animation = RevealAnimator.TYPES[type]
     this.node = typeof element === 'string' ? document.querySelector(element) : element
     this.needsCopy = needsCopy
     this.scrollSelectors = scrollSelectors ?? []
+    this.copyTo = copyTo
 
     this.animated = false
 
@@ -962,7 +958,8 @@ class RevealAnimator {
     this.node.parentNode.style.position = getComputedStyle(this.node.parentNode).position === 'static' ? 'relative' : ''
 
     const clonedNode = this.node.cloneNode(true)
-    this.node.after(clonedNode)
+    if (this.copyTo) this.copyTo.append(clonedNode)
+    else this.node.after(clonedNode)
 
     clonedNode.style.position = getComputedStyle(this.node).position === 'fixed' ? 'fixed' : 'absolute'
     clonedNode.style.pointerEvents = 'none'
@@ -1213,6 +1210,7 @@ module.exports = class BetterAnimations {
 
       const animator = new RevealAnimator(this.settings.popouts.type, node, {
         needsCopy: true,
+        copyTo: node.closest(`.${Selectors.Popout.layerContainer}`),
         scrollSelectors: [Selectors.Content.scrollerBase]
       })
       animator.animate({
@@ -1842,7 +1840,7 @@ module.exports = class BetterAnimations {
             id: 'duration',
             name: 'Duration',
             inline: false,
-            children: React.createElement(Common.Slider, {
+            children: React.createElement(Slider, {
               minValue: 100,
               maxValue: 5000,
               markers: markers(100, 5001, 100),
