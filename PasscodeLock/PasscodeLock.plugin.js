@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.1
+ * @version 1.5.2
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.1',
+    version: '1.5.2',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Fixed plugin crashing when attempting to show disclaimer modal.'
       ]
     }
   ]
@@ -44,7 +44,9 @@ const {
 } = new BdApi(config.info.name)
 const { Filters } = Webpack
 
-const ModalActions = Webpack.getByKeys('openModal', 'closeModal')
+const ModalActions = {
+  openModal: Webpack.getModule(Filters.byStrings('onCloseRequest', 'onCloseCallback', 'instant', 'backdropStyle'), { searchExports: true })
+}
 const ConfirmationModal = Webpack.getByKeys('ConfirmModal').ConfirmModal
 const MediaEngineStore = Webpack.getStore('MediaEngineStore')
 const WindowStore = Webpack.getStore('WindowStore')
