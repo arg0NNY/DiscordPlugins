@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.1
+ * @version 1.2.2
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.1',
+    version: '1.2.2',
     description: '3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Fixed the plugin failing to start.'
       ]
     }
   ]
@@ -127,7 +127,7 @@ const Selectors = {
   },
   App: Webpack.getByKeys('app', 'layers'),
   Base: Webpack.getByKeys('base', 'sidebar'),
-  DirectMessages: Webpack.getByKeys('activity', 'channel'),
+  DirectMessages: Webpack.getByKeys('dm', 'channel'),
   GuildHeader: Webpack.getByKeys('bannerImage', 'bannerImg'),
   Margins: Webpack.getByKeys('marginBottom40', 'marginTop40'),
   SidebarFooter: Webpack.getByKeys('nameTag', 'avatarWrapper'),
