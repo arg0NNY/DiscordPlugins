@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.1
+ * @version 1.2.2
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.1',
+    version: '1.2.2',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
@@ -23,9 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed popouts not being animated when closed.',
-        'Fixed user popout occasionally not being animated when opened.',
-        'Updated to work in the latest release of Discord.'
+        'Fixed channels and guilds transitions not being animated.'
       ]
     },
     {
@@ -218,7 +216,7 @@ class Route {
 
 const Routes = [
   new Route('Chat', [
-    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)/threads/:threadId/:messageId?',
+    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|\\d+)/threads/:threadId/:messageId?',
     '/channels/@me/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)',
     '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)?/:messageId?'
   ], {
