@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the plugin failing to start.'
+        'Fixed the plugin failing to start.',
       ]
     }
   ]

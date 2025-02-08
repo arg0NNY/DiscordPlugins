@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed plugin crashing when attempting to show disclaimer modal.'
+        'Fixed plugin crashing when attempting to show disclaimer modal.',
       ]
     }
   ]
