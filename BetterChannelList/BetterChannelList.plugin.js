@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.2
+ * @version 1.2.3
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.2',
+    version: '1.2.3',
     description: '3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the plugin failing to start.',
+        'Updated to work in the latest release of Discord.',
       ]
     }
   ]
@@ -90,7 +90,10 @@ const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads',
 const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
 const ChannelTypes = Webpack.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
 const MessageTypes = Webpack.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
-const { intl, t } = Webpack.getByKeys('intl', 't')
+const { intl, t } = Webpack.getMangled(Filters.byKeys('currentLocale', 'format'), {
+  intl: Filters.byKeys('currentLocale', 'format'),
+  t: m => typeof m[0] === 'function'
+}, { searchExports: true, raw: true })
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const ForumPostAuthor = Webpack.getByStrings('renderColon', 'author')
 const buildMessageReplyContent = Webpack.getModule(Filters.byStrings('trailingIconClass', 'CHANNEL_PINNED_MESSAGE'), { searchExports: true })
