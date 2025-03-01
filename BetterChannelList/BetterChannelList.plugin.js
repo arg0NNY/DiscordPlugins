@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.3
+ * @version 1.2.4
  * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.3',
+    version: '1.2.4',
     description: '3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.'
   },
   changelog: [
@@ -38,9 +38,12 @@ const {
   UI,
   Logger,
   React,
-  Utils
+  Utils,
+  Components
 } = new BdApi(config.info.name)
+
 const { Filters } = Webpack
+const { ErrorBoundary } = Components
 
 const Dispatcher = Webpack.getByKeys('dispatch', 'subscribe')
 const ChannelStore = Webpack.getStore('ChannelStore')
@@ -117,7 +120,7 @@ const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RE
 const Alert = Webpack.getModule(Filters.byStrings('messageType', 'iconDiv'), { searchExports: true })
 const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
 const Flex = Webpack.getByKeys('Child', 'Direction')
-const ReplyMessageHeader = Webpack.getByStrings('replyReference', 'isReplySpineClickable', 'showReplySpine')?.({ replyReference: {} })?.props?.children?.type?.type
+const ReplyMessageHeader = Webpack.getByStrings('replyReference', 'isReplySpineClickable', 'showReplySpine')?.({ replyReference: {} })?.type?.type
 const createMessage = Webpack.getByStrings('createMessage: author cannot be undefined')
 
 const Selectors = {
@@ -938,14 +941,17 @@ module.exports = class BetterChannelList {
       // Inject last message
       if (this.settings.lastMessage.enabled && [ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT].includes(channel.type))
         children.push(
-          React.createElement(ChannelLastMessage, {
-            channel,
-            guild,
-            muted,
-            selected,
-            unread,
-            locked,
-            noColor: !this.settings.lastMessage.roleColors
+          React.createElement(ErrorBoundary, {
+            name: 'ChannelLastMessage',
+            children: React.createElement(ChannelLastMessage, {
+              channel,
+              guild,
+              muted,
+              selected,
+              unread,
+              locked,
+              noColor: !this.settings.lastMessage.roleColors
+            })
           })
         )
 
