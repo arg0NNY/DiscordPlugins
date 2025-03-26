@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.2
+ * @version 1.5.3
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,15 +15,22 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.2',
+    version: '1.5.3',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
     {
+      type: 'improved',
+      title: 'Improvements',
+      items: [
+        'Moved Lock Discord button to the app title bar.',
+      ]
+    },
+    {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed plugin crashing when attempting to show disclaimer modal.',
+        'Fixed system bar buttons being unreachable when the Lock screen is shown.',
       ]
     }
   ]
@@ -68,7 +75,8 @@ const Selectors = {
   Chat: Webpack.getByKeys('title', 'chat'),
   HeaderBar: Webpack.getByKeys('iconWrapper', 'clickable'),
   App: Webpack.getByKeys('mobileApp'),
-  Modals: Webpack.getByKeys('root', 'small')
+  Modals: Webpack.getByKeys('root', 'small'),
+  AppTitleBar: Webpack.getByKeys('guildIcon', 'button', 'title')
 }
 
 const Gifs = {
@@ -80,6 +88,11 @@ const Gifs = {
   EDIT_ACTION: 'https://i.imgur.com/VL5UV1X.gif'
 }
 Object.keys(Gifs).forEach(k => fetch(Gifs[k])) // Preload gifs
+
+function forceAppUpdate () {
+  Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
+  setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
+}
 
 const buildAnimatedIcon = (src, width = 24, height = width) => {
   const icon = document.createElement('img')
@@ -150,7 +163,6 @@ const hashCode = async string => {
 
 const hashCheck = async ({ string, salt, iterations }, hashed) => await pbkdf2(string, salt, iterations) === hashed
 
-const HeaderBar = Webpack.getWithKey(Filters.byStrings('toolbar', 'hamburger'))
 const Tooltip = Components.Tooltip
 const Keybinds = Webpack.getByKeys('combokeys', 'disable')
 const Markdown = Webpack.getByKeys('rules')
@@ -158,13 +170,17 @@ const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialV
 const Button = Webpack.getModule(Filters.byKeys('Looks', 'Link'), { searchExports: true })
 const LanguageStore = Webpack.getByKeys('getLocale', 'getDefaultLocale')
 const VoiceActions = Webpack.getByKeys('toggleSelfDeaf', 'toggleSelfMute')
-const playSound = Webpack.getWithKey(Filters.byStrings('getSoundpack', 'play'))
+const playSound = [...Webpack.getWithKey(Filters.byStrings('getSoundpack', 'play'))]
 const { getVoiceChannelId } = Webpack.getByKeys('getVoiceChannelId')
 const KeybindStore = {
   toCombo: Webpack.getModule(Filters.byStrings('numpad plus'), { searchExports: true }),
   toString: Webpack.getModule(Filters.byStrings('KEYBOARD_MODIFIER_KEY', 'UNK'), { searchExports: true })
 }
 const NotificationModule = Webpack.getByKeys('showNotification', 'hasPermission')
+const Flux = Webpack.getByKeys('Store', 'connectStores')
+const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
+const SystemBar = [...Webpack.getWithKey(Filters.byStrings('systemBar', 'PlatformTypes'))]
+const AppTitleBar = Webpack.getModule(m => Filters.byStrings('AppTitleBar')(m?.type), { searchExports: true })
 
 const Locale = new class {
 
@@ -217,6 +233,27 @@ const Locale = new class {
   }
 
 }()
+
+const PasscodeLockStore = (() => {
+  let isLocked = false
+
+  function handleLock () {
+    isLocked = true
+  }
+
+  function handleUnlock () {
+    isLocked = false
+  }
+
+  return new class PasscodeLockStore extends Flux.Store {
+    isLocked () {
+      return isLocked
+    }
+  }(Dispatcher, {
+    'PL__LOCK': handleLock,
+    'PL__UNLOCK': handleUnlock
+  })
+})()
 
 class DOMObserver {
   constructor (root, options) {
@@ -993,6 +1030,7 @@ module.exports = class PasscodeLock {
     this.disableInteractions()
 
     this.locked = true
+    Dispatcher.dispatch({ type: 'PL__LOCK' })
     if (type === PasscodeLocker.Types.DEFAULT) {
       VoiceProtector.deafIfNeeded()
       Data.locked = true
@@ -1007,6 +1045,7 @@ module.exports = class PasscodeLock {
     }
     this.enableInteractions()
     this.locked = false
+    Dispatcher.dispatch({ type: 'PL__UNLOCK' })
     if (safeUnlock) Data.locked = false
 
     if (!this.element) return
@@ -1034,7 +1073,8 @@ module.exports = class PasscodeLock {
     this.injectCSS()
     this.patchPlaySound()
     this.patchWindowInfo()
-    this.patchHeaderBar()
+    this.patchAppTitleBar()
+    this.patchSystemBar()
     this.patchSettingsButton()
     this.enableAutolock()
 
@@ -1044,6 +1084,8 @@ module.exports = class PasscodeLock {
     KeybindListener.listen(this.keybind, () => this.onLockKeybind())
 
     if (this.settings.lockOnStartup || Data.locked) setTimeout(this.lock.bind(this))
+
+    forceAppUpdate()
   }
 
   patchPlaySound () {
@@ -1061,30 +1103,43 @@ module.exports = class PasscodeLock {
     })
   }
 
-  async patchHeaderBar () {
-    Patcher.after(...HeaderBar, (self, props, value) => {
-      const toolbar = findInReactTree(value, i => i?.className === Selectors.HeaderBar.toolbar)?.children?.props?.children
-      if (!Array.isArray(toolbar) || toolbar.length < 2 || toolbar.some((e => e?.key === this.getName()))) return
+  patchAppTitleBar () {
+    Patcher.after(AppTitleBar, 'type', (self, args, value) => {
+      Patcher.after(value.props, 'children', (self, args, value) => {
+        Patcher.after(value.props, 'children', (self, args, value) => {
+          const buttons = value?.props?.trailing?.props?.children
+          if (!buttons) return
 
-      toolbar.splice(-2, 0, React.createElement(
-        Tooltip,
-        {
-          text: Locale.current.LOCK_DISCORD,
-          key: this.getName(),
-          position: 'bottom'
-        },
-        props => React.createElement(
-          Button,
-          Object.assign({}, props, {
-            id: 'PCLButton',
-            size: Button.Sizes.NONE,
-            look: Button.Looks.BLANK,
-            innerClassName: `${Selectors.HeaderBar.iconWrapper} ${Selectors.HeaderBar.clickable}`,
-            onClick: () => this.lock()
-          }),
-          this.buildStaticIcon()
-        )
-      ))
+          buttons.unshift(
+            React.createElement(
+              Tooltip,
+              {
+                text: Locale.current.LOCK_DISCORD,
+                key: this.getName(),
+                position: 'bottom'
+              },
+              props => React.createElement(
+                Button,
+                Object.assign({}, props, {
+                  id: 'PCLButton',
+                  size: Button.Sizes.NONE,
+                  look: Button.Looks.BLANK,
+                  innerClassName: `${Selectors.AppTitleBar.button} ${Selectors.HeaderBar.iconWrapper} ${Selectors.HeaderBar.clickable}`,
+                  onClick: () => this.lock()
+                }),
+                this.buildStaticIcon()
+              )
+            )
+          )
+        })
+      })
+    })
+  }
+
+  patchSystemBar () {
+    Patcher.before(...SystemBar, (self, [props]) => {
+      const isLocked = useStateFromStores([PasscodeLockStore], () => PasscodeLockStore.isLocked())
+      if (isLocked) props.show = isLocked
     })
   }
 
@@ -1287,6 +1342,8 @@ module.exports = class PasscodeLock {
     this.disableAutolock()
     KeybindListener.stop(true)
     Patcher.unpatchAll()
+
+    forceAppUpdate()
   }
 
   patchSettingsButton () {
