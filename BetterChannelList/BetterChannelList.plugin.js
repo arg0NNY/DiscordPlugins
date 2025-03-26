@@ -4,8 +4,8 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.4
- * @description 3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.
+ * @version 1.2.5
+ * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,15 +15,22 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.4',
-    description: '3 in 1: Shows the most recent message for each channel, brings channel list redesign from the new mobile UI and allows you to alter the sidebar width.'
+    version: '1.2.5',
+    description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
     {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.',
+        'Minor visual fixes to accommodate for Discord\'s visual refresh.',
+      ]
+    },
+    {
+      type: 'fixed',
+      title: 'Removed',
+      items: [
+        'Removed Resizer, as it was implemented by Discord itself.',
       ]
     }
   ]
@@ -66,11 +73,6 @@ const Data = new Proxy({}, {
   }
 })
 
-const SIDEBAR_DEFAULT_WIDTH = 240
-const SIDEBAR_REDESIGNED_DEFAULT_WIDTH = 300
-const SIDEBAR_MIN_WIDTH = 190
-const SIDEBAR_MAX_WIDTH = 640
-
 const EmojiIconSizes = {
   TINY: 'tiny',
   SMALL: 'small',
@@ -111,9 +113,7 @@ const ColorUtils = {
 }
 const SortedVoiceStateStore = Webpack.getStore('SortedVoiceStateStore')
 const isLimited = Webpack.getByStrings('permissionOverwrites', 'VIEW_CHANNEL', 'CONNECT')
-const GuildBanner = Webpack.getModule(m => Filters.byStrings('guildBanner')(m?.type))
 const ActiveThreadsStore = Webpack.getStore('ActiveThreadsStore')
-const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
 const DevToolsDesignTogglesStore = Webpack.getStore('DevToolsDesignTogglesStore')
 const EmojiPicker = Webpack.getModule(m => Filters.byStrings('pickerIntention')(m?.type?.render))
 const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RELATED_EMOJI', 'SOUNDBOARD'), { searchExports: true })
@@ -567,35 +567,6 @@ function ChannelNameIcons ({ channel, locked }) {
   )
 }
 
-function ResizeHandler ({ onResize, onClick }) {
-  const [dragging, setDragging] = React.useState(false)
-
-  React.useEffect(() => {
-    const onMouseUp = () => setDragging(false)
-    const onMouseMove = e => dragging && onResize?.(e)
-
-    window.addEventListener('mouseup', onMouseUp)
-    window.addEventListener('mousemove', onMouseMove)
-    return () => {
-      window.removeEventListener('mouseup', onMouseUp)
-      window.removeEventListener('mousemove', onMouseMove)
-    }
-  }, [dragging])
-
-  return React.createElement(
-    'div',
-    {
-      className: 'BCL--resize-handler-container',
-      style: { '--just-a-style-attr-for-bd-toasts-to-position-correctly': '\':)\'' }
-    },
-    React.createElement('div', {
-      className: 'BCL--resize-handler' + (dragging ? ' BCL--resize-handler--dragging' : ''),
-      onMouseDown: () => setDragging(true),
-      onClick
-    })
-  )
-}
-
 function ForumActivePostsCount ({ channel, unread }) {
   const count = useStateFromStores([ActiveThreadsStore], () => Object.keys(
     ActiveThreadsStore.getThreadsForParent(channel.guild_id, channel.id)
@@ -632,7 +603,6 @@ module.exports = class BetterChannelList {
     this.patchContextMenu()
     this.patchChannelItem()
     this.patchScrollerProvider()
-    this.injectResizer()
 
     forceAppUpdate('Plugin enabled')
   }
@@ -652,7 +622,6 @@ module.exports = class BetterChannelList {
     DOM.addStyle(this.styleName, `
         .BCL--last-message {
             pointer-events: none;
-            padding-top: 2px;
         }
 
         .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessage.author} * {
@@ -691,8 +660,8 @@ module.exports = class BetterChannelList {
 
         .BCL--channel-icon {
             flex-shrink: 0;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background-color: var(--bcl-channel-icon-bg, var(--background-tertiary));
             display: flex;
@@ -718,8 +687,8 @@ module.exports = class BetterChannelList {
         }
 
         .BCL--channel-icon--${EmojiIconSizes.SMALL} {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
         }
 
         .BCL--channel-icon--${EmojiIconSizes.SMALL} .emoji {
@@ -788,36 +757,6 @@ module.exports = class BetterChannelList {
             color: var(--interactive-muted);
         }
 
-        .BCL--resize-handler-container {
-            position: relative;
-            height: 100%;
-        }
-
-        .BCL--resize-handler {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 5px;
-            z-index: 150;
-            cursor: ew-resize;
-        }
-
-        .BCL--resize-handler::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--green-360);
-            transform-origin: left center;
-            transform: scaleX(0);
-            transition: .2s transform;
-        }
-
-        .BCL--resize-handler:is(:hover, .BCL--resize-handler--dragging)::before {
-            transform: scaleX(50%);
-            transition-delay: .1s;
-        }
-
         .BCL--emoji-picker-header {
             display: flex;
             align-items: stretch;
@@ -826,7 +765,7 @@ module.exports = class BetterChannelList {
         }
 
         .BCL--emoji-picker-header .${Selectors.Diversity.diversitySelectorOptions} {
-            top: 66px;
+            top: 69px;
         }
 
         .BCL--emoji-picker-header-content {
@@ -835,7 +774,7 @@ module.exports = class BetterChannelList {
         }
 
         .BCL--emoji-picker + * {
-            top: 112px;
+            top: 119px !important;
         }
 
         .BCL--disabled {
@@ -844,19 +783,6 @@ module.exports = class BetterChannelList {
 
         /* Discord's style fixes */
         /* ===================== */
-
-        .${Selectors.DirectMessages.channel} {
-            max-width: unset !important;
-        }
-
-        .${Selectors.GuildHeader.bannerImage}, .${Selectors.GuildHeader.bannerImg} {
-            width: 100%;
-        }
-
-        .${Selectors.SidebarFooter.avatarWrapper} {
-            flex: 1;
-            min-width: 0;
-        }
 
         .${Selectors.Base.sidebar}.${Selectors.Base.hidden} {
             display: none;
@@ -1050,62 +976,12 @@ module.exports = class BetterChannelList {
             const { channel } = guildChannels.getChannelFromSectionRow(section, row) ?? {}
             const emojiIconSize = this.settings.redesign.enabled && this.settings.redesign.iconSize
 
-            if (this.willRenderLastMessage(channel?.id) || emojiIconSize === EmojiIconSizes.MEDIUM) result += 20
-            else if (emojiIconSize === EmojiIconSizes.SMALL) result += 10
+            if (this.willRenderLastMessage(channel?.id) || emojiIconSize === EmojiIconSizes.MEDIUM) result += 18
+            else if (emojiIconSize === EmojiIconSizes.SMALL) result += 8
           }
 
           return result
         })
-      })
-    })
-  }
-
-  injectResizer () {
-    Patcher.after(...AppView, (self, props, value) => {
-      if (!this.settings.resizer.enabled) return
-
-      const base = findInReactTree(value, byClassName(Selectors.Base.base))
-      const content = base && findInReactTree(base, byClassName(Selectors.Base.content))
-      const sidebarIndex = content && content.props.children.findIndex(c => c?.props?.hasOwnProperty('hideSidebar'))
-      if (typeof sidebarIndex !== 'number') return
-
-      const getCurrentWidth = () => Data.sidebarWidth ?? (this.settings.redesign.enabled ? SIDEBAR_REDESIGNED_DEFAULT_WIDTH : SIDEBAR_DEFAULT_WIDTH)
-
-      const getSidebarNode = () => document.querySelector(`.${Selectors.Base.sidebar}`)
-      const update = () => {
-        const node = getSidebarNode()
-        if (node) node.style.setProperty('width', getCurrentWidth() + 'px', 'important')
-      }
-      const onResize = e => {
-        const rect = getSidebarNode()?.getBoundingClientRect()
-        if (rect) Data.sidebarWidth = Math.max(SIDEBAR_MIN_WIDTH, Math.min(SIDEBAR_MAX_WIDTH, e.clientX - rect.x))
-        update()
-      }
-      const onClick = e => {
-        if (e.detail !== 2) return
-        Data.sidebarWidth = null
-        update()
-      }
-
-      content.props.children.splice(
-        sidebarIndex + 1, 0,
-        React.createElement(ResizeHandler, { onResize, onClick })
-      )
-      Patcher.after(content.props.children[sidebarIndex], 'type', (self, props, value) => {
-        Patcher.after(value.props, 'children', (self, props, value) => {
-          value.ref = el => el?.style.setProperty('width', getCurrentWidth() + 'px', 'important')
-        })
-      })
-    })
-
-    // Server banner quality fix
-    Patcher.after(GuildBanner, 'type', (self, props, value) => {
-      const banner = findInReactTree(value, m => m?.props?.guildBanner)
-      if (!banner) return
-
-      Patcher.after(banner, 'type', (self, props, value) => {
-        const img = findInReactTree(value, m => m?.type === 'img')
-        if (img) img.props.src = img.props.src.replace(/\?size=[0-9]+/, '?size=640')
       })
     })
   }
@@ -1134,9 +1010,6 @@ module.exports = class BetterChannelList {
       redesign: {
         enabled: true,
         iconSize: EmojiIconSizes.MEDIUM
-      },
-      resizer: {
-        enabled: true
       }
     }
 
@@ -1228,7 +1101,6 @@ module.exports = class BetterChannelList {
           }),
           React.createElement(FormSection, {
             title: 'Redesign',
-            className: Selectors.Margins.marginBottom20,
             children: [
               React.createElement(Switch, {
                 children: 'Enable Redesign',
@@ -1277,7 +1149,6 @@ module.exports = class BetterChannelList {
                 ]
               }),
               React.createElement(FormSection, {
-                className: Selectors.Margins.marginBottom20,
                 children: [
                   React.createElement(FormTitle, {
                     tag: FormTitleTags.H3,
@@ -1304,22 +1175,10 @@ module.exports = class BetterChannelList {
                       saveSettings()
                     },
                     disabled: !settings.redesign.enabled
-                  }),
-                  React.createElement(FormDivider, {
-                    className: Selectors.FormSwitch.dividerDefault
                   })
                 ]
               })
             ]
-          }),
-          React.createElement(FormSection, {
-            title: 'Resizer',
-            children: React.createElement(Switch, {
-              children: 'Enable Resizer',
-              note: 'Allows you to alter the sidebar width by dragging its right edge.',
-              value: settings.resizer.enabled,
-              onChange: e => settings.resizer.enabled = e
-            })
           })
         ]
       )
