@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.1
+ * @version 2.1.2
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.1',
+    version: '2.1.2',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,8 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Minor visual fixes to accommodate for Discord\'s visual refresh.',
+        'Fixed the preview not appearing for Voice Channels and DMs.'
       ]
     }
   ]
@@ -90,8 +91,8 @@ const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), {
 const FormItem = Webpack.getModule(m => Filters.byStrings('titleId', 'errorId', 'setIsFocused')(m?.render), { searchExports: true })
 
 const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'))]
-const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('isMultiUserDM', 'getTypingUsers'))]
-const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('VoiceChannel', 'MANAGE_CHANNELS'))]
+const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('PrivateChannel', 'getTypingUsers'))]
+const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('PLAYING', 'MANAGE_CHANNELS'))]
 const StageVoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('getStageInstanceByChannel', 'MANAGE_CHANNELS'))]
 const ChannelLink = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))]
 const ThreadChannelItem = Webpack.getModule(m => Filters.byStrings('thread', 'getVoiceStatesForChannel')(m?.type))
@@ -335,10 +336,7 @@ function ChannelPopoutBackdrop () {
 
   return shouldShow ? React.createElement('div', {
     className: 'CP__backdrop',
-    style: {
-      left: (document.querySelector(`.${Selectors.ChatLayout.sidebar}`)?.clientWidth ?? 240) + 'px',
-      opacity: settings.appearance.darkenLevel
-    }
+    style: { opacity: settings.appearance.darkenLevel }
   }) : null
 }
 
@@ -518,12 +516,13 @@ module.exports = class ChannelsPreview {
       useUpdater()
       if (!settings.appearance.darkenChat) return
 
-      const content = findInReactTree(value, m => m?.className?.includes(Selectors.AppView.content))
-      if (!content) return
+      const page = findInReactTree(value, m => m?.className?.includes(Selectors.AppView.page))
+      if (!page) return
 
-      content.children.push(
+      page.children = [
+        page.children,
         React.createElement(ChannelPopoutBackdrop)
-      )
+      ]
     })
   }
 
@@ -562,14 +561,14 @@ module.exports = class ChannelsPreview {
     DOM.addStyle(`${config.info.name}-style`, `
         .CP__popout {
             pointer-events: none;
-            background: var(--background-primary);
+            background-color: var(--bg-overlay-chat, var(--background-base-lower)) !important;
             border-radius: 10px;
             height: 30vh;
             min-height: 150px;
             width: 50vw;
             min-width: 350px;
             overflow: hidden;
-            margin-top: 30px; /* TODO: Accomodate for different platforms */
+            margin-top: calc(var(--custom-app-top-bar-height) + 8px);
         }
 
         .CP__popout * {
