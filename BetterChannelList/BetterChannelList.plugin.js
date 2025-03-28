@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.5
+ * @version 1.2.6
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,22 +15,22 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.5',
+    version: '1.2.6',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
     {
-      type: 'fixed',
-      title: 'Fixes',
+      type: 'improved',
+      title: 'Improvements',
       items: [
-        'Minor visual fixes to accommodate for Discord\'s visual refresh.',
+        'Added support for different UI Density options.',
       ]
     },
     {
       type: 'fixed',
-      title: 'Removed',
+      title: 'Fixes',
       items: [
-        'Removed Resizer, as it was implemented by Discord itself.',
+        'Fixed the cause of Discord crash.',
       ]
     }
   ]
@@ -567,12 +567,20 @@ function ChannelNameIcons ({ channel, locked }) {
   )
 }
 
-function ForumActivePostsCount ({ channel, unread }) {
-  const count = useStateFromStores([ActiveThreadsStore], () => Object.keys(
+function getActiveThreadsCount (channel) {
+  if (channel.type !== ChannelTypes.GUILD_FORUM) throw new Error('Channel is not a forum')
+  return Object.keys(
     ActiveThreadsStore.getThreadsForParent(channel.guild_id, channel.id)
-  ).length)
+  ).length
+}
+function useActiveThreadsCount (channel) {
+  return useStateFromStores([ActiveThreadsStore], () => getActiveThreadsCount(channel))
+}
 
-  return count ? React.createElement(
+function ForumActivePostsCount ({ channel, unread }) {
+  const count = useActiveThreadsCount(channel)
+
+  return count > 0 ? React.createElement(
     Text,
     {
       className: `${Selectors.ForumPost.message} BCL--last-message`,
@@ -586,10 +594,6 @@ function ForumActivePostsCount ({ channel, unread }) {
 const byClassName = c => m => m?.props?.className?.includes(c)
 
 module.exports = class BetterChannelList {
-  willRenderLastMessage (channelId) {
-    return channelId && this.settings.lastMessage.enabled && !!MessageStore.getMessages(channelId)?.last()
-  }
-
   start () {
     this.injectStyle()
 
@@ -659,9 +663,13 @@ module.exports = class BetterChannelList {
         }
 
         .BCL--channel-icon {
+            --bcl-icon-size: 42px;
+            --bcl-emoji-size: 20px;
+            --bcl-icon-size-offset: 0px;
+            --bcl-emoji-size-offset: 0px;
             flex-shrink: 0;
-            width: 42px;
-            height: 42px;
+            width: calc(var(--bcl-icon-size) + var(--bcl-icon-size-offset));
+            height: calc(var(--bcl-icon-size) + var(--bcl-icon-size-offset));
             border-radius: 50%;
             background-color: var(--bcl-channel-icon-bg, var(--background-tertiary));
             display: flex;
@@ -670,30 +678,30 @@ module.exports = class BetterChannelList {
         }
 
         .BCL--channel-icon .emoji {
-            width: 20px;
-            height: 20px;
-        }
-
-        .BCL--channel-icon--${EmojiIconSizes.TINY} {
-            width: 20px;
-            height: 20px;
-            padding: 4px;
-            margin: -4px 0;
-        }
-
-        .BCL--channel-icon--${EmojiIconSizes.TINY} .emoji {
-            width: 14px;
-            height: 14px;
+            width: calc(var(--bcl-emoji-size) + var(--bcl-emoji-size-offset));
+            height: calc(var(--bcl-emoji-size) + var(--bcl-emoji-size-offset));
         }
 
         .BCL--channel-icon--${EmojiIconSizes.SMALL} {
-            width: 32px;
-            height: 32px;
+            --bcl-icon-size: 32px;
+            --bcl-emoji-size: 16px;
         }
 
-        .BCL--channel-icon--${EmojiIconSizes.SMALL} .emoji {
-            width: 16px;
-            height: 16px;
+        .BCL--channel-icon--${EmojiIconSizes.TINY} {
+            --bcl-icon-size: 20px;
+            --bcl-emoji-size: 14px;
+            padding: 4px;
+            margin: -4px 0;
+        }
+        
+        .density-compact .BCL--channel-icon {
+            --bcl-icon-size-offset: -4px;
+            --bcl-emoji-size-offset: -2px;
+        }
+        
+        .density-cozy .BCL--channel-icon {
+            --bcl-icon-size-offset: 4px;
+            --bcl-emoji-size-offset: 2px;
         }
 
         .${Selectors.ChannelItem.wrapper}.${Selectors.ChannelItem.modeMuted}:not(:hover) .BCL--channel-icon {
@@ -822,6 +830,15 @@ module.exports = class BetterChannelList {
     ]
   }
 
+  willRenderLastMessage (channel) {
+    if (!channel) return false
+    if (channel.type === ChannelTypes.GUILD_FORUM)
+      return this.settings.redesign.enabled && this.settings.redesign.iconSize === EmojiIconSizes.MEDIUM && getActiveThreadsCount(channel) > 0
+    if ([ChannelTypes.GUILD_TEXT, ChannelTypes.GUILD_ANNOUNCEMENT].includes(channel.type))
+      return this.settings.lastMessage.enabled && !!MessageStore.getMessages(channel.id)?.last()
+    return false
+  }
+
   patchChannelItem () {
     function useEmojiPickerState (channel) {
       const openedEmojiPickerChannelId = useStateFromStores([OpenedEmojiPickerStore], () => OpenedEmojiPickerStore.getChannelId())
@@ -849,7 +866,7 @@ module.exports = class BetterChannelList {
       })
     })
 
-    Patcher.instead(...ChannelItem, (self, [props], original) => {
+    Patcher.instead(...ChannelItem, (self, [props, ...args], original) => {
       const { channel, guild, muted: _muted, selected: _selected, unread, locked, connected } = props
 
       const { openedEmojiPickerChannelId, isEmojiPickerOpen } = useEmojiPickerState(channel)
@@ -857,7 +874,7 @@ module.exports = class BetterChannelList {
       const muted = openedEmojiPickerChannelId ? !isEmojiPickerOpen : _muted
       const selected = openedEmojiPickerChannelId ? isEmojiPickerOpen : _selected
 
-      const value = original({ ...props, muted, selected })
+      const value = original({ ...props, muted, selected }, ...args)
 
       const link = findInReactTree(value, byClassName(Selectors.ChannelItem.link))
       if (!link) return value
@@ -974,9 +991,11 @@ module.exports = class BetterChannelList {
           const [section, row] = props
           if (section > 1) {
             const { channel } = guildChannels.getChannelFromSectionRow(section, row) ?? {}
+            if (!channel) return result
+
             const emojiIconSize = this.settings.redesign.enabled && this.settings.redesign.iconSize
 
-            if (this.willRenderLastMessage(channel?.id) || emojiIconSize === EmojiIconSizes.MEDIUM) result += 18
+            if (this.willRenderLastMessage(channel.record) || emojiIconSize === EmojiIconSizes.MEDIUM) result += 18
             else if (emojiIconSize === EmojiIconSizes.SMALL) result += 8
           }
 
