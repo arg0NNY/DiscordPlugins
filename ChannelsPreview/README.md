@@ -1,7 +1,7 @@
 ![ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/assets/52377180/de4ddd67-f8e6-4256-95aa-0fd733513da9)
 
 # [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
-V2 is out! Allows you to view recent messages in channels without switching to them.
+Allows you to view recent messages in channels without switching to them.
 
 [![Download][download-badge]][channelspreview-download-link] [![View][view-badge]][channelspreview-view-link] [![Support][support-badge]][support-link]
 
@@ -18,6 +18,6 @@ V2 is out! Allows you to view recent messages in channels without switching to t
 
 [channelspreview-download-link]: https://arg0nny.github.io/bd/download/?id=ChannelsPreview
 [channelspreview-view-link]: https://betterdiscord.app/plugin/ChannelsPreview
-[channelspreview-version-badge]: https://img.shields.io/badge/version-2.1.2-blue
+[channelspreview-version-badge]: https://img.shields.io/badge/version-2.1.3-blue
 [channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/ChannelsPreview
 [channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/ChannelsPreview

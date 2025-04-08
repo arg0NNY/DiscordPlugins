@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.2
+ * @version 2.1.3
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.2',
+    version: '2.1.3',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,8 +23,8 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Minor visual fixes to accommodate for Discord\'s visual refresh.',
-        'Fixed the preview not appearing for Voice Channels and DMs.'
+        'Fixed the preview positioning incorrectly when the plugin is used in pair with BetterChannelList\'s redesign feature.',
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -80,7 +80,7 @@ const SUPPORTED_CHANNEL_TYPES = [
 ]
 
 const [PinToBottomScrollerAuto] = Object.values(Webpack.getBySource('disableScrollAnchor', 'ResizeObserver'))
-const Popout = Webpack.getModule(m => Filters.byKeys('animation', 'autoInvert')(m?.defaultProps), { searchExports: true })
+const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
 const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
 const FormTitleTags = Webpack.getModule(Filters.byKeys('H1', 'LABEL', 'LEGEND'), { searchExports: true })
 const FormText = Webpack.getModule(m => Filters.byKeys('DESCRIPTION', 'ERROR')(m?.Types), { searchExports: true })
@@ -375,16 +375,29 @@ module.exports = class ChannelsPreview {
       if (isPatched || !value?.type?.DecoratedComponent?.prototype?.render) return
       isPatched = true
 
-      Patcher.after(value.type.DecoratedComponent.prototype, 'render', ({ props }, args, value) => {
-        const { channel, messages, selected, CP__shouldShowPopout: shouldShow } = props
+      Patcher.after(value.type.DecoratedComponent.prototype, 'render', (self, args, value) => {
+        const { channel, messages, selected, CP__shouldShowPopout: shouldShow } = self.props
 
         if (!SUPPORTED_CHANNEL_TYPES.includes(channel.type)) return
 
         const popout = findInReactTree(value, m => m?.props?.renderPopout)
         if (!popout) return
 
+        if (!self.channelItemRef && !self.__channelItemRef) {
+          self.__channelItemRef = React.createRef(null)
+        }
+        if (self.__channelItemRef && typeof popout.props.children === 'function') {
+          const ref = self.__channelItemRef
+          Patcher.after(popout.props, 'children', (self, args, value) => {
+            Patcher.after(value.props, 'children', (self, args, value) => {
+              value.ref = ref
+            })
+          })
+        }
+
         popout.type = ChannelPopout
         popout.props = {
+          targetElementRef: self.channelItemRef ?? self.__channelItemRef,
           channel,
           selected,
           messages,
