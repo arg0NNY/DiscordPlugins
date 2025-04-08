@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.6
+ * @version 1.2.7
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,22 +15,15 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.6',
+    version: '1.2.7',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
-      items: [
-        'Added support for different UI Density options.',
-      ]
-    },
-    {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the cause of Discord crash.',
+        'Updated to work in the latest release of Discord.',
       ]
     }
   ]
@@ -81,7 +74,7 @@ const EmojiIconSizes = {
 
 const Button = Webpack.getModule(Filters.byKeys('Looks', 'Link'), { searchExports: true })
 const Text = Webpack.getModule(m => Filters.byStrings('WebkitLineClamp', 'data-text-variant')(m?.render), { searchExports: true })
-const Popout = Webpack.getModule(m => Filters.byKeys('animation', 'autoInvert')(m?.defaultProps), { searchExports: true })
+const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
 const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
 const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
 const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
@@ -921,6 +914,7 @@ module.exports = class BetterChannelList {
         const actions = findInReactTree(link, byClassName(Selectors.ChannelItem.children))
         if (actions)
           actions.props.children = actions.props.children
+            .flatMap(c => c?.type === React.Fragment ? c.props.children : c)
             .filter(c => !findInReactTree(c, m => m?.props?.hasOwnProperty('userCount')))
             .concat([React.createElement(ChannelVoiceBadge, { channel, locked, connected, selected })])
       }

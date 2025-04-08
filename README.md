@@ -122,6 +122,6 @@ SOFTWARE.
 
 [betterchannellist-download-link]: https://arg0nny.github.io/bd/download/?id=BetterChannelList
 [betterchannellist-view-link]: https://betterdiscord.app/plugin/BetterChannelList
-[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.2.6-blue
+[betterchannellist-version-badge]: https://img.shields.io/badge/version-1.2.7-blue
 [betterchannellist-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterChannelList
 [betterchannellist-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterChannelList
