@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.2.0
+ * @version 1.2.1
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
@@ -14,15 +14,15 @@
 const config = {
   info: {
     name: 'BetterGuildTooltip',
-    version: '1.2.0',
+    version: '1.2.1',
     description: 'Displays an online and total member count in the guild tooltip.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
+      type: 'fixed',
+      title: 'Fixes',
       items: [
-        'Completely removed dependency on ZeresPluginLibrary.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -58,7 +58,7 @@ const Selectors = {
   Guild: Webpack.getByKeys('statusOffline', 'guildDetail')
 }
 
-const GuildInfoStore = Webpack.getByKeys('getGuild', 'hasFetchFailed')
+const GuildStore = Webpack.getStore('GuildStore')
 const GuildActions = Webpack.getByKeys('preload', 'closePrivateChannel')
 const GuildTooltip = [...Webpack.getWithKey(Filters.byStrings('listItemTooltip', 'guild'))]
 
@@ -126,8 +126,8 @@ function formatNumber (number) {
 function GuildTooltipCounters (props) {
   MemberCountsStore.initialize()
 
-  const { presenceCount, memberCount } = useStateFromStores([GuildInfoStore], () =>
-    GuildInfoStore.getGuild(props.guild.id) ?? {}
+  const { presenceCount, memberCount } = useStateFromStores([GuildStore], () =>
+    GuildStore.getGuild(props.guild.id) ?? {}
   )
   const { members, membersOnline } = useStateFromStores([MemberCountsStore], () =>
     MemberCountsStore.getMemberCounts(props.guild.id)
