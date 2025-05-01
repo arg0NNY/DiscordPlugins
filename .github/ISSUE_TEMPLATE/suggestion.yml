@@ -16,10 +16,9 @@ body:
     options:
       - "🔒 PasscodeLock"
       - "👀 ChannelsPreview"
-      - "🎞️ BetterAnimations"
+      - "🌊 BetterAnimations"
       - "📑 BetterGuildTooltip"
       - "🔊 InMyVoice"
-      - "🎨 FreeThemes"
       - "📜 BetterChannelList"
       - "⭕ Other/Unrelated"
   validations:
