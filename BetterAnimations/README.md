@@ -27,6 +27,6 @@ Here are some examples from plugin's settings:
 
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
-[betteranimations-version-badge]: https://img.shields.io/badge/version-1.2.3-blue
+[betteranimations-version-badge]: https://img.shields.io/badge/version-1.2.4-blue
 [betteranimations-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterAnimations
 [betteranimations-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterAnimations

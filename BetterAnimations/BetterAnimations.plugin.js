@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.3
+ * @version 1.2.4
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,23 +15,22 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.3',
+    version: '1.2.4',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
+      type: 'fixed',
+      title: 'Fixes',
       items: [
-        'A couple of adjustments for animations to work smoothly with Discord\'s visual refresh.',
-        'Server animations are now fullscreen.'
+        'Updated Servers and Channels animations to work in the latest release of Discord.'
       ]
     },
     {
       type: 'progress',
       title: 'Stay tuned',
       items: [
-        'Big changes are underway...'
+        'Big changes are just around the corner...'
       ]
     }
   ]
@@ -218,9 +217,9 @@ class Route {
 
 const Routes = [
   new Route('Chat', [
-    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|\\d+)/threads/:threadId/:messageId?',
-    '/channels/@me/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)',
-    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|\\d+)?/:messageId?'
+    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)/threads/:threadId/:messageId?',
+    '/channels/@me/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)',
+    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)?/:messageId?'
   ], {
     element: `.${Selectors.Chat.chat}:not(.${Selectors.MessageRequests.container})`,
     scrollers: [Selectors.MemberList.members, Selectors.Content.scrollerBase]
