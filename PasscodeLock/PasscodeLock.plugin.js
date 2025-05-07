@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.3
+ * @version 1.5.4
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,22 +15,15 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.3',
+    version: '1.5.4',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
     {
-      type: 'improved',
-      title: 'Improvements',
-      items: [
-        'Moved Lock Discord button to the app title bar.',
-      ]
-    },
-    {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed system bar buttons being unreachable when the Lock screen is shown.',
+        'Updated to work in the latest release of Discord.',
       ]
     }
   ]
@@ -1026,7 +1019,8 @@ module.exports = class PasscodeLock {
 
     this.element = document.createElement('div')
     getContainer().appendChild(this.element)
-    ReactDOM.render(React.createElement(PasscodeLocker, { plugin: this, button, type, onSuccess }), this.element)
+    this.reactRoot = ReactDOM.createRoot(this.element)
+    this.reactRoot.render(React.createElement(PasscodeLocker, { plugin: this, button, type, onSuccess }))
     this.disableInteractions()
 
     this.locked = true
@@ -1048,10 +1042,8 @@ module.exports = class PasscodeLock {
     Dispatcher.dispatch({ type: 'PL__UNLOCK' })
     if (safeUnlock) Data.locked = false
 
-    if (!this.element) return
-
-    ReactDOM.unmountComponentAtNode(this.element)
-    this.element.remove()
+    this.reactRoot?.unmount()
+    this.element?.remove()
   }
 
   disableInteractions () {
