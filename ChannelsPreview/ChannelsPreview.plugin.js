@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.3
+ * @version 2.1.4
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.3',
+    version: '2.1.4',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,8 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the preview positioning incorrectly when the plugin is used in pair with BetterChannelList\'s redesign feature.',
-        'Updated to work in the latest release of Discord.'
+        'Fixed the crash occurring when previewing Stage Voice channels.'
       ]
     }
   ]
@@ -390,14 +389,17 @@ module.exports = class ChannelsPreview {
           const ref = self.__channelItemRef
           Patcher.after(popout.props, 'children', (self, args, value) => {
             Patcher.after(value.props, 'children', (self, args, value) => {
-              value.ref = ref
+              value.props.ref = ref
             })
           })
         }
 
+        const targetElementRef = self.channelItemRef ?? self.__channelItemRef
+        if (!targetElementRef) return
+
         popout.type = ChannelPopout
         popout.props = {
-          targetElementRef: self.channelItemRef ?? self.__channelItemRef,
+          targetElementRef,
           channel,
           selected,
           messages,
