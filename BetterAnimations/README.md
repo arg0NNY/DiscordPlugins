@@ -1,3 +1,22 @@
+![BetterAnimations](https://i.imgur.com/Kkv8zKB.png)
+
+## BetterAnimations V2 enters Beta!
+
+The newest version of [one of the most downloaded BetterDiscord plugins](https://betterdiscord.app/plugin/BetterAnimations) almost 2 years in development takes the success of its predecessor to a whole new level.
+
+[**Join the Support Server**](https://discord.gg/jgfy25t47r) to be one of the first ones to experience the largest BetterDiscord plugin ever made
+and take part in establishing it as the ultimate solution for bringing your Discord app to life with fluid animations.
+
+Main keynotes of the newest release:
+- **10 new animation modules** — BetterAnimations V2 supports 14 modules in total: Servers, Channels, Settings, Layers, Tooltips, Popouts, Context Menu, Messages, Channel List, Modals, Modals Backdrop, Members Sidebar, Thread Sidebar, Thread Sidebar Switch.
+- **Native integration** — animations are tightly integrated into Discord making them much more reliable and rigid.
+- **Ultimate customizability** — tweak every part of the plugin and animations in a fully revamped Settings Panel.
+- **Client Mod & Framework** — build your own animations and publish them to the official Catalog for everyone to download and use.
+
+```
+ 
+```
+
 ![BetterAnimations](https://user-images.githubusercontent.com/52377180/152634904-a58fdab9-3402-44c3-a9aa-8eed14b47c8e.gif)
 
 # [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
