@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.4
+ * @version 1.2.5
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,22 +15,15 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.4',
+    version: '1.2.5',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
     {
-      type: 'fixed',
-      title: 'Fixes',
-      items: [
-        'Updated Servers and Channels animations to work in the latest release of Discord.'
-      ]
-    },
-    {
       type: 'progress',
-      title: 'Stay tuned',
+      title: 'Big changes are here',
       items: [
-        'Big changes are just around the corner...'
+        '**BetterAnimations V2 enters Beta!** See Settings to learn more.'
       ]
     }
   ]
@@ -48,6 +41,10 @@ const {
   Data
 } = new BdApi(config.info.name)
 const { Filters } = Webpack
+
+const handleClick = Webpack.getModule(Filters.byStrings('sanitizeUrl', 'shouldConfirm'), { searchExports: true })
+const Button = Webpack.getModule(Filters.byKeys('Link', 'Sizes'), { searchExports: true })
+const Text = Webpack.getModule(m => Filters.byStrings('WebkitLineClamp', 'data-text-variant')(m?.render), { searchExports: true })
 
 const Dispatcher = Webpack.getByKeys('_subscriptions', '_waitQueue')
 const SelectedGuildStore = Webpack.getStore('SelectedGuildStore')
@@ -1376,6 +1373,62 @@ module.exports = class BetterAnimations {
             text-align: center;
             white-space: wrap;
         }
+        
+        .BA__createUpsellBanner {
+            align-items: center;
+            background: linear-gradient(187deg, #5865F2, #2F379F);
+            background-size: cover;
+            border-radius: var(--radius-sm);
+            flex-direction: row;
+            padding-right: 24px;
+            margin: 32px 12px;
+        }
+        
+        .BA__createUpsellBanner, .BA__mainColumn {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .BA__mainColumn {
+            color: var(--white-100);
+            flex: 1;
+            flex-direction: column;
+            margin: auto 0;
+            min-height: 96px;
+            padding: 16px 16px 16px 4px;
+        }
+        
+        .BA__createUpsellBanner h3 {
+            margin-bottom: 4px;
+        }
+        
+        .BA__createUpsellButton {
+            padding: 11px 20px;
+            margin-top: 12px;
+            width: min-content;
+        }
+        
+        .BA__createUpsellButton:hover {
+            opacity: .9;
+        }
+        
+        .BA__createUpsellArtContainer {
+            align-items: center;
+            align-self: stretch;
+            display: flex;
+            flex-basis: 124px;
+            height: 100px;
+            position: relative;
+        }
+        
+        .BA__createUpsellArt {
+            width: 129px;
+            bottom: -51px;
+            left: -15px;
+            object-fit: contain;
+            pointer-events: none;
+            position: absolute;
+        }
     `)
   }
 
@@ -1898,6 +1951,7 @@ module.exports = class BetterAnimations {
     return React.createElement(
       'div',
       { className: SETTINGS_CLASSNAME },
+      this.renderV2Banner(),
       element
     )
   }
@@ -1946,6 +2000,7 @@ module.exports = class BetterAnimations {
     this.settings = this.loadSettings(this.defaultSettings)
 
     this.showChangelogIfNeeded()
+    this.showV2ModalIfNeeded()
   }
 
   loadSettings (defaults = {}) {
@@ -1971,5 +2026,83 @@ module.exports = class BetterAnimations {
       subtitle: 'Version ' + config.info.version,
       changes: config.changelog
     })
+  }
+
+  showV2ModalIfNeeded () {
+    if (Data.load('hasShownV2Modal')) return
+
+    this.showV2Modal()
+    Data.save('hasShownV2Modal', true)
+  }
+  showV2Modal () {
+    const invite = 'https://discord.gg/jgfy25t47r'
+
+    return UI.showChangelogModal({
+      banner: 'https://i.imgur.com/Kkv8zKB.png',
+      title: 'BetterAnimations V2 enters Beta!',
+      subtitle: 'Big changes are finally here.',
+      blurb: 'The newest version of one of the most downloaded BetterDiscord plugins almost 2 years in development takes the success of its predecessor to a whole new level.' +
+        `\n\n[**Join the Support Server**](${invite}) to be one of the first ones to experience the largest BetterDiscord plugin ever made ` +
+        'and take part in establishing it as the ultimate solution for bringing your Discord app to life with fluid animations.',
+      changes: [
+        {
+          type: 'progress',
+          title: 'Main keynotes of the newest release',
+          items: [
+            '**10 new animation modules** — BetterAnimations V2 supports 14 modules in total: Servers, Channels, Settings, Layers, Tooltips, Popouts, Context Menu, Messages, Channel List, Modals, Modals Backdrop, Members Sidebar, Thread Sidebar, Thread Sidebar Switch.',
+            '**Native integration** — animations are tightly integrated into Discord making them much more reliable and rigid.',
+            '**Ultimate customizability** — tweak every part of the plugin and animations in a fully revamped Settings Panel.',
+            '**Client Mod & Framework** — build your own animations and publish them to the official Catalog for everyone to download and use.'
+          ]
+        }
+      ],
+      footer: React.createElement(
+        Button,
+        {
+          style: {
+            marginLeft: 'auto'
+          },
+          children: 'Try it out',
+          onClick: () => handleClick({ href: invite })
+        }
+      )
+    })
+  }
+
+  renderV2Banner () {
+    function PackPicture(props) {
+      return /* @__PURE__ */ BdApi.React.createElement("svg", { ...props, width: "160", height: "192", viewBox: "0 0 160 192", fill: "none", xmlns: "http://www.w3.org/2000/svg" }, /* @__PURE__ */ BdApi.React.createElement("g", { "clip-path": "url(#clip0_364_497)" }, /* @__PURE__ */ BdApi.React.createElement("path", { d: "M0.12699 43.8989C-0.863275 37.1255 4.04575 30.863 11.0915 29.911L113.152 16.1221C120.197 15.1702 126.712 19.8893 127.702 26.6627L147.873 164.635C148.863 171.409 143.954 177.671 136.908 178.623L39.1006 191.837C29.7063 193.107 21.0203 186.814 19.7001 177.784L0.12699 43.8989Z", fill: "url(#paint0_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M10.1376 30.5728C9.06483 22.8787 14.3827 15.7647 22.0152 14.6834L124.678 0.138664C132.31 -0.942678 139.367 4.41806 140.44 12.1122L159.862 151.427C160.935 159.121 155.617 166.235 147.985 167.317L45.3224 181.861C37.6899 182.943 30.6329 177.582 29.5602 169.888L10.1376 30.5728Z", fill: "url(#paint1_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M19.0979 33.7417C18.3346 28.2753 22.1183 23.221 27.5489 22.4527L121.946 9.09852C127.376 8.33025 132.397 12.1389 133.161 17.6054L151.402 148.258C152.165 153.725 148.382 158.779 142.951 159.547L48.5544 172.901C43.1238 173.67 38.1027 169.861 37.3394 164.395L19.0979 33.7417Z", fill: "white" }), /* @__PURE__ */ BdApi.React.createElement("path", { "fill-rule": "evenodd", "clip-rule": "evenodd", d: "M91.6298 136.767C104.339 149.771 112.123 129.724 110.522 118.561C108.63 105.362 94.2015 99.8837 86.5377 100.972C74.237 102.719 63.9659 114.548 65.9411 128.458C68.1366 143.918 82.7808 150.575 93.3682 149.072C90.9234 149.067 82.6965 148.49 79.9777 130.116C78.1393 117.689 81.5632 112.133 88.286 113.408C88.4372 113.441 95.755 115.191 97.0231 124.121C98.2858 133.013 91.6298 136.767 91.6298 136.767Z", fill: "url(#paint2_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { "fill-rule": "evenodd", "clip-rule": "evenodd", d: "M88.2981 113.397C80.9178 111.971 73.1222 118.994 74.7716 130.609C77.4648 149.574 91.7633 149.3 93.4668 149.058C105.768 147.311 116.039 135.481 114.063 121.572C111.868 106.111 97.2237 99.4545 86.6364 100.958C89.5111 100.135 102.892 101.887 105.39 119.481C107.02 130.954 98.2947 138.565 91.6643 136.784C91.5131 136.751 84.1953 135.001 82.9272 126.071C81.6645 117.179 88.2981 113.397 88.2981 113.397Z", fill: "url(#paint3_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M47.8507 42.0276C47.8349 41.9761 47.8165 41.9254 47.7955 41.8757C47.775 41.8263 47.752 41.778 47.7266 41.731C47.7016 41.6837 47.6741 41.6378 47.644 41.5935C47.6135 41.5495 47.5812 41.5068 47.5471 41.4665C47.5126 41.4252 47.4757 41.3858 47.4368 41.3487C47.399 41.312 47.3583 41.2768 47.3168 41.2438C47.2747 41.2126 47.231 41.1838 47.1858 41.1573C47.1407 41.129 47.0938 41.1021 47.0463 41.0783C46.9982 41.0547 46.9489 41.0336 46.8986 41.0152C46.5918 40.9079 46.262 40.8844 45.943 40.9471C45.4691 41.1322 45.0954 41.3724 44.8774 41.8574C44.8551 41.9067 44.8356 41.9571 44.819 42.0086C44.8031 42.0592 44.7885 42.1117 44.7771 42.1649C44.7655 42.2175 44.7565 42.2707 44.7504 42.3242C44.7443 42.3776 44.7413 42.4306 44.7396 42.4855C44.738 42.5404 44.7409 42.5904 44.7459 42.6475C44.7503 42.7011 44.7579 42.7544 44.7685 42.8072C44.7762 42.8608 44.7904 42.9092 44.8057 42.9648C44.8209 43.0204 44.8388 43.0652 44.8598 43.1169C44.9176 43.2604 44.9965 43.3944 45.094 43.5145C45.1259 43.5541 45.1607 43.5922 45.1964 43.6292C45.2322 43.6662 45.2707 43.7006 45.31 43.7329C45.3494 43.7662 45.3906 43.7971 45.4335 43.8257C45.4754 43.8544 45.5201 43.8806 45.5647 43.9058C45.6093 43.931 45.6564 43.9517 45.7045 43.9722C46.0531 44.1181 46.3754 44.1154 46.7427 44.0601C47.2113 43.8663 47.5776 43.6261 47.7889 43.1389C47.8103 43.0892 47.829 43.0385 47.8451 42.9869C47.8621 42.9358 47.8758 42.8837 47.886 42.8308C47.9183 42.6723 47.9271 42.51 47.9121 42.3489C47.9045 42.2954 47.8975 42.2459 47.8894 42.1892C47.8814 42.1326 47.8664 42.079 47.8507 42.0276Z", fill: "url(#paint4_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M60.4791 52.2765C60.5 52.3274 60.5239 52.377 60.5507 52.425C60.576 52.4723 60.6039 52.5182 60.6343 52.5624C60.6638 52.6066 60.6958 52.649 60.7301 52.6896C60.7647 52.7305 60.8015 52.7694 60.8403 52.8064C60.8783 52.8435 60.9184 52.8785 60.9603 52.9112C61.0025 52.9445 61.0466 52.9754 61.0922 53.0039C61.1372 53.0322 61.184 53.0581 61.2315 53.0818C61.2792 53.1057 61.3281 53.1268 61.3782 53.1451C61.4281 53.164 61.4792 53.18 61.531 53.1927C61.8483 53.2683 62.1804 53.2539 62.4899 53.151C62.9429 52.929 63.2885 52.6466 63.4547 52.1521C63.4714 52.1012 63.4854 52.0493 63.4967 51.9969C63.5081 51.9438 63.5171 51.8889 63.5235 51.8376C63.5298 51.784 63.5334 51.7302 63.5342 51.6763C63.535 51.6226 63.5329 51.5714 63.5281 51.5153C63.5233 51.4592 63.5135 51.4123 63.5054 51.3556C63.4974 51.299 63.4826 51.2538 63.4674 51.1992C63.4523 51.1446 63.4343 51.0988 63.4133 51.0471C63.3936 50.9971 63.3709 50.9484 63.3452 50.9012C63.3207 50.8543 63.2932 50.8088 63.2637 50.7636C63.2341 50.7184 63.2019 50.6767 63.1678 50.6364C63.1337 50.596 63.0975 50.556 63.0596 50.5183C63.0217 50.4806 62.9831 50.4461 62.9394 50.4124C62.8985 50.3787 62.8555 50.3476 62.8106 50.3193C62.7663 50.2899 62.7204 50.2631 62.6731 50.239C62.6254 50.2142 62.5772 50.1927 62.527 50.1725C62.4776 50.153 62.4272 50.1363 62.3759 50.1225C62.0311 50.0254 61.7375 50.0671 61.3936 50.1402C60.942 50.3641 60.595 50.6436 60.429 51.1401C60.4127 51.1929 60.3983 51.2464 60.3857 51.3008C60.3742 51.3548 60.3654 51.4093 60.3595 51.4642C60.3529 51.5191 60.3495 51.5743 60.3494 51.6296C60.3489 51.6854 60.3513 51.7397 60.3562 51.7958C60.3608 51.8508 60.3686 51.9055 60.3794 51.9596C60.3872 52.0142 60.4042 52.0675 60.4202 52.1209C60.437 52.1738 60.4566 52.2257 60.4791 52.2765Z", fill: "url(#paint5_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M58.6152 47.0068C58.6285 46.9597 58.6387 46.9131 58.6477 46.8656C58.6567 46.818 58.6614 46.7701 58.665 46.7212C58.6689 46.6732 58.6701 46.6249 58.6686 46.5767C58.6672 46.5284 58.6631 46.4802 58.6565 46.4323C58.6523 46.3843 58.6455 46.3365 58.6362 46.2891C58.6241 46.2415 58.6112 46.1949 58.5954 46.1499C58.5797 46.1042 58.5614 46.0594 58.5406 46.0158C58.5207 45.9718 58.4981 45.929 58.473 45.8877C58.374 45.7258 58.2418 45.5866 58.0851 45.4795C57.9284 45.3724 57.7507 45.2998 57.5639 45.2665C56.9696 45.1523 53.7461 45.6766 52.9821 45.8398C52.5752 46.0532 52.2879 46.3021 52.1465 46.7563C52.1318 46.8014 52.1205 46.8472 52.1103 46.8938C52.1001 46.9405 52.0933 46.9887 52.0884 47.0357C52.0835 47.0826 52.0808 47.1303 52.0804 47.1787C52.0799 47.2271 52.0823 47.274 52.087 47.3217C52.0917 47.3694 52.1003 47.4155 52.1071 47.4629C52.1161 47.5098 52.1276 47.5562 52.1416 47.602C52.1545 47.648 52.1704 47.6931 52.1891 47.7371C52.2069 47.7812 52.227 47.8243 52.2495 47.8662C52.333 48.0206 52.4466 48.1567 52.5837 48.2663C52.7208 48.3759 52.8785 48.4568 53.0475 48.5042C53.2375 48.5572 53.4351 48.5771 53.6318 48.5631C54.2106 48.5313 54.797 48.3975 55.3708 48.316C56.1712 48.2022 56.9789 48.1169 57.7717 47.9643C58.1838 47.7355 58.4792 47.477 58.6152 47.0068Z", fill: "url(#paint6_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M104.452 55.4932C105.883 53.1573 106.79 49.8482 106.973 47.1232C107.196 43.8283 106.508 40.383 104.27 37.8487C102.357 35.6822 99.4849 34.4981 96.6252 34.3432C93.987 34.201 91.124 34.7918 88.4959 35.1579L58.7608 39.3191L53.0144 40.1357C52.1903 40.2528 51.3438 40.3237 50.5284 40.4805C50.2035 40.5312 49.8999 40.6739 49.6536 40.8918C49.5264 41.0127 49.4245 41.1578 49.3539 41.3185C49.2832 41.4792 49.2453 41.6523 49.2422 41.8278C49.2417 41.8762 49.2423 41.9245 49.2459 41.9723C49.2501 42.02 49.2568 42.0675 49.2661 42.1145C49.2744 42.1618 49.2853 42.2087 49.2987 42.2549C49.3114 42.3012 49.3266 42.3467 49.3443 42.3913C49.3808 42.4807 49.4254 42.5665 49.4775 42.6478C49.5041 42.6871 49.5317 42.7262 49.5623 42.7639C49.5929 42.8016 49.6252 42.837 49.6584 42.8711C49.8982 43.1132 50.2142 43.265 50.553 43.3011C51.1149 43.3358 53.1592 42.9517 53.8165 42.8583L65.9119 41.1396C66.4384 41.0648 66.9972 40.9296 67.5311 40.9442C67.9321 40.9555 68.2853 41.0745 68.5554 41.3851C68.8108 41.6772 68.9431 42.057 68.9246 42.4446C68.9072 42.676 68.8294 42.8989 68.6991 43.091C68.5687 43.2831 68.3902 43.4376 68.1815 43.5391C67.6328 43.8273 66.8942 43.8513 66.2851 43.9358L62.5608 44.4492C61.9427 44.5371 61.2569 44.5704 60.6629 44.7463C60.4156 44.814 60.1863 44.9356 59.9915 45.1023C59.8598 45.2137 59.7531 45.3517 59.6785 45.5072C59.6039 45.6627 59.563 45.8322 59.5585 46.0046C59.5489 46.3886 59.6756 46.8288 59.9573 47.0957C60.178 47.3167 60.4678 47.4554 60.7783 47.4887C61.4675 47.561 62.3016 47.3437 62.989 47.2408L67.594 46.5864C68.2811 46.4888 69.0334 46.302 69.7235 46.2922C70.1326 46.2866 70.5103 46.378 70.8075 46.6721C70.9503 46.809 71.0626 46.9743 71.1374 47.1575C71.2121 47.3406 71.2475 47.5374 71.2413 47.735C71.2365 47.9687 71.1708 48.197 71.0508 48.3975C70.9307 48.598 70.7603 48.7636 70.5566 48.8781C69.399 49.5334 65.8126 49.2201 64.9229 50.1253C64.7998 50.2588 64.7051 50.4159 64.6445 50.5871C64.584 50.7583 64.5587 50.94 64.5704 51.1213C64.5713 51.3152 64.6127 51.5069 64.6922 51.6839C64.7716 51.8609 64.8873 52.0192 65.0317 52.1487C65.3096 52.3878 65.6694 52.5096 66.0354 52.4885C66.6586 52.4735 67.3324 52.3189 67.9525 52.2308L89.9636 49.103C90.8104 48.9827 91.6754 48.8199 92.5301 48.7699C93.0358 48.8746 93.4749 49.0434 93.7811 49.4897C94.062 49.8985 94.096 50.3519 94.0766 50.8297C94.012 51.2682 93.8591 51.689 93.6272 52.0666C93.3952 52.4442 93.0891 52.7709 92.7272 53.0268C92.4863 53.2013 92.22 53.3377 91.9376 53.4311C91.1221 53.609 90.2717 53.6973 89.4414 53.8153C87.7653 54.0535 86.0811 54.2644 84.4099 54.5303C84.0268 58.1875 83.536 61.8411 83.1965 65.5016L88.2114 64.789C89.0449 64.6706 89.9378 64.468 90.7761 64.4582C91.2511 64.5389 91.6963 64.7205 91.9944 65.1175C92.3213 65.5545 92.3882 66.143 92.2967 66.6678C92.2122 67.0968 92.0433 67.5046 91.7997 67.8677C91.5561 68.2307 91.2427 68.5416 90.8777 68.7823C90.5982 68.9642 90.2879 69.0938 89.962 69.1646C89.4074 69.2928 88.8223 69.3392 88.2583 69.4162L85.6488 69.787C83.1548 70.1414 80.6574 70.5467 78.1573 70.8515C78.1439 70.3132 78.2548 69.7331 78.316 69.1947L78.6867 65.9312L79.8911 55.1766L66.03 57.1399C65.42 62.3513 64.9158 67.5896 64.269 72.8083C63.9473 76.2392 63.5118 79.6685 63.1293 83.0934L62.8127 85.9466C62.7831 86.2336 62.7083 86.5206 62.6908 86.8047C62.6761 86.9189 62.6926 87.035 62.7386 87.1406C62.8264 87.1711 62.922 87.1705 63.0095 87.1389C64.8136 86.9582 66.6278 86.6342 68.4234 86.379L86.4549 83.8167C89.2024 83.4263 91.9513 83.0683 94.6113 82.2468C97.119 81.47 99.5452 80.3202 101.512 78.5546C105.213 75.232 106.367 70.6266 106.612 65.8581C106.784 62.5029 106.357 58.8904 104.02 56.2998L104.016 56.2771C104.174 56.0193 104.316 55.7585 104.452 55.4932Z", fill: "url(#paint7_linear_364_497)" })), /* @__PURE__ */ BdApi.React.createElement("defs", null, /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint0_linear_364_497", x1: "0.447603", y1: "16.413", x2: "148.448", y2: "191.541", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#508AB7" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#1F2569" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint1_linear_364_497", x1: "11.1858", y1: "19.1536", x2: "158.875", y2: "162.67", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint2_linear_364_497", x1: "73.3725", y1: "107.902", x2: "107.5", y2: "144.392", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#5865F2" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#41D1FF" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint3_linear_364_497", x1: "109.369", y1: "139.553", x2: "70.6513", y2: "110.457", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#5865F2" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#41D1FF" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint4_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint5_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint6_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint7_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("clipPath", { id: "clip0_364_497" }, /* @__PURE__ */ BdApi.React.createElement("rect", { width: "160", height: "192", fill: "white" }))));
+    }
+
+    return BdApi.React.createElement("div", { className: "BA__createUpsellBanner" },
+      /* @__PURE__ */ BdApi.React.createElement("div", { class: "BA__createUpsellArtContainer" },
+        /* @__PURE__ */ BdApi.React.createElement(PackPicture, { className: "BA__createUpsellArt" })),
+      /* @__PURE__ */ BdApi.React.createElement("div", { class: "BA__mainColumn" },
+        /* @__PURE__ */ BdApi.React.createElement(
+      Text,
+      {
+        tag: "h3",
+        variant: "heading-lg/extrabold",
+        color: "currentColor"
+      },
+      "BetterAnimations V2 enters Beta!"
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      Text,
+      {
+        variant: "text-sm/normal",
+        color: "currentColor"
+      },
+      "Be one of the first ones to experience the largest BetterDiscord plugin ever made "
+      + "and take part in establishing it as the ultimate solution for bringing your Discord app to life with fluid animations."
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      Button,
+      {
+        className: "BA__createUpsellButton",
+        innerClassName: "BA__buttonContents",
+        color: Button.Colors.BRAND_INVERTED,
+        onClick: () => this.showV2Modal()
+      },
+      "Learn more"
+    )))
   }
 }
