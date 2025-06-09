@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.7
+ * @version 1.2.8
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.7',
+    version: '1.2.8',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,9 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.',
+        'Fixed Emoji Editor not displaying when opened.',
+        'Fixed the last message contents sometimes interfering with the channel list scroll.',
+        'Fixed the forum post count and the blocked message(s) text not displaying correctly.'
       ]
     }
   ]
@@ -88,10 +90,7 @@ const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads',
 const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
 const ChannelTypes = Webpack.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
 const MessageTypes = Webpack.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
-const { intl, t } = Webpack.getMangled(Filters.byKeys('currentLocale', 'format'), {
-  intl: Filters.byKeys('currentLocale', 'format'),
-  t: m => typeof m[0] === 'function'
-}, { searchExports: true, raw: true })
+const { intl, t } = Webpack.getByKeys('intl', 't')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const ForumPostAuthor = Webpack.getByStrings('renderColon', 'author')
 const buildMessageReplyContent = Webpack.getModule(Filters.byStrings('trailingIconClass', 'CHANNEL_PINNED_MESSAGE'), { searchExports: true })
@@ -151,7 +150,7 @@ function deepEqual (x, y) {
 
 function forceAppUpdate (reason = null) {
   Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
-  setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
+  requestIdleCallback(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
 
   Logger.log(`Forced app update.` + (reason ? ` Reason: ${reason}` : ''))
 }
@@ -619,6 +618,7 @@ module.exports = class BetterChannelList {
     DOM.addStyle(this.styleName, `
         .BCL--last-message {
             pointer-events: none;
+            contain: layout;
         }
 
         .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessage.author} * {
@@ -932,13 +932,14 @@ module.exports = class BetterChannelList {
       // Emoji picker
       const _children = value.props.children
       value.props.children = React.createElement(Popout, {
+        targetElementRef: _children.props.ref,
         renderPopout: ({ closePopout }) => React.createElement(EmojiPicker, {
           className: 'BCL--emoji-picker',
           headerClassName: 'BCL--emoji-picker-header',
           closePopout,
           pickerIntention: EmojiPickerIntentions.SOUNDBOARD,
           onNavigateAway: closePopout,
-          onSelectEmoji: emoji => {
+          onSelectEmoji: ({ emoji }) => {
             Dispatcher.dispatch({ type: 'BCL__EMOJI_ICON_SET', channelId: channel.id, emoji: emoji.surrogates })
             closePopout()
           },
