@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.4
+ * @version 2.1.5
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.4',
+    version: '2.1.5',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,8 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the crash occurring when previewing Stage Voice channels.'
+        'Fixed the preview not displaying for DMs and Threads.',
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -37,9 +38,12 @@ const {
   React,
   Utils,
   Data,
-  UI
+  UI,
+  Components
 } = new BdApi(config.info.name)
+
 const { Filters } = Webpack
+const { ErrorBoundary } = Components
 
 const MessageActions = Webpack.getByKeys('jumpToMessage', '_sendMessage')
 const MessageStore = Webpack.getStore('MessageStore')
@@ -99,7 +103,7 @@ const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
 const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
 const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
 const EmptyMessage = Webpack.getByStrings('parseTopic', 'buttonContainer')
-const FluxTypingUsers = Webpack.getByStrings('getTypingUsers', 'isThreadCreation')
+const FluxTypingUsers = Webpack.getByStrings('getUserCombo', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
 const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'MESSAGE_GROUP_BLOCKED')
@@ -112,7 +116,7 @@ const FocusRing = Webpack.getModule(m => Filters.byStrings('focusProps', '"li"')
 
 function forceAppUpdate () {
   Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
-  setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
+  requestIdleCallback(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
 }
 
 function FormDivider ({ className, style }) {
@@ -321,7 +325,10 @@ function ChannelPopout ({ channel, selected, messages, children, shouldShow: _sh
   return React.createElement(Popout, {
     position: 'right',
     align: 'center',
-    renderPopout: () => React.createElement(PreviewDialog, { channel, messages }),
+    renderPopout: () => React.createElement(ErrorBoundary, {
+      name: 'PreviewDialog',
+      children: React.createElement(PreviewDialog, { channel, messages })
+    }),
     children,
     shouldShow: shouldShow && !isFetchable,
     spacing: 16,
@@ -431,7 +438,7 @@ module.exports = class ChannelsPreview {
     })
 
     const ref = React.useRef(null)
-    if (!link.ref) link.ref = ref
+    if (!link.props.ref) link.props.ref = ref
 
     React.useEffect(() => {
       const onWheel = e => {
@@ -443,8 +450,8 @@ module.exports = class ChannelsPreview {
         scroller.scrollTop += e.deltaY
         e.preventDefault()
       }
-      link.ref?.current?.addEventListener('wheel', onWheel, { passive: false })
-      return () => link.ref?.current?.removeEventListener('wheel', onWheel, { passive: false })
+      link.props.ref?.current?.addEventListener('wheel', onWheel, { passive: false })
+      return () => link.props.ref?.current?.removeEventListener('wheel', onWheel, { passive: false })
     }, [])
   }
 
@@ -480,6 +487,7 @@ module.exports = class ChannelsPreview {
 
       const { children } = linkWrapper
       linkWrapper.children = React.createElement(ChannelPopout, {
+        targetElementRef: linkWrapper.children?.props?.ref,
         channel: thread,
         selected: isSelectedChannel,
         messages,
@@ -497,7 +505,11 @@ module.exports = class ChannelsPreview {
       const messages = useStateFromStores([MessageStore], () => MessageStore.getMessages(channel.id))
       const shouldShow = useStateFromStores([ShownPreviewsStore], () => ShownPreviewsStore.shouldShow(channel.id))
 
+      const ref = React.useRef(null)
+      if (!value.props.ref) value.props.ref = ref
+
       const popout = React.createElement(ChannelPopout, {
+        targetElementRef: value.props.ref,
         channel,
         selected,
         messages,
