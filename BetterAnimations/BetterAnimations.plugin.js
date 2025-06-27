@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.5
+ * @version 1.2.6
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,15 +15,15 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.5',
+    version: '1.2.6',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
     {
-      type: 'progress',
-      title: 'Big changes are here',
+      type: 'fixed',
+      title: 'Fixes',
       items: [
-        '**BetterAnimations V2 enters Beta!** See Settings to learn more.'
+        'A couple of style fixes for the latest release of Discord.'
       ]
     }
   ]
@@ -1336,7 +1336,7 @@ module.exports = class BetterAnimations {
             grid-auto-rows: 120px;
         }
         .${SETTINGS_CLASSNAME} .${Selectors.Sticker.wrapper} {
-            background-color: var(--background-secondary);
+            background-color: var(--background-base-lower);
             border-radius: 8px;
             display: flex;
             padding: 12px;
@@ -1590,13 +1590,13 @@ module.exports = class BetterAnimations {
           left: '0',
           height: '100%',
           width: '100%',
-          background: `var(--background-${num === 2 ? 'tertiary' : 'accent'})`,
+          background: `var(--background-${num === 2 ? 'base-lowest' : 'accent'})`,
           borderRadius: '5px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
           textAlign: 'center',
-          color: 'var(--text-normal)',
+          color: 'var(--text-default)',
           fontSize: '12px',
           opacity: 0
         },
