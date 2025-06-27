@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.8
+ * @version 1.2.9
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.8',
+    version: '1.2.9',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,9 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed Emoji Editor not displaying when opened.',
-        'Fixed the last message contents sometimes interfering with the channel list scroll.',
-        'Fixed the forum post count and the blocked message(s) text not displaying correctly.'
+        'A couple of style fixes for the latest release of Discord.'
       ]
     }
   ]
@@ -711,7 +709,7 @@ module.exports = class BetterChannelList {
 
         .BCL--voice-badge {
             background: var(--background-secondary-alt);
-            color: var(--text-normal);
+            color: var(--text-default);
             padding: 5px 8px;
             border-radius: 100px;
             display: flex;
