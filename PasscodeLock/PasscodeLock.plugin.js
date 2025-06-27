@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.4
+ * @version 1.5.5
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.4',
+    version: '1.5.5',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.',
+        'Fixed the title bar button not displaying or being inaccessible.',
       ]
     }
   ]
@@ -84,7 +84,7 @@ Object.keys(Gifs).forEach(k => fetch(Gifs[k])) // Preload gifs
 
 function forceAppUpdate () {
   Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
-  setTimeout(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
+  requestIdleCallback(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
 }
 
 const buildAnimatedIcon = (src, width = 24, height = width) => {
@@ -172,8 +172,8 @@ const KeybindStore = {
 const NotificationModule = Webpack.getByKeys('showNotification', 'hasPermission')
 const Flux = Webpack.getByKeys('Store', 'connectStores')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
-const SystemBar = [...Webpack.getWithKey(Filters.byStrings('systemBar', 'PlatformTypes'))]
-const AppTitleBar = Webpack.getModule(m => Filters.byStrings('AppTitleBar')(m?.type), { searchExports: true })
+const App = [...Webpack.getWithKey(Filters.byStrings('APP', 'data-app-not-dev-tools'))]
+const AppTitleBar = Webpack.waitForModule(m => Filters.byStrings('AppTitleBar')(m?.type))
 
 const Locale = new class {
 
@@ -1095,8 +1095,8 @@ module.exports = class PasscodeLock {
     })
   }
 
-  patchAppTitleBar () {
-    Patcher.after(AppTitleBar, 'type', (self, args, value) => {
+  async patchAppTitleBar () {
+    Patcher.after(await AppTitleBar, 'type', (self, args, value) => {
       Patcher.after(value.props, 'children', (self, args, value) => {
         Patcher.after(value.props, 'children', (self, args, value) => {
           const buttons = value?.props?.trailing?.props?.children
@@ -1129,9 +1129,19 @@ module.exports = class PasscodeLock {
   }
 
   patchSystemBar () {
-    Patcher.before(...SystemBar, (self, [props]) => {
-      const isLocked = useStateFromStores([PasscodeLockStore], () => PasscodeLockStore.isLocked())
-      if (isLocked) props.show = isLocked
+    let patched = false
+
+    Patcher.after(...App, (self, args, value) => {
+      if (patched) return
+
+      const systemBar = findInReactTree(value, m => Filters.byStrings('hasLayers', 'isAuthenticated')(m?.type?.type))
+      if (!systemBar) return
+
+      Patcher.after(systemBar.type, 'type', (self, args, value) => {
+        const isLocked = useStateFromStores([PasscodeLockStore], () => PasscodeLockStore.isLocked())
+        if (value) value.props.show ||= isLocked
+      })
+      patched = true
     })
   }
 
