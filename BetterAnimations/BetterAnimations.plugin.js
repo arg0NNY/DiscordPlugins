@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.6
+ * @version 1.2.7
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.6',
+    version: '1.2.7',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'A couple of style fixes for the latest release of Discord.'
+        'Minor style fixes in the settings panel.'
       ]
     }
   ]
@@ -151,7 +151,6 @@ const Selectors = buildSelectors({
     }
   ],
   Sizes: () => Webpack.getByKeys('size10', 'size12'),
-  Colors: () => Webpack.getByKeys('colorHeaderPrimary', 'colorWhite'),
   VideoOptions: [
     () => Webpack.getByKeys('backgroundOptionRing'),
     { backgroundOptionRing: 'backgroundOptionRing_ad7d79' }
@@ -1748,9 +1747,11 @@ module.exports = class BetterAnimations {
                     }
                   ),
                   React.createElement(
-                    'div',
+                    Text,
                     {
-                      className: `${Selectors.Colors.colorHeaderPrimary} ${Selectors.Sizes.size10} ${Selectors.Sticker.stickerName}`
+                      className: Selectors.Sticker.stickerName,
+                      variant: 'text-xs/normal',
+                      color: 'text-default'
                     },
                     this.props.type.name
                   )
