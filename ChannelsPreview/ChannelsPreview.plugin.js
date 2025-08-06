@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.5
+ * @version 2.1.6
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.5',
+    version: '2.1.6',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,6 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the preview not displaying for DMs and Threads.',
         'Updated to work in the latest release of Discord.'
       ]
     }
@@ -106,7 +105,7 @@ const EmptyMessage = Webpack.getByStrings('parseTopic', 'buttonContainer')
 const FluxTypingUsers = Webpack.getByStrings('getUserCombo', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
-const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'MESSAGE_GROUP_BLOCKED')
+const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'THREAD_STARTER_MESSAGE')
 const ReadStateStore = Webpack.getStore('ReadStateStore')
 const ChannelStreamItemTypes = Webpack.getModule(Filters.byKeys('MESSAGE', 'DIVIDER'), { searchExports: true })
 const MessageDivider = Webpack.getModule(m => Filters.byStrings('divider', 'isBeforeGroup')(m?.type?.render))
