@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.7
+ * @version 1.2.8
  * @description Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterAnimations/BetterAnimations.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterAnimations',
-    version: '1.2.7',
+    version: '1.2.8',
     description: 'Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Minor style fixes in the settings panel.'
+        'Updated Servers and Channels animations to work in the latest release of Discord.'
       ]
     }
   ]
@@ -213,9 +213,9 @@ class Route {
 
 const Routes = [
   new Route('Chat', [
-    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)/threads/:threadId/:messageId?',
+    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|@inbox|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)/threads/:threadId/:messageId?',
     '/channels/@me/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)',
-    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)?/:messageId?'
+    '/channels/:guildId(@me|@favorites|@guilds-empty-nux|@inbox|\\d+)/:channelId(role-subscriptions|shop|member-applications|@home|channel-browser|onboarding|customize-community|member-safety|boosts|report-to-mod|\\d+)?/:messageId?'
   ], {
     element: `.${Selectors.Chat.chat}:not(.${Selectors.MessageRequests.container})`,
     scrollers: [Selectors.MemberList.members, Selectors.Content.scrollerBase]
