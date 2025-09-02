@@ -7,24 +7,11 @@
  
 ```
 
-![BetterAnimations](https://i.imgur.com/Kkv8zKB.png)
+## [BetterAnimations](https://github.com/arg0NNY/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
+🌊 Discord Animations Client Mod & Framework
 
-## BetterAnimations V2 enters Beta!
+[![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link]
 
-The newest version of [one of the most downloaded BetterDiscord plugins](https://betterdiscord.app/plugin/BetterAnimations) almost 2 years in development takes the success of its predecessor to a whole new level.
-
-[**Join the Support Server**](https://discord.gg/jgfy25t47r) to be one of the first ones to experience the largest BetterDiscord plugin ever made
-and take part in establishing it as the ultimate solution for bringing your Discord app to life with fluid animations.
-
-Main keynotes of the newest release:
-- **10 new animation modules** — BetterAnimations V2 supports 14 modules in total: Servers, Channels, Settings, Layers, Tooltips, Popouts, Context Menu, Messages, Channel List, Modals, Modals Backdrop, Members Sidebar, Thread Sidebar, Thread Sidebar Switch.
-- **Native integration** — animations are tightly integrated into Discord making them much more reliable and rigid.
-- **Ultimate customizability** — tweak every part of the plugin and animations in a fully revamped Settings Panel.
-- **Client Mod & Framework** — build your own animations and publish them to the official Catalog for everyone to download and use.
-
-```
- 
-```
 
 ## [BetterChannelList](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList) ![Status][status-official-badge] ![Version][betterchannellist-version-badge] ![Downloads][betterchannellist-downloads-badge] ![Likes][betterchannellist-likes-badge]
 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
@@ -36,12 +23,6 @@ Main keynotes of the newest release:
 Protect your Discord with a passcode.
 
 [![Download][download-badge]][passcodelock-download-link] [![View][view-badge]][passcodelock-view-link]
-
-
-## [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
-Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
-
-[![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link]
 
 
 ## [ChannelsPreview](https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview) ![Status][status-official-badge] ![Version][channelspreview-version-badge] ![Downloads][channelspreview-downloads-badge] ![Likes][channelspreview-likes-badge]
@@ -117,7 +98,7 @@ SOFTWARE.
 
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
-[betteranimations-version-badge]: https://img.shields.io/badge/version-1.2.9-blue
+[betteranimations-version-badge]: https://img.shields.io/badge/version-2.0.0-blue
 [betteranimations-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterAnimations
 [betteranimations-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterAnimations
 

@@ -1,37 +1,9 @@
-![BetterAnimations](https://i.imgur.com/Kkv8zKB.png)
+![BetterAnimations](https://github.com/arg0NNY/BetterAnimations/blob/main/assets/cover.webp)
 
-## BetterAnimations V2 enters Beta!
-
-The newest version of [one of the most downloaded BetterDiscord plugins](https://betterdiscord.app/plugin/BetterAnimations) almost 2 years in development takes the success of its predecessor to a whole new level.
-
-[**Join the Support Server**](https://discord.gg/jgfy25t47r) to be one of the first ones to experience the largest BetterDiscord plugin ever made
-and take part in establishing it as the ultimate solution for bringing your Discord app to life with fluid animations.
-
-Main keynotes of the newest release:
-- **10 new animation modules** — BetterAnimations V2 supports 14 modules in total: Servers, Channels, Settings, Layers, Tooltips, Popouts, Context Menu, Messages, Channel List, Modals, Modals Backdrop, Members Sidebar, Thread Sidebar, Thread Sidebar Switch.
-- **Native integration** — animations are tightly integrated into Discord making them much more reliable and rigid.
-- **Ultimate customizability** — tweak every part of the plugin and animations in a fully revamped Settings Panel.
-- **Client Mod & Framework** — build your own animations and publish them to the official Catalog for everyone to download and use.
-
-```
- 
-```
-
-![BetterAnimations](https://user-images.githubusercontent.com/52377180/152634904-a58fdab9-3402-44c3-a9aa-8eed14b47c8e.gif)
-
-# [BetterAnimations](https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
-Improves your whole Discord experience. Adds highly customizable switching animations between guilds, channels, etc. Introduces smooth new message reveal animations, along with popout animations, and more.
-
-![example-min](https://user-images.githubusercontent.com/52377180/152634998-2b1a9be7-b495-4096-b741-1eef7660625b.gif)
+# [BetterAnimations](https://github.com/arg0NNY/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
+🌊 Discord Animations Client Mod & Framework
 
 [![Download][download-badge]][betteranimations-download-link] [![View][view-badge]][betteranimations-view-link] [![Support][support-badge]][support-link]
-
-## Highly customizable
-Here are some examples from plugin's settings:
-
-![settings](https://user-images.githubusercontent.com/52377180/152635040-3beffff8-058b-4243-8229-a3e477e8924e.png)
-![page animations](https://user-images.githubusercontent.com/52377180/152635041-0a9a955e-394a-4602-ab55-cbcfc81ece2f.gif)
-![reveal animations](https://user-images.githubusercontent.com/52377180/152635043-ebf83c53-d031-4148-b3e0-0e179397ba67.gif)
 
 [support-badge]: https://img.shields.io/badge/Support-%2343b581.svg?style=flat&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAC4UlEQVRYR8WXS4jNcRTHP195bEgWkoVsCAspNcVoLGblsaAoFCalBqU8BhuPPDZeQ5LBRmHBYsok7KYor5TyKDI2UiQLZWwojs6d351+85977+93J7q/uqt7Hp/fOed3zvmLzGNm44BWYAUwB5gafm7hc/i9AXqAXkk/c0wrJWRmU4BDwHpgQko+/N8PXAcOS/pSS6cqgJmNBfYBe4HxmY6LYj+AE8BxSb8q2agIEG7dDSwaoeOi2kNgVaVoDAMws7nAHWDaP3JeNvMRWC7pVWx3CEC4+bMM533AE+B5MDYfWADMTEA7RFMciUGAkPPeRNi9svcDnZL+xM7MbBSwCzgG+IupdjwdreWaiAEOAEdqKLrzZknlW1cUNTOPxqMExEFJR91ACSCE/n2i2vdIOpVTF2bWAZysIeuvY4anogxwAdhaQ8FzPjsOu5lNAjYFnSuSvpX1QzreJmqiS9I2hQ73NdFkrknaGDlw5x8iHW880wsQV4ENNS7lOpMdYClwNxHanZLORgBebKcLOrsldUYyO4AzCbvLHOAi0J4QbJd0OTJ+D1iSANgOnEvYveQA94HFCcHvgDv1M7GC80op6AK2JOw+cIB3GQ2kmh1/Oe6oWISjgdfArARAnwM4fb3D5jew0lu2JCs6MbOc8Lvaj5EC9EhygGHHzFqA2yFVqbZRAhhJCtok+TMbPGY2BmgDzie6YKxWSkFOERZvsk7SjehVbA4zwJeXek6pCHOeYdHoWkk3IwCHWVOP5yBbeoY5jahoO6cv5PCUGpGPzlQrLhpL9YUc5wOt2CXNLDWMKhn0ifYSWFieqjleI5mBYRQAvHhS4zi2/wJokdRvZk3A0zohho7jAJFaSGKADkmDw8jMfMtpriMCQxeSAOBreGolK/volrQ66Pm3wqc6umnllSxKRc5S6q34FvA4zPx5mbevvpRGb7pxa3kE4UXZmA+TCKJxn2ZxPhv2cVosqv/1ef4XvUY7+DQzteEAAAAASUVORK5CYII=
 [support-link]: https://discord.gg/M8DBtcZjXD
@@ -46,6 +18,6 @@ Here are some examples from plugin's settings:
 
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
-[betteranimations-version-badge]: https://img.shields.io/badge/version-1.2.9-blue
+[betteranimations-version-badge]: https://img.shields.io/badge/version-2.0.0-blue
 [betteranimations-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterAnimations
 [betteranimations-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterAnimations
