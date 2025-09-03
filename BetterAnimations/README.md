@@ -1,4 +1,4 @@
-![BetterAnimations](https://github.com/arg0NNY/BetterAnimations/blob/main/assets/cover.webp)
+![BetterAnimations](https://raw.githubusercontent.com/arg0NNY/BetterAnimations/refs/heads/main/assets/cover.webp)
 
 # [BetterAnimations](https://github.com/arg0NNY/BetterAnimations) ![Status][status-official-badge] ![Version][betteranimations-version-badge] ![Downloads][betteranimations-downloads-badge] ![Likes][betteranimations-likes-badge]
 🌊 Discord Animations Client Mod & Framework

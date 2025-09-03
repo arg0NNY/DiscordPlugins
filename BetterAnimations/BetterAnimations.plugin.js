@@ -154,7 +154,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ModalScrimModule,
     Clickable,
     Switch$1,
-    Checkbox,
+    CheckboxModule,
     FormTitle,
     FormTitleTags,
     FormText,
@@ -289,10 +289,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       filter: Filters.byStrings("checkbox", "animated.rect"),
       searchExports: true
     },
-    // Checkbox
+    // CheckboxModule
     {
-      filter: (m) => Filters.byKeys("BOX", "ROUND")(m?.Shapes),
-      searchExports: true
+      filter: Filters.bySource("Checkbox:", "is not a valid hex color")
     },
     // FormTitle
     {
@@ -777,6 +776,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     }
   );
   const ModalScrim = Object.values(ModalScrimModule ?? {}).find((m) => m?.render);
+  const { Checkbox, CheckboxTypes } = mangled(CheckboxModule, {
+    Checkbox: Filters.byStrings("checkboxWrapper"),
+    CheckboxTypes: Filters.byKeys("INVERTED")
+  });
   const ModalActions = mangled(ModalActionsModule, {
     openModal: Filters.byStrings("onCloseRequest", "onCloseCallback", "stackingBehavior"),
     closeModal: Filters.byStrings("onCloseCallback()", "filter"),
@@ -919,6 +922,8 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ChatSidebarKeyed,
     ChatSidebarModule,
     Checkbox,
+    CheckboxModule,
+    CheckboxTypes,
     Clickable,
     ContextMenuKeyed,
     ContextMenuModule,
@@ -23350,7 +23355,7 @@ img.BAP__viewport {
         className: DiscordClasses.Margins.marginTop8,
         value,
         onChange: (_, value2) => onChange(value2),
-        type: Checkbox.Types.INVERTED
+        type: CheckboxTypes.INVERTED
       },
       /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, label)
     );
@@ -23641,7 +23646,7 @@ img.BAP__viewport {
       {
         value,
         onChange: (_, value2) => onChange(value2),
-        type: Checkbox.Types.INVERTED,
+        type: CheckboxTypes.INVERTED,
         disabled: forced
       },
       /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, "Enable overflow")
