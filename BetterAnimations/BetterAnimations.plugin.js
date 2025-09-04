@@ -795,12 +795,12 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     const source = Webpack.modules[id].toString();
     return exports2[source.match(new RegExp(`(\\w+):\\(\\)=>${source.match(/let (\w+)=/)[1]}`))[1]];
   })();
-  const { showToast, popToast, useToastStore } = mangled(ToastStoreModule, {
-    showToast: Filters.byStrings(".currentToast?"),
-    popToast: Filters.byStrings("currentToast:null"),
+  const { showToast, useToastStore } = mangled(ToastStoreModule, {
+    showToast: Filters.byStrings("currentToastMap.has"),
     useToastStore: Filters.byKeys("setState")
   });
-  const popToastKeyed = keyed(ToastStoreModule, Filters.byStrings("currentToast:null"));
+  const popToastKeyed = keyed(ToastStoreModule, Filters.byStrings(".delete"));
+  const popToast = unkeyedFn(popToastKeyed);
   const { Toast: Toast$1, createToast } = mangled(ToastModule, {
     Toast: Filters.byKeys("type"),
     createToast: Filters.byStrings("type", "position")
@@ -28785,14 +28785,14 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       Logger.info(this.name, "Initialized.");
     }
     isToastActive() {
-      return useToastStore.getState().currentToast?.type === ErrorManagerToastSymbol;
+      return useToastStore.getState().currentToastMap.get("APP")?.type === ErrorManagerToastSymbol;
     }
     clear() {
       this.errors = [];
       this.errorsOverload = false;
       clearTimeout(this.timeout);
       this.timeout = null;
-      if (this.isToastActive()) popToast(true);
+      if (this.isToastActive()) popToast("APP", true);
     }
     shouldSuppress(error2) {
       switch (Config.current.general.suppressErrors) {
@@ -28824,10 +28824,13 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     showToast() {
       useToastStore.setState((state) => ({
         ...state,
-        currentToast: createToast(null, ErrorManagerToastSymbol, {
-          component: /* @__PURE__ */ BdApi.React.createElement(ErrorToast, { onView: this.onView.bind(this) }),
-          duration: 0
-        })
+        currentToastMap: new Map([
+          ...state.currentToastMap,
+          ["APP", createToast(null, ErrorManagerToastSymbol, {
+            component: /* @__PURE__ */ BdApi.React.createElement(ErrorToast, { onView: this.onView.bind(this) }),
+            duration: 0
+          })]
+        ])
       }));
     }
     showModal(errors = this.errors) {
@@ -30633,9 +30636,9 @@ ${DiscordSelectors.Select.measurement} {
     patchChannelAppLauncher();
   }
   function patchPopToast() {
-    Patcher.instead(...popToastKeyed, (self2, [force], original) => {
-      if (force !== true && ErrorManager.isToastActive()) return;
-      return original();
+    Patcher.instead(...popToastKeyed, (self2, [key2, force], original) => {
+      if (key2 === "APP" && force !== true && ErrorManager.isToastActive()) return;
+      return original(key2);
     });
   }
   class WebSocketController {
