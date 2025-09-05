@@ -29190,6 +29190,8 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       value.props.onMouseEnter = (event) => {
         if (isCooldown) return;
         const { x, y, width } = event.currentTarget.getBoundingClientRect();
+        const isValid2 = y >= window.innerHeight / 2 && x + width <= window.innerWidth / 2;
+        if (isValid2) return;
         const theme = Themes.getAll().find((theme2) => Themes.isEnabled(theme2.id) && !isDismissed(getDismissibleKey(theme2)));
         if (!theme) return;
         openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
