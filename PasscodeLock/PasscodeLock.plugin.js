@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.5
+ * @version 1.5.6
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.5',
+    version: '1.5.6',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the title bar button not displaying or being inaccessible.',
+        'Updated to work in the latest release of Discord.',
       ]
     }
   ]
@@ -69,7 +69,7 @@ const Selectors = {
   HeaderBar: Webpack.getByKeys('iconWrapper', 'clickable'),
   App: Webpack.getByKeys('mobileApp'),
   Modals: Webpack.getByKeys('root', 'small'),
-  AppTitleBar: Webpack.getByKeys('guildIcon', 'button', 'title')
+  AppTitleBarButtons: Webpack.getByKeys('button', 'smallButton')
 }
 
 const Gifs = {
@@ -1116,7 +1116,7 @@ module.exports = class PasscodeLock {
                   id: 'PCLButton',
                   size: Button.Sizes.NONE,
                   look: Button.Looks.BLANK,
-                  innerClassName: `${Selectors.AppTitleBar.button} ${Selectors.HeaderBar.iconWrapper} ${Selectors.HeaderBar.clickable}`,
+                  innerClassName: `${Selectors.AppTitleBarButtons.button} ${Selectors.HeaderBar.iconWrapper} ${Selectors.HeaderBar.clickable}`,
                   onClick: () => this.lock()
                 }),
                 this.buildStaticIcon()
@@ -1375,8 +1375,8 @@ module.exports = class PasscodeLock {
     }
     setTimeout(() => callback(document.querySelector(selector)))
 
-    this.observer = new DOMObserver()
-    this.observer.subscribeToQuerySelector(e => callback(e.addedNodes[0]), selector, this, false)
+    this._observer = new DOMObserver()
+    this._observer.subscribeToQuerySelector(e => callback(e.addedNodes[0]), selector, this, false)
   }
 
   unpatchSettingsButton () {
@@ -1385,7 +1385,7 @@ module.exports = class PasscodeLock {
   }
 
   disconnectObserver () {
-    this.observer.unsubscribeAll()
+    this._observer.unsubscribeAll()
   }
 
   async updateCode (code) {
