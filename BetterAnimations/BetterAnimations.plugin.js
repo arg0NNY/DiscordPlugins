@@ -7,29 +7,22 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.1
+ * @version 2.0.2
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
     {
-      "type": "added",
-      "title": "What's new",
-      "items": [
-        "Enhance layout: Added alert when conflict with the custom theme is detected."
-      ]
-    },
-    {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "General Settings: Updated to work in the latest release of Discord."
+        "Fixed the plugin failing to load."
       ]
     }
   ]
@@ -155,16 +148,16 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   const [
     Text$1,
     Heading,
-    { ModalScrim },
+    ModalScrimModule,
     Clickable,
     Switch$1,
-    { Checkbox, CheckboxTypes },
+    CheckboxModule,
     FormTitle,
     FormTitleTags,
     FormText,
     FormSection,
     Breadcrumbs,
-    { RadioGroup },
+    RadioGroupModule,
     FormSwitch,
     FormItem,
     Slider$1,
@@ -227,18 +220,18 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     SelectedGuildStore,
     SelectedChannelStore,
     GuildStore,
-    { openModal, closeModal, closeAllModals, useModalsStore, useIsModalAtTop },
-    { Tooltip: Tooltip$1, TooltipLayer },
+    ModalActionsModule,
+    TooltipModule,
     ListRawModule,
     ToastStoreModule,
-    { Toast: Toast$1, createToast },
+    ToastModule,
     AppViewModule,
-    Router,
+    RouterModule,
     ContextMenuModule,
     MenuSubmenuItemModule,
     MenuSubmenuListItemModule,
     PopoutCSSAnimatorModule,
-    { AppLayer, appLayerContext },
+    AppLayerModule,
     ModalsModule,
     LayersModule,
     GuildChannelListModule,
@@ -247,22 +240,22 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     VoiceChannelViewModule,
     CallChatSidebarModule,
     SelectModule,
-    { pushLayer, popLayer, popAllLayers },
-    { Alert, AlertTypes },
+    LayerActionsModule,
+    AlertModule,
     UserSettingsModal,
-    { ModalRoot, ModalSize, ModalHeader, ModalFooter, ModalContent, ModalCloseButton },
+    ModalModule,
     MenuItemModule,
     ChannelItemModule,
     VoiceChannelItemModule,
     StageVoiceChannelItemModule,
-    { AppContext },
+    AppContextModule,
     ExpressionPickerStoreModule,
     ProfileEffectsModule,
     EmojiModule,
     UseIsVisibleModule,
     RootElementContextModule,
-    { useListItem, useListContainerProps, ListNavigatorProvider },
-    { useFocusLock, FocusLock },
+    ListNavigatorModule,
+    FocusLockModule,
     ManaModalRootModule,
     BasePopoverModule,
     ChannelThreadList,
@@ -279,12 +272,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       filter: (m) => Filters.byStrings("variant", "data-excessive-heading-level")(m?.render),
       searchExports: true
     },
-    // ModalScrim
+    // ModalScrimModule
     {
-      filter: Filters.bySource("scrim", '"lightbox"'),
-      map: {
-        ModalScrim: (m) => m?.render
-      }
+      filter: Filters.bySource("scrim", '"lightbox"')
     },
     // Clickable
     {
@@ -296,13 +286,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       filter: Filters.byStrings("checkbox", "animated.rect"),
       searchExports: true
     },
-    // Checkbox
+    // CheckboxModule
     {
-      filter: Filters.bySource("Checkbox:", "is not a valid hex color"),
-      map: {
-        Checkbox: Filters.byStrings("checkboxWrapper"),
-        CheckboxTypes: Filters.byKeys("INVERTED")
-      }
+      filter: Filters.bySource("Checkbox:", "is not a valid hex color")
     },
     // FormTitle
     {
@@ -329,12 +315,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       filter: (m) => Filters.byStrings("renderBreadcrumb")(m?.prototype?.render),
       searchExports: true
     },
-    // RadioGroup
+    // RadioGroupModule
     {
-      filter: Filters.bySource('"radiogroup"', "getFocusableElements"),
-      map: {
-        RadioGroup: Filters.byStrings("container", "labelledBy")
-      }
+      filter: Filters.bySource('"radiogroup"', "getFocusableElements")
     },
     // FormSwitch
     {
@@ -378,7 +361,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     },
     // Spinner
     {
-      filter: Filters.byStrings("spinner", '"wanderingCubes"'),
+      filter: (m) => Filters.byKeys("WANDERING_CUBES")(m?.Type),
       searchExports: true
     },
     // Popout
@@ -619,24 +602,13 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.byStoreName("GuildStore")
     },
-    // ModalActions
+    // ModalActionsModule
     {
-      filter: Filters.bySource("POPOUT", "OVERLAY", "modalKey"),
-      map: {
-        openModal: Filters.byStrings("onCloseRequest", "onCloseCallback", "stackingBehavior"),
-        closeModal: Filters.byStrings("onCloseCallback()", "filter"),
-        closeAllModals: Filters.byStrings(".getState();for"),
-        useModalsStore: Filters.byKeys("setState"),
-        useIsModalAtTop: Filters.byStrings("popout:", ".at(-1)")
-      }
+      filter: Filters.bySource("POPOUT", "OVERLAY", "modalKey")
     },
-    // Tooltip
+    // TooltipModule
     {
-      filter: Filters.bySource("renderTooltip", "tooltipPointer"),
-      map: {
-        Tooltip: Filters.byPrototypeKeys("renderTooltip"),
-        TooltipLayer: Filters.byStrings("tooltipPointer")
-      }
+      filter: Filters.bySource("renderTooltip", "tooltipPointer")
     },
     // ListRawModule
     {
@@ -647,29 +619,17 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("currentToast", "queuedToasts")
     },
-    // Toast
+    // ToastModule
     {
-      filter: Filters.bySource("toast", "position", "STATUS_DANGER"),
-      map: {
-        Toast: Filters.byKeys("type"),
-        createToast: Filters.byStrings("type", "position")
-      }
+      filter: Filters.bySource("toast", "position", "STATUS_DANGER")
     },
     // AppViewModule
     {
       filter: Filters.bySource("CHANNEL_THREAD_VIEW", "GUILD_DISCOVERY", "data-fullscreen")
     },
-    // Router
+    // RouterModule
     {
-      filter: Filters.bySource("props.computedMatch", "isExact"),
-      map: {
-        Router: (m) => m?.computeRootMatch,
-        Route: (m) => Filters.byStrings("props.computedMatch", "props.path")(m?.prototype?.render),
-        Switch: (m) => Filters.byStrings("props.location", "cloneElement")(m?.prototype?.render),
-        matchPath: Filters.byStrings("strict", "isExact"),
-        useLocation: Filters.byStrings(").location"),
-        useParams: Filters.byStrings(".match", ".params")
-      }
+      filter: Filters.bySource("props.computedMatch", "isExact")
     },
     // ContextMenuModule
     {
@@ -687,13 +647,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("animatorTop", "TRANSLATE")
     },
-    // AppLayer
+    // AppLayerModule
     {
-      filter: Filters.bySource("layerContext", '"App"'),
-      map: {
-        AppLayer: Filters.byDisplayName("AppLayer"),
-        appLayerContext: (m) => m?.Provider
-      }
+      filter: Filters.bySource("layerContext", '"App"')
     },
     // ModalsModule
     {
@@ -727,38 +683,21 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("select", "newValues")
     },
-    // LayerActions
+    // LayerActionsModule
     {
-      filter: Filters.bySource('"LAYER_PUSH"', '"LAYER_POP_ALL"'),
-      map: {
-        pushLayer: Filters.byStrings('"LAYER_PUSH"'),
-        popLayer: Filters.byStrings('"LAYER_POP"'),
-        popAllLayers: Filters.byStrings('"LAYER_POP_ALL"')
-      }
+      filter: Filters.bySource('"LAYER_PUSH"', '"LAYER_POP_ALL"')
     },
-    // Alert
+    // AlertModule
     {
-      filter: Filters.bySource("messageType", "iconDiv"),
-      map: {
-        Alert: Filters.byStrings("messageType", "iconDiv"),
-        AlertTypes: Filters.byKeys("WARNING", "ERROR")
-      }
+      filter: Filters.bySource("messageType", "iconDiv")
     },
     // UserSettingsModal
     {
       filter: Filters.byKeys("open", "setSection", "updateAccount")
     },
-    // Modal
+    // ModalModule
     {
-      filter: Filters.bySource("MODAL", "rootWithShadow"),
-      map: {
-        ModalRoot: Filters.byStrings("MODAL", "rootWithShadow"),
-        ModalSize: Filters.byKeys("MEDIUM", "LARGE"),
-        ModalHeader: Filters.byStrings("headerIdIsManaged", "HORIZONTAL"),
-        ModalFooter: Filters.byStrings("footerSeparator"),
-        ModalContent: Filters.byStrings("content", "scrollbarType"),
-        ModalCloseButton: Filters.byStrings("closeIcon")
-      }
+      filter: Filters.bySource("MODAL", "rootWithShadow")
     },
     // MenuItemModule
     {
@@ -776,10 +715,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("getStageInstanceByChannel", "isFavoriteSuggestion", "MANAGE_CHANNELS")
     },
-    // AppContext
+    // AppContextModule
     {
-      filter: Filters.bySource("renderWindow", "ownerDocument.defaultView"),
-      map: { AppContext: (m) => m?.Provider }
+      filter: Filters.bySource("renderWindow", "ownerDocument.defaultView")
     },
     // ExpressionPickerStoreModule
     {
@@ -801,22 +739,13 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("useRootElementContext", "createContext")
     },
-    // ListNavigator
+    // ListNavigatorModule
     {
-      filter: Filters.bySource("NO_LIST", "listitem"),
-      map: {
-        useListItem: Filters.byStrings('"listitem"'),
-        useListContainerProps: Filters.byStrings('"list"', "useContext"),
-        ListNavigatorProvider: Filters.byStrings("containerProps", ".Provider")
-      }
+      filter: Filters.bySource("NO_LIST", "listitem")
     },
-    // FocusLock
+    // FocusLockModule
     {
-      filter: Filters.bySource("disableReturnRef", '"app-mount"'),
-      map: {
-        useFocusLock: Filters.byStrings("disableReturnRef"),
-        FocusLock: Filters.byStrings("children", "containerRef")
-      }
+      filter: Filters.bySource("disableReturnRef", '"app-mount"')
     },
     // ManaModalRootModule
     {
@@ -842,6 +771,25 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       searchExports: true
     }
   );
+  const { RadioGroup } = mangled(RadioGroupModule, {
+    RadioGroup: Filters.byStrings("container", "labelledBy")
+  });
+  const ModalScrim = Object.values(ModalScrimModule ?? {}).find((m) => m?.render);
+  const { Checkbox, CheckboxTypes } = mangled(CheckboxModule, {
+    Checkbox: Filters.byStrings("checkboxWrapper"),
+    CheckboxTypes: Filters.byKeys("INVERTED")
+  });
+  const { useModalsStore, useIsModalAtTop, ...ModalActions } = mangled(ModalActionsModule, {
+    openModal: Filters.byStrings("onCloseRequest", "onCloseCallback", "stackingBehavior"),
+    closeModal: Filters.byStrings("onCloseCallback()", "filter"),
+    closeAllModals: Filters.byStrings(".getState();for"),
+    useModalsStore: Filters.byKeys("setState"),
+    useIsModalAtTop: Filters.byStrings("popout:", ".at(-1)")
+  });
+  const { Tooltip: Tooltip$1, TooltipLayer } = mangled(TooltipModule, {
+    Tooltip: Filters.byPrototypeKeys("renderTooltip"),
+    TooltipLayer: Filters.byStrings("tooltipPointer")
+  });
   const ListThin = (() => {
     if (!ListRawModule) return;
     const { id, exports: exports2 } = ListRawModule;
@@ -854,12 +802,28 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   });
   const popToastKeyed = keyed(ToastStoreModule, Filters.byStrings(".delete"));
   const popToast = unkeyedFn(popToastKeyed);
+  const { Toast: Toast$1, createToast } = mangled(ToastModule, {
+    Toast: Filters.byKeys("type"),
+    createToast: Filters.byStrings("type", "position")
+  });
   const AppViewKeyed = keyed(AppViewModule, Filters.byStrings("CHANNEL_THREAD_VIEW", "GUILD_DISCOVERY"));
+  const Router = mangled(RouterModule, {
+    Router: (m) => m?.computeRootMatch,
+    Route: (m) => Filters.byStrings("props.computedMatch", "props.path")(m?.prototype?.render),
+    Switch: (m) => Filters.byStrings("props.location", "cloneElement")(m?.prototype?.render),
+    matchPath: Filters.byStrings("strict", "isExact"),
+    useLocation: Filters.byStrings(").location"),
+    useParams: Filters.byStrings(".match", ".params")
+  });
   const TransitionGroupContext = Transition && new Transition({ children: require$$0$1.createElement("div") }).render().type;
   const ContextMenuKeyed = keyed(ContextMenuModule, Filters.byStrings("getContextMenu", "isOpen"));
   const MenuSubmenuItemKeyed = keyed(MenuSubmenuItemModule, Filters.byStrings("subMenuClassName", "submenuPaddingContainer"));
   const MenuSubmenuListItemKeyed = keyed(MenuSubmenuListItemModule, Filters.byStrings("menuSubmenuProps", "listClassName", "submenuPaddingContainer"));
   const PopoutCSSAnimatorKeyed = keyed(PopoutCSSAnimatorModule, (m) => Filters.byKeys("TRANSLATE", "SCALE")(m?.Types));
+  const { AppLayer, appLayerContext } = mangled(AppLayerModule, {
+    AppLayer: Filters.byDisplayName("AppLayer"),
+    appLayerContext: (m) => m?.Provider
+  });
   const ModalsKeyed = keyed(ModalsModule, Filters.byStrings("modalKey", '"layer-"'));
   const LayersKeyed = keyed(LayersModule, Filters.byStrings("hasFullScreenLayer"));
   const GuildChannelListKeyed = keyed(GuildChannelListModule, Filters.byStrings("getGuild", "guildId"));
@@ -869,17 +833,44 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   const SelectKeyed = keyed(SelectModule, Filters.byStrings("listbox", "renderPopout", "closeOnSelect"));
   const SingleSelectKeyed = keyed(SelectModule, (m) => Filters.byStrings("value", "onChange")(m) && !Filters.byStrings("isSelected")(m));
   const SingleSelect = unkeyedFn(SingleSelectKeyed);
+  const LayerActions = mangled(LayerActionsModule, {
+    pushLayer: Filters.byStrings('"LAYER_PUSH"'),
+    popLayer: Filters.byStrings('"LAYER_POP"'),
+    popAllLayers: Filters.byStrings('"LAYER_POP_ALL"')
+  });
+  const { Alert, AlertTypes } = mangled(AlertModule, {
+    Alert: Filters.byStrings("messageType", "iconDiv"),
+    AlertTypes: Filters.byKeys("WARNING", "ERROR")
+  });
+  const { ModalRoot, ModalSize, ModalHeader, ModalFooter, ModalContent, ModalCloseButton } = mangled(ModalModule, {
+    ModalRoot: Filters.byStrings("MODAL", "rootWithShadow"),
+    ModalSize: Filters.byKeys("MEDIUM", "LARGE"),
+    ModalHeader: Filters.byStrings("headerIdIsManaged", "HORIZONTAL"),
+    ModalFooter: Filters.byStrings("footerSeparator"),
+    ModalContent: Filters.byStrings("content", "scrollbarType"),
+    ModalCloseButton: Filters.byStrings("closeIcon")
+  });
   const MenuItemKeyed = keyed(MenuItemModule, Filters.byStrings("dontCloseOnActionIfHoldingShiftKey", "data-menu-item"));
   const ChannelItemKeyed = keyed(ChannelItemModule, Filters.byStrings("shouldIndicateNewChannel", "MANAGE_CHANNELS"));
   const VoiceChannelItemKeyed = keyed(VoiceChannelItemModule, Filters.byStrings("PLAYING", "MANAGE_CHANNELS"));
   const StageVoiceChannelItemKeyed = keyed(StageVoiceChannelItemModule, Filters.byStrings("getStageInstanceByChannel", "MANAGE_CHANNELS"));
+  const { AppContext } = mangled(AppContextModule, { AppContext: (m) => m?.Provider });
   const useExpressionPickerStoreKeyed = keyed(ExpressionPickerStoreModule, Filters.byKeys("getState", "setState"));
   const ProfileEffectsKeyed = keyed(ProfileEffectsModule, Filters.byStrings("profileEffectConfig", "useReducedMotion"));
   const EmojiKeyed = keyed(EmojiModule, Filters.byStrings("emojiId", "emojiName", "animated", "shouldAnimate"));
   const useIsVisibleKeyed = keyed(UseIsVisibleModule, Filters.byStrings("isIntersecting", "arguments.length"));
   const useIsVisible = unkeyedFn(useIsVisibleKeyed);
   const useRootElementContextKeyed = keyed(RootElementContextModule, Filters.byStrings("useRootElementContext"));
+  const { useListItem, useListContainerProps, ListNavigatorProvider } = mangled(ListNavigatorModule, {
+    useListItem: Filters.byStrings('"listitem"'),
+    useListContainerProps: Filters.byStrings('"list"', "useContext"),
+    ListNavigatorProvider: Filters.byStrings("containerProps", ".Provider")
+  });
   const ListNavigatorContainer = ({ children: children2 }) => children2(useListContainerProps());
+  const { useFocusLock, FocusLock } = mangled(FocusLockModule, {
+    useFocusLock: Filters.byStrings("disableReturnRef"),
+    FocusLock: Filters.byStrings("children", "containerRef")
+  });
   const Mana = {
     ModalRootKeyed: keyed(ManaModalRootModule, Filters.byStrings("MODAL", '"padding-size-"')),
     get ModalRoot() {
@@ -898,12 +889,15 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   const DiscordModules = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,
     Alert,
+    AlertModule,
     AlertTypes,
     Anchor,
     App,
     AppContext,
+    AppContextModule,
     AppLauncherPopup,
     AppLayer,
+    AppLayerModule,
     AppPanels,
     AppViewKeyed,
     AppViewModule,
@@ -929,6 +923,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ChatSidebarKeyed,
     ChatSidebarModule,
     Checkbox,
+    CheckboxModule,
     CheckboxTypes,
     Clickable,
     ContextMenuKeyed,
@@ -942,6 +937,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Flex: Flex$1,
     Flux,
     FocusLock,
+    FocusLockModule,
     FormItem,
     FormSection,
     FormSwitch,
@@ -962,10 +958,13 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     InviteEmbed,
     InviteStates,
     InviteStore,
+    LayerActions,
+    LayerActionsModule,
     LayerStore: LayerStore$1,
     LayersKeyed,
     LayersModule,
     ListNavigatorContainer,
+    ListNavigatorModule,
     ListNavigatorProvider,
     ListRawModule,
     ListThin,
@@ -981,12 +980,16 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     MenuSubmenuListItemModule,
     Message: Message$1,
     MessageDivider,
+    ModalActions,
+    ModalActionsModule,
     ModalCloseButton,
     ModalContent,
     ModalFooter,
     ModalHeader,
+    ModalModule,
     ModalRoot,
     ModalScrim,
+    ModalScrimModule,
     ModalSize,
     ModalsKeyed,
     ModalsModule,
@@ -999,9 +1002,11 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ProfileEffectsKeyed,
     ProfileEffectsModule,
     RadioGroup,
+    RadioGroupModule,
     ReferencePositionLayer,
     RootElementContextModule,
     Router,
+    RouterModule,
     Routes,
     SearchBar,
     SearchableSelect,
@@ -1031,9 +1036,11 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Timeout,
     Timestamp,
     Toast: Toast$1,
+    ToastModule,
     ToastStoreModule,
     Tooltip: Tooltip$1,
     TooltipLayer,
+    TooltipModule,
     Transition,
     TransitionGroup,
     TransitionGroupContext,
@@ -1044,8 +1051,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     VoiceChannelViewKeyed,
     VoiceChannelViewModule,
     appLayerContext,
-    closeAllModals,
-    closeModal,
     colors,
     createToast,
     generateUserSettingsSectionsKeyed,
@@ -1053,12 +1058,8 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     handleClick,
     humanize,
     matchSorter,
-    openModal,
-    popAllLayers,
-    popLayer,
     popToast,
     popToastKeyed,
-    pushLayer,
     showToast,
     useExpressionPickerStoreKeyed,
     useFocusLock,
@@ -1445,7 +1446,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.1";
+  const version$1 = "2.0.2";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -18753,7 +18754,7 @@ ${buildStyles(styles)}}
       };
     }
     prompt() {
-      openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         MigratorModal,
         {
           ...props,
@@ -18840,7 +18841,7 @@ ${buildStyles(styles)}}
       }
     }
     promptCancel() {
-      openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         Modal$2,
         {
           ...props,
@@ -19231,7 +19232,7 @@ ${buildStyles(styles)}}
     const selectMethod = require$$0$1.useCallback((method) => {
       const dismissibleName = `verificationIssueResolveMethodConfirmation:${method.value}`;
       if (!method.confirmation || isDismissed(dismissibleName)) return onSelect(method);
-      openModal((props2) => /* @__PURE__ */ BdApi.React.createElement(
+      ModalActions.openModal((props2) => /* @__PURE__ */ BdApi.React.createElement(
         DismissibleModal,
         {
           ...props2,
@@ -19663,8 +19664,8 @@ ${buildStyles(styles)}}
     const invalid = isInviteInvalid(invite2);
     const join = require$$0$1.useCallback(() => {
       if (guild) {
-        closeAllModals();
-        popAllLayers();
+        ModalActions.closeAllModals();
+        LayerActions.popAllLayers();
       }
       UI.showInviteModal(code);
     }, [code, guild]);
@@ -19752,7 +19753,7 @@ ${buildStyles(styles)}}
     const uninstall = require$$0$1.useCallback(() => {
       if (!pack.installed) return;
       const affectedModules = Core.getModulesUsingPack(pack);
-      openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         Modal$2,
         {
           ...props,
@@ -25154,7 +25155,7 @@ img.BAP__viewport {
   }
   function promptDownload() {
     return new Promise((resolve) => {
-      const showPackModal = () => openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      const showPackModal = () => ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         PackModal,
         {
           ...props,
@@ -25162,7 +25163,7 @@ img.BAP__viewport {
           location: PackContentLocation.CATALOG
         }
       ), { onCloseCallback: () => PackRegistry.storage.clear() });
-      openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         Modal$2,
         {
           ...props,
@@ -25891,7 +25892,7 @@ img.BAP__viewport {
     );
   }
   function PackCard({ pack, location = PackContentLocation.CATALOG }) {
-    const onClick = () => openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+    const onClick = () => ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
       PackModal,
       {
         ...props,
@@ -27595,7 +27596,7 @@ img.BAP__viewport {
     const title = `${meta$1.name} Settings`;
     const sections = useSections();
     const [section2, setSection2] = useSection();
-    const onClose = require$$0$1.useCallback(() => popLayer(), []);
+    const onClose = require$$0$1.useCallback(() => LayerActions.popLayer(), []);
     const actions = (actions2) => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, actions2, /* @__PURE__ */ BdApi.React.createElement(
       Button$1,
       {
@@ -27657,11 +27658,11 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       setSection(section2);
       const component = () => /* @__PURE__ */ BdApi.React.createElement(SettingsModal, null);
       component.__BA_isSettingsModal = true;
-      pushLayer(component);
+      LayerActions.pushLayer(component);
     }
     closeSettingsModal() {
       if (this.isSettingsModalOpen())
-        popLayer();
+        LayerActions.popLayer();
     }
   }();
   const avatarPlaceholder = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAMAAABrrFhUAAAAhFBMVEV1fop9hpGgpq+ytr2prraXnqfT19vu7/H////29/iGjpju7/DCxszc3+K6vsS6v8WOlqD39/fLztPLz9OPlqDl5+nDx8ygpq6xtr6xtr3m5+iOlp/Dxsvc3+Hd3+GorraGjpnT19rT1tv29/eOlqHU19p+hpGprrWxt72or7bLz9Kfpq+ibmTzAAAEY0lEQVR4AezBAQEAAAQAIPB/swkMqAIAAAAAAAAAAAAAAAAAAAAAgBNZPfFWy86dLimOw3AAV5qYEXFicMKxHIFs03e///PtvaouagjRGMKfNr/vmhorsiMbpwcm+UZjN4PhD2YedR5TZpnZDgfmOww+L/h/jjoaS0iRG7pdk0HBQlECmeevisGEbpDJf7DQlUDJh2xlbm30noWmBGQFuOUcTMeej3CqFeCQzTOCl8i8bymBbPKQDlxeCecGqTH/Dc/ycUVK0LKx51ZVXs08H+WLoSu5la0yQmUK7sXQEKQ592ZOgFLukSE4meUe2YTQlCyinARTFnFOAss9swRlzL1zBCTj/o2ySFdAURCMBV+FiXQFFLP4esADvxGExPKVjJJIX4HCxbcJACyBkq/IxdkDQZVAyVfl4i4AgBIo+cpcvK8AiBJYMsddApY56hJIGcCSrmfFAAq6GsMQTKTvQDEEaILiXAZTBuEAlsAYl8E1wzCRLoEij7QLFKNYmwBhIp0BIo9tBgDMAcMc9xzYMJQcugvytl55VtCHWNx9wHaZ0d+mO6sP6Z7mBnQfYA2R2Fl1yMKCHov8zp3kycHKoQ9x3Mkj9Wv/i9s0FxCC9CJca8cv3JlDxBPecfgz/cwzt9j+etO5hFsCbEM/89I2e/QhoqI+2YBzGnfWEGHRuoBRQ6R9nu0hQJ3AIqgkNwEhLR6oPy7o/2MCQwC2AwWfltAxL/oifgFrhfZhtxitvpexAKug7nnU+gKqw2sO6DDk8bwJKKF6wZRPq8IToO28XqkvDnMK5FiNMB1n9SErqGZ4xeGvQV0IYV2f34ed05qgEIAjgZfAc9oyIATiPbgOvLZgA0IgtkMm7NpCGhCC8evIgkNKILHqEJIQjEZgGfR971wfMmasBLiQj5regkLaObifBd/p0Ls+xHBXOd7NgLH+YepDRIWXAK4yIpE9B4QAJaBgjcq0/3Wl8BDxiJUA4Yuqqob+YiGi7i0BiO4JuCfgnoB7Au4J6ME9AfcE3BNQMqjqnoAYrgkDnAc4BuWoH0sGtUS6J7xdWj4bu5wBHIqqL+yYZz6Lrek47wzOL0M7+kfjLAfyLpGJB3NDYrfnE2wq5VLagNF/GJl3nk/wS+pNM+PuKZAc6EefKP5m87ahPjnWpICMq1lllRsSpmCYxy8aq0sBJcbVnjvw23yR0OHwcR6/cPsuKcjoq+kir1d8lH3O0yl9lYw9oz1+0ZSqQ34SU5O6/KOuV/Zfdf3x4dJFltAB8+wZ9PErvoKqL7vxtp90TY5Pmlyy5ZI2QcDNg+qSZy9VQ9fX1Je7uDM91SNjMPZie/QN9vDFrtZ8OaXwsgcfvjB1y64owBJp+PrlsLrIGfSzIUzN4a7HNxSs2cO8+PSLwfLsJ3Dbh4QEfBlsz/xDjHcTQicHAPIGONck8LJBvpkc7OhMduxzk9CtmUL+U3+2BwcyAAAAAIP8re/xVQAAAAAAAAAAAAAAAAAAAAAAKwFiKavpSRGzHgAAAABJRU5ErkJggg==";
@@ -27848,7 +27849,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     }
     showModal() {
       if (!this.hasIssues()) return;
-      openModal(
+      ModalActions.openModal(
         (props) => /* @__PURE__ */ BdApi.React.createElement(VerificationIssuesModal, { ...props }),
         { modalKey: "BA__verificationIssuesModal" }
       );
@@ -28486,7 +28487,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
             onClick: () => {
               UserSettingsModal.open("updates");
               Settings.closeSettingsModal();
-              closeAllModals();
+              ModalActions.closeAllModals();
             }
           }
         )
@@ -28514,7 +28515,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
           text: "Go to Settings",
           onClick: () => {
             Settings.openSettingsModal(module2.id);
-            closeAllModals();
+            ModalActions.closeAllModals();
           }
         }
       )
@@ -28841,7 +28842,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     }
     showModal(errors = this.errors) {
       if (!errors?.length) return;
-      openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         ErrorModal,
         {
           errors,
@@ -29194,7 +29195,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
         if (isValid2) return;
         const theme = Themes.getAll().find((theme2) => Themes.isEnabled(theme2.id) && !isDismissed(getDismissibleKey(theme2)));
         if (!theme) return;
-        openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+        ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
           UserPanelMisplacedAlertModal,
           {
             ...props,
@@ -30528,7 +30529,7 @@ ${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelIte
     }
     promptHardwareAcceleration() {
       return new Promise(
-        (resolve) => openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+        (resolve) => ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
           Modal$2,
           {
             ...props,
@@ -31134,7 +31135,8 @@ ${DiscordSelectors.Select.measurement} {
   }
   const changelog = {
     "2.0.0": { "banner": "https://github.com/arg0NNY/BetterAnimations/raw/refs/heads/main/assets/V2.webp", "blurb": "Larger, faster, and rebuilt from the ground up. **BetterAnimations 2.0** is here, transforming your Discord experience with a new generation of silky-smooth, deeply integrated animations.", "changes": [{ "type": "added", "title": "What's New in 2.0", "items": ["🎭 **Expanded Animation Library** — experience motion across Discord like never before. This release introduces 10 new animation modules, bringing the total to 14. Animate everything from Servers and Messages to the Thread Sidebar and Modals.", "⚙️ **Native-Level Integration** — animations are now woven directly into Discord's core UI. This creates a more reliable, rigid, and natural-feeling experience that truly belongs.", "🚀 **Unmatched Performance** — enjoy buttery-smooth animations that make Discord feel snappier and more responsive than ever.", "🎨 **Ultimate Customization** — take full control with a completely redesigned Settings Panel. Fine-tune every detail of your animations or craft entirely new ones from scratch.", "🌐 **Client Mod & Framework** — expand your library with community-made animations or build and share your own through the official Catalog."] }] },
-    "2.0.1": { "changes": [{ "type": "added", "title": "What's new", "items": ["Enhance layout: Added alert when conflict with the custom theme is detected."] }, { "type": "fixed", "title": "Fixes", "items": ["General Settings: Updated to work in the latest release of Discord."] }] }
+    "2.0.1": { "changes": [{ "type": "added", "title": "What's new", "items": ["Enhance layout: Added alert when conflict with the custom theme is detected."] }, { "type": "fixed", "title": "Fixes", "items": ["General Settings: Updated to work in the latest release of Discord."] }] },
+    "2.0.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Fixed the plugin failing to load."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
@@ -31210,7 +31212,7 @@ ${DiscordSelectors.Select.measurement} {
             iconPosition: "end",
             text: "Go to Settings",
             onClick: () => {
-              closeAllModals();
+              ModalActions.closeAllModals();
               Settings.openSettingsModal();
             }
           }
@@ -31229,7 +31231,7 @@ ${DiscordSelectors.Select.measurement} {
     }
     showPackModal(pack) {
       if (!pack.changelog) return;
-      const showPackModal = () => openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
+      const showPackModal = () => ModalActions.openModal((props) => /* @__PURE__ */ BdApi.React.createElement(
         PackModal,
         {
           ...props,
@@ -31345,7 +31347,7 @@ ${DiscordSelectors.Select.measurement} {
       },
       getSettingsPanel() {
         queueMicrotask(() => {
-          closeAllModals();
+          ModalActions.closeAllModals();
           Settings.openSettingsModal();
         });
       }
