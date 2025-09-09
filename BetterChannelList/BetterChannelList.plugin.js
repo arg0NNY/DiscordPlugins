@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.9
+ * @version 1.2.10
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.9',
+    version: '1.2.10',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'A couple of style fixes for the latest release of Discord.'
+        'Updated the settings to work in the latest release of Discord.'
       ]
     }
   ]
@@ -80,7 +80,7 @@ const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'section
 const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
 const FormTitleTags = Webpack.getModule(Filters.byKeys('H1', 'LABEL', 'LEGEND'), { searchExports: true })
 const FormText = Webpack.getModule(m => Filters.byKeys('DESCRIPTION', 'ERROR')(m?.Types), { searchExports: true })
-const RadioGroup = Webpack.getModule(m => Filters.byKeys('NOT_SET', 'NONE')(m?.Sizes), { searchExports: true })
+const RadioGroup = Webpack.getModule(Filters.byStrings('container', 'labelledBy', 'radioItemClassName'), { searchExports: true })
 
 const { getSocket } = Webpack.getByKeys('getSocket')
 const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
