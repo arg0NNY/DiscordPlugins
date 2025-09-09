@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.2
+ * @version 2.0.3
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.2",
+    "version": "2.0.3",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Fixed the plugin failing to load."
+        "Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -351,7 +351,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     },
     // SearchBar
     {
-      filter: (m) => Filters.byKeys("isLoading", "size")(m?.defaultProps) && Filters.byPrototypeKeys("blur", "focus")(m),
+      filter: Filters.byStrings("query", '"aria-label":', "clearable:null"),
       searchExports: true
     },
     // Paginator
@@ -1446,7 +1446,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.2";
+  const version$1 = "2.0.3";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -18389,11 +18389,11 @@ ${buildStyles(styles)}}
         enabled: true,
         enter: {
           packSlug: PREINSTALLED_PACK_SLUG,
-          animationKey: "fade"
+          animationKey: "slip"
         },
         exit: {
           packSlug: PREINSTALLED_PACK_SLUG,
-          animationKey: "fade"
+          animationKey: "slip"
         }
       },
       [ModuleKey.ChannelList]: {
@@ -26029,7 +26029,7 @@ img.BAP__viewport {
         color: "header-primary"
       },
       title
-    ), /* @__PURE__ */ BdApi.React.createElement(
+    ), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewSearchBar" }, /* @__PURE__ */ BdApi.React.createElement(
       SearchBar,
       {
         className: "BA__packListViewSearchBar",
@@ -26040,7 +26040,7 @@ img.BAP__viewport {
         onClear: () => setQuery(""),
         autoFocus: true
       }
-    )), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActionBar" }, actions && /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActions" }, actions), /* @__PURE__ */ BdApi.React.createElement(
+    ))), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActionBar" }, actions && /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActions" }, actions), /* @__PURE__ */ BdApi.React.createElement(
       SortSelect,
       {
         options: displayedSortOptions,
@@ -26101,7 +26101,7 @@ img.BAP__viewport {
     margin-bottom: 16px;
 }
 .BA__packListViewSearchBar {
-    max-width: 260px;
+    flex-basis: 260px;
 }
 .BA__packListViewActionBar {
     display: flex;
@@ -26327,7 +26327,6 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packSelectPopoutHeader" }, /* @__PURE__ */ BdApi.React.createElement(
         SearchBar,
         {
-          className: "BA__packSelectPopoutSearchBar",
           placeholder: "Search",
           size: "md",
           query,
@@ -29141,7 +29140,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
         onClose,
         footer: false
       },
-      /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-md/normal" }, /* @__PURE__ */ BdApi.React.createElement("p", null, "User Panel appears to be misplaced."), /* @__PURE__ */ BdApi.React.createElement("p", null, "This may be due to the ", /* @__PURE__ */ BdApi.React.createElement(Anchor, { onClick: () => handleClick({ href: Documentation.enhanceLayoutUrl }) }, /* @__PURE__ */ BdApi.React.createElement("b", null, "Enhance layout")), " option of Servers animations being incompatible with the custom theme ", /* @__PURE__ */ BdApi.React.createElement("b", null, themeName), " you have enabled."), /* @__PURE__ */ BdApi.React.createElement("p", null, /* @__PURE__ */ BdApi.React.createElement(
+      /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-md/normal" }, /* @__PURE__ */ BdApi.React.createElement("p", null, "User Panel appears to be out of place."), /* @__PURE__ */ BdApi.React.createElement("p", null, "This may be due to the ", /* @__PURE__ */ BdApi.React.createElement(Anchor, { onClick: () => handleClick({ href: Documentation.enhanceLayoutUrl }) }, /* @__PURE__ */ BdApi.React.createElement("b", null, "Enhance layout")), " option of Servers animations being incompatible with the custom theme ", /* @__PURE__ */ BdApi.React.createElement("b", null, themeName), " you have enabled."), /* @__PURE__ */ BdApi.React.createElement("p", null, /* @__PURE__ */ BdApi.React.createElement(
         ButtonGroup$1,
         {
           direction: "vertical",
@@ -31136,7 +31135,8 @@ ${DiscordSelectors.Select.measurement} {
   const changelog = {
     "2.0.0": { "banner": "https://github.com/arg0NNY/BetterAnimations/raw/refs/heads/main/assets/V2.webp", "blurb": "Larger, faster, and rebuilt from the ground up. **BetterAnimations 2.0** is here, transforming your Discord experience with a new generation of silky-smooth, deeply integrated animations.", "changes": [{ "type": "added", "title": "What's New in 2.0", "items": ["🎭 **Expanded Animation Library** — experience motion across Discord like never before. This release introduces 10 new animation modules, bringing the total to 14. Animate everything from Servers and Messages to the Thread Sidebar and Modals.", "⚙️ **Native-Level Integration** — animations are now woven directly into Discord's core UI. This creates a more reliable, rigid, and natural-feeling experience that truly belongs.", "🚀 **Unmatched Performance** — enjoy buttery-smooth animations that make Discord feel snappier and more responsive than ever.", "🎨 **Ultimate Customization** — take full control with a completely redesigned Settings Panel. Fine-tune every detail of your animations or craft entirely new ones from scratch.", "🌐 **Client Mod & Framework** — expand your library with community-made animations or build and share your own through the official Catalog."] }] },
     "2.0.1": { "changes": [{ "type": "added", "title": "What's new", "items": ["Enhance layout: Added alert when conflict with the custom theme is detected."] }, { "type": "fixed", "title": "Fixes", "items": ["General Settings: Updated to work in the latest release of Discord."] }] },
-    "2.0.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Fixed the plugin failing to load."] }] }
+    "2.0.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Fixed the plugin failing to load."] }] },
+    "2.0.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
