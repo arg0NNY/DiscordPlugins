@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.3
+ * @version 2.0.4
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -152,9 +152,8 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Clickable,
     Switch$1,
     CheckboxModule,
-    FormTitle,
-    FormTitleTags,
-    FormText,
+    FormTitleModule,
+    FormTextModule,
     FormSection,
     Breadcrumbs,
     RadioGroupModule,
@@ -290,20 +289,13 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("Checkbox:", "is not a valid hex color")
     },
-    // FormTitle
+    // FormTitleModule
     {
-      filter: Filters.byStrings("defaultMargin", "errorMessage"),
-      searchExports: true
+      filter: Filters.bySource("defaultMargin", "errorMessage", "H4")
     },
-    // FormTitleTags
+    // FormTextModule
     {
-      filter: Filters.byKeys("H1", "LABEL", "LEGEND"),
-      searchExports: true
-    },
-    // FormText
-    {
-      filter: (m) => Filters.byKeys("DESCRIPTION", "ERROR")(m?.Types),
-      searchExports: true
+      filter: Filters.bySource('"description"', '"modeDefault"')
     },
     // FormSection
     {
@@ -771,8 +763,16 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       searchExports: true
     }
   );
+  const { FormTitle, FormTitleTags } = mangled(FormTitleModule, {
+    FormTitle: Filters.byStrings("errorMessage"),
+    FormTitleTags: Filters.byKeys("H1", "H2")
+  });
+  const { FormText, FormTextTypes } = mangled(FormTextModule, {
+    FormText: Filters.byStrings("variant", "text"),
+    FormTextTypes: Filters.byKeys("DESCRIPTION")
+  });
   const { RadioGroup } = mangled(RadioGroupModule, {
-    RadioGroup: Filters.byStrings("container", "labelledBy")
+    RadioGroup: Filters.byStrings("label", "description")
   });
   const ModalScrim = Object.values(ModalScrimModule ?? {}).find((m) => m?.render);
   const { Checkbox, CheckboxTypes } = mangled(CheckboxModule, {
@@ -942,7 +942,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     FormSection,
     FormSwitch,
     FormText,
+    FormTextModule,
+    FormTextTypes,
     FormTitle,
+    FormTitleModule,
     FormTitleTags,
     GatewaySocket,
     GenerateUserSettingsSectionsModule,
@@ -1446,7 +1449,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.3";
+  const version$1 = "2.0.4";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -25503,7 +25506,7 @@ img.BAP__viewport {
         ),
         onBreadcrumbClick: ({ id }) => setSection2(id)
       }
-    ), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: `${enabled ? "Disable" : "Enable"} ${module2.name} animations`, hideOnClick: false }, (props2) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props2 }, toggleSwitch))), module2.description && /* @__PURE__ */ BdApi.React.createElement(FormText, { type: FormText.Types.DESCRIPTION, className: DiscordClasses.Margins.marginTop8 }, typeof module2.description === "function" ? module2.description(setSection2) : module2.description), module2.controls && /* @__PURE__ */ BdApi.React.createElement("div", { className: DiscordClasses.Margins.marginTop8 }, module2.controls({ module: module2 })), childModules.map((m) => /* @__PURE__ */ BdApi.React.createElement(Clickable, { tag: "div", onClick: () => setSection2(m.id) }, /* @__PURE__ */ BdApi.React.createElement(
+    ), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: `${enabled ? "Disable" : "Enable"} ${module2.name} animations`, hideOnClick: false }, (props2) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props2 }, toggleSwitch))), module2.description && /* @__PURE__ */ BdApi.React.createElement(FormText, { type: FormTextTypes.DESCRIPTION, className: DiscordClasses.Margins.marginTop8 }, typeof module2.description === "function" ? module2.description(setSection2) : module2.description), module2.controls && /* @__PURE__ */ BdApi.React.createElement("div", { className: DiscordClasses.Margins.marginTop8 }, module2.controls({ module: module2 })), childModules.map((m) => /* @__PURE__ */ BdApi.React.createElement(Clickable, { tag: "div", onClick: () => setSection2(m.id) }, /* @__PURE__ */ BdApi.React.createElement(
       FormTitle,
       {
         key: m.id,
@@ -26029,7 +26032,7 @@ img.BAP__viewport {
         color: "header-primary"
       },
       title
-    ), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewSearchBar" }, /* @__PURE__ */ BdApi.React.createElement(
+    ), /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewSearchBar" }, /* @__PURE__ */ BdApi.React.createElement(
       SearchBar,
       {
         className: "BA__packListViewSearchBar",
@@ -26040,7 +26043,7 @@ img.BAP__viewport {
         onClear: () => setQuery(""),
         autoFocus: true
       }
-    ))), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActionBar" }, actions && /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActions" }, actions), /* @__PURE__ */ BdApi.React.createElement(
+    )))), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActionBar" }, actions && /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewActions" }, actions), /* @__PURE__ */ BdApi.React.createElement(
       SortSelect,
       {
         options: displayedSortOptions,
@@ -26324,7 +26327,7 @@ img.BAP__viewport {
         style: { width },
         onKeyDown: navigator.containerProps.onKeyDown
       },
-      /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packSelectPopoutHeader" }, /* @__PURE__ */ BdApi.React.createElement(
+      /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packSelectPopoutHeader" }, /* @__PURE__ */ BdApi.React.createElement(
         SearchBar,
         {
           placeholder: "Search",
@@ -26341,7 +26344,7 @@ img.BAP__viewport {
           value: sort,
           onChange: setSort
         }
-      )),
+      ))),
       /* @__PURE__ */ BdApi.React.createElement(ListNavigatorContainer, null, ({ ref, ...props }) => /* @__PURE__ */ BdApi.React.createElement(
         "div",
         {
@@ -31136,7 +31139,8 @@ ${DiscordSelectors.Select.measurement} {
     "2.0.0": { "banner": "https://github.com/arg0NNY/BetterAnimations/raw/refs/heads/main/assets/V2.webp", "blurb": "Larger, faster, and rebuilt from the ground up. **BetterAnimations 2.0** is here, transforming your Discord experience with a new generation of silky-smooth, deeply integrated animations.", "changes": [{ "type": "added", "title": "What's New in 2.0", "items": ["🎭 **Expanded Animation Library** — experience motion across Discord like never before. This release introduces 10 new animation modules, bringing the total to 14. Animate everything from Servers and Messages to the Thread Sidebar and Modals.", "⚙️ **Native-Level Integration** — animations are now woven directly into Discord's core UI. This creates a more reliable, rigid, and natural-feeling experience that truly belongs.", "🚀 **Unmatched Performance** — enjoy buttery-smooth animations that make Discord feel snappier and more responsive than ever.", "🎨 **Ultimate Customization** — take full control with a completely redesigned Settings Panel. Fine-tune every detail of your animations or craft entirely new ones from scratch.", "🌐 **Client Mod & Framework** — expand your library with community-made animations or build and share your own through the official Catalog."] }] },
     "2.0.1": { "changes": [{ "type": "added", "title": "What's new", "items": ["Enhance layout: Added alert when conflict with the custom theme is detected."] }, { "type": "fixed", "title": "Fixes", "items": ["General Settings: Updated to work in the latest release of Discord."] }] },
     "2.0.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Fixed the plugin failing to load."] }] },
-    "2.0.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.0.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.0.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
