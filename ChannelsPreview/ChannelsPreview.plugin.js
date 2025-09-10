@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.7
+ * @version 2.1.8
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.7',
+    version: '2.1.8',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated the settings to work in the latest release of Discord.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -83,11 +83,18 @@ const SUPPORTED_CHANNEL_TYPES = [
 
 const [PinToBottomScrollerAuto] = Object.values(Webpack.getBySource('disableScrollAnchor', 'ResizeObserver'))
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
-const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
-const FormTitleTags = Webpack.getModule(Filters.byKeys('H1', 'LABEL', 'LEGEND'), { searchExports: true })
-const FormText = Webpack.getModule(m => Filters.byKeys('DESCRIPTION', 'ERROR')(m?.Types), { searchExports: true })
 const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
-const RadioGroup = Webpack.getModule(Filters.byStrings('container', 'labelledBy', 'radioItemClassName'), { searchExports: true })
+const { FormTitle, FormTitleTags } = Webpack.getMangled(Filters.bySource('defaultMargin', 'errorMessage', 'H4'), {
+  FormTitle: Filters.byStrings('errorMessage'),
+  FormTitleTags: Filters.byKeys('H1', 'H2')
+})
+const { FormText, FormTextTypes } = Webpack.getMangled(Filters.bySource('"description"', '"modeDefault"'), {
+  FormText: Filters.byStrings('variant', 'text'),
+  FormTextTypes: Filters.byKeys('DESCRIPTION')
+})
+const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
+  RadioGroup: Filters.byStrings('label', 'description')
+})
 const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
 const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
 const FormItem = Webpack.getModule(m => Filters.byStrings('titleId', 'errorId', 'setIsFocused')(m?.render), { searchExports: true })
@@ -789,7 +796,7 @@ module.exports = class ChannelsPreview {
                   }),
                   React.createElement(FormText, {
                     className: Selectors.Margins.marginBottom20,
-                    type: FormText.Types.DESCRIPTION,
+                    type: FormTextTypes.DESCRIPTION,
                     children: 'The amount of time to hover before triggering the preview.'
                   }),
                   React.createElement(Slider, {
@@ -827,7 +834,7 @@ module.exports = class ChannelsPreview {
               }),
               React.createElement(FormText, {
                 className: Selectors.Margins.marginBottom20,
-                type: FormText.Types.DESCRIPTION,
+                type: FormTextTypes.DESCRIPTION,
                 children: 'Sets the maximum amount of messages to fetch and display in the preview.'
               }),
               React.createElement(Slider, {
@@ -844,7 +851,7 @@ module.exports = class ChannelsPreview {
               }),
               plugin.settings.appearance.messagesCount > 40 && React.createElement(FormText, {
                 className: Selectors.Margins.marginTop8,
-                type: FormText.Types.ERROR,
+                type: FormTextTypes.ERROR,
                 children: [
                   React.createElement('b', { children: 'WARNING' }),
                   ': Rendering a lot of messages at once can cause performance issues and freezing.'
@@ -946,7 +953,7 @@ module.exports = class ChannelsPreview {
               }),
               React.createElement(FormText, {
                 className: Selectors.Margins.marginBottom20,
-                type: FormText.Types.DESCRIPTION,
+                type: FormTextTypes.DESCRIPTION,
                 children: 'Sets the height of the preview window relative to the Discord window.'
               }),
               React.createElement(Slider, {
@@ -976,7 +983,7 @@ module.exports = class ChannelsPreview {
               }),
               React.createElement(FormText, {
                 className: Selectors.Margins.marginBottom20,
-                type: FormText.Types.DESCRIPTION,
+                type: FormTextTypes.DESCRIPTION,
                 children: 'Darken the chat behind the preview for better contrast.'
               }),
               React.createElement(FormSwitch, {
