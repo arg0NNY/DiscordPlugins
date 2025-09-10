@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.10
+ * @version 1.2.11
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.10',
+    version: '1.2.11',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated the settings to work in the latest release of Discord.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -77,10 +77,17 @@ const Text = Webpack.getModule(m => Filters.byStrings('WebkitLineClamp', 'data-t
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
 const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
 const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
-const FormTitle = Webpack.getModule(Filters.byStrings('defaultMargin', 'errorMessage'), { searchExports: true })
-const FormTitleTags = Webpack.getModule(Filters.byKeys('H1', 'LABEL', 'LEGEND'), { searchExports: true })
-const FormText = Webpack.getModule(m => Filters.byKeys('DESCRIPTION', 'ERROR')(m?.Types), { searchExports: true })
-const RadioGroup = Webpack.getModule(Filters.byStrings('container', 'labelledBy', 'radioItemClassName'), { searchExports: true })
+const { FormTitle, FormTitleTags } = Webpack.getMangled(Filters.bySource('defaultMargin', 'errorMessage', 'H4'), {
+  FormTitle: Filters.byStrings('errorMessage'),
+  FormTitleTags: Filters.byKeys('H1', 'H2')
+})
+const { FormText, FormTextTypes } = Webpack.getMangled(Filters.bySource('"description"', '"modeDefault"'), {
+  FormText: Filters.byStrings('variant', 'text'),
+  FormTextTypes: Filters.byKeys('DESCRIPTION')
+})
+const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
+  RadioGroup: Filters.byStrings('label', 'description')
+})
 
 const { getSocket } = Webpack.getByKeys('getSocket')
 const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
@@ -1169,7 +1176,7 @@ module.exports = class BetterChannelList {
                     disabled: !settings.redesign.enabled
                   }),
                   React.createElement(FormText, {
-                    type: FormText.Types.DESCRIPTION,
+                    type: FormTextTypes.DESCRIPTION,
                     className: Selectors.Margins.marginBottom8,
                     children: 'Controls the size of the channel emoji icons.',
                     disabled: !settings.redesign.enabled
