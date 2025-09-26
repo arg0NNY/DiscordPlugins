@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.8
+ * @version 2.1.9
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.8',
+    version: '2.1.9',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -109,7 +109,7 @@ const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
 const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
 const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
 const EmptyMessage = Webpack.getByStrings('parseTopic', 'buttonContainer')
-const FluxTypingUsers = Webpack.getByStrings('getUserCombo', 'isThreadCreation')
+const FluxTypingUsers = Webpack.getByStrings('typingUsers', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
 const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'THREAD_STARTER_MESSAGE')
