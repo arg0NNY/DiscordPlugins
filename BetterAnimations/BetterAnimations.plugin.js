@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.4
+ * @version 2.0.5
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,6 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
+        "Channels: Fixed the animation direction being incorrectly determined for the Quests page.",
         "Updated to work in the latest release of Discord."
       ]
     }
@@ -737,7 +738,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     },
     // FocusLockModule
     {
-      filter: Filters.bySource("disableReturnRef", '"app-mount"')
+      filter: Filters.bySource("disableReturnRef", "containerRef")
     },
     // ManaModalRootModule
     {
@@ -1449,7 +1450,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.4";
+  const version$1 = "2.0.5";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -29022,7 +29023,8 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       [GuildActionRow.GUILD_SHOP]: StaticChannelRoute.GUILD_SHOP,
       [GuildActionRow.CHANNELS_AND_ROLES]: [StaticChannelRoute.CHANNEL_BROWSER, StaticChannelRoute.CUSTOMIZE_COMMUNITY],
       [GuildActionRow.GUILD_MOD_DASH_MEMBER_SAFETY]: StaticChannelRoute.MEMBER_SAFETY,
-      [GuildActionRow.GUILD_BOOSTS]: StaticChannelRoute.GUILD_BOOSTS
+      [GuildActionRow.GUILD_BOOSTS]: StaticChannelRoute.GUILD_BOOSTS,
+      [GuildActionRow.PORTKEY]: StaticChannelRoute.PORTKEY
     }[guildActionRow] ?? guildActionRow;
   }
   function getStaticDMRouteIndex(pathname) {
@@ -29032,7 +29034,8 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       (p) => p.startsWith(Routes.MESSAGE_REQUESTS),
       (p) => p.startsWith(Routes.APPLICATION_STORE),
       (p) => p.startsWith(Routes.COLLECTIBLES_SHOP),
-      (p) => p.startsWith(Routes.FAMILY_CENTER)
+      (p) => p.startsWith(Routes.FAMILY_CENTER),
+      (p) => p.startsWith(Routes.QUEST_HOME_V2)
     ].findIndex((c) => c(pathname ?? ""));
   }
   function getSortedGuildTreeIds(node = SortedGuildStore.getGuildsTree().root) {
@@ -31140,7 +31143,8 @@ ${DiscordSelectors.Select.measurement} {
     "2.0.1": { "changes": [{ "type": "added", "title": "What's new", "items": ["Enhance layout: Added alert when conflict with the custom theme is detected."] }, { "type": "fixed", "title": "Fixes", "items": ["General Settings: Updated to work in the latest release of Discord."] }] },
     "2.0.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Fixed the plugin failing to load."] }] },
     "2.0.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
-    "2.0.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.0.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.0.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Channels: Fixed the animation direction being incorrectly determined for the Quests page.", "Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
