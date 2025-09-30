@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.5
+ * @version 2.0.6
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,8 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Channels: Fixed the animation direction being incorrectly determined for the Quests page.",
-        "Updated to work in the latest release of Discord."
+        "Modals Backdrop: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -775,7 +774,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   const { RadioGroup } = mangled(RadioGroupModule, {
     RadioGroup: Filters.byStrings("label", "description")
   });
-  const ModalScrim = Object.values(ModalScrimModule ?? {}).find((m) => m?.render);
+  const ModalScrimKeyed = keyed(ModalScrimModule, Filters.byStrings("scrim", "isVisible"));
   const { Checkbox, CheckboxTypes } = mangled(CheckboxModule, {
     Checkbox: Filters.byStrings("checkboxWrapper"),
     CheckboxTypes: Filters.byKeys("INVERTED")
@@ -992,7 +991,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ModalHeader,
     ModalModule,
     ModalRoot,
-    ModalScrim,
+    ModalScrimKeyed,
     ModalScrimModule,
     ModalSize,
     ModalsKeyed,
@@ -1450,7 +1449,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.5";
+  const version$1 = "2.0.6";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -6968,7 +6967,7 @@ ${buildStyles(styles)}}
   }
   /**
    * anime.js - ESM
-   * @version v4.1.3
+   * @version v4.1.4
    * @author Julian Garnier
    * @license MIT
    * @copyright (c) 2025 Julian Garnier
@@ -7147,7 +7146,7 @@ ${buildStyles(styles)}}
     }
     return items2;
   };
-  const clampInfinity = (v) => v === Infinity ? maxValue : v === -Infinity ? -1e12 : v;
+  const clampInfinity = (v) => v === Infinity ? maxValue : v === -Infinity ? -maxValue : v;
   const normalizeTime = (v) => v <= minValue ? minValue : clampInfinity(round(v, 11));
   const cloneArray = (a) => isArr(a) ? [...a] : a;
   const mergeObjects = (o1, o2) => {
@@ -7936,7 +7935,7 @@ ${buildStyles(styles)}}
               const v1 = +values[0];
               const v2 = +values[1];
               const scaleFactor = getScaleFactor($scalled);
-              const os = v1 * -1e3 * scaleFactor;
+              const os = v1 * -pathLength * scaleFactor;
               const d1 = v2 * pathLength * scaleFactor + os;
               const d2 = pathLength * scaleFactor + (v1 === 0 && v2 === 1 || v1 === 1 && v2 === 0 ? 0 : 10 * scaleFactor) - d1;
               if (strokeLineCap !== "butt") {
@@ -30144,7 +30143,7 @@ ${DiscordSelectors.ManaModal.container} {
     );
   }
   function patchModalScrim() {
-    Patcher.after(ModuleKey.ModalsBackdrop, ModalScrim, "render", (self2, [props], value) => {
+    Patcher.after(ModuleKey.ModalsBackdrop, ...ModalScrimKeyed, (self2, [props], value) => {
       const { isMainWindow } = useWindow();
       const module2 = useModule(ModuleKey.ModalsBackdrop);
       if (!isMainWindow || !module2.isEnabled()) return;
@@ -31144,7 +31143,8 @@ ${DiscordSelectors.Select.measurement} {
     "2.0.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Fixed the plugin failing to load."] }] },
     "2.0.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.0.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
-    "2.0.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Channels: Fixed the animation direction being incorrectly determined for the Quests page.", "Updated to work in the latest release of Discord."] }] }
+    "2.0.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Channels: Fixed the animation direction being incorrectly determined for the Quests page.", "Updated to work in the latest release of Discord."] }] },
+    "2.0.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Modals Backdrop: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
