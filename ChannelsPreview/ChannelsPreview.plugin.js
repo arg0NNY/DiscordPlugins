@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.9
+ * @version 2.1.10
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.9',
+    version: '2.1.10',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Settings: Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -88,16 +88,18 @@ const { FormTitle, FormTitleTags } = Webpack.getMangled(Filters.bySource('defaul
   FormTitle: Filters.byStrings('errorMessage'),
   FormTitleTags: Filters.byKeys('H1', 'H2')
 })
-const { FormText, FormTextTypes } = Webpack.getMangled(Filters.bySource('"description"', '"modeDefault"'), {
-  FormText: Filters.byStrings('variant', 'text'),
-  FormTextTypes: Filters.byKeys('DESCRIPTION')
-})
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
   RadioGroup: Filters.byStrings('label', 'description')
 })
 const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
-const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
-const FormItem = Webpack.getModule(m => Filters.byStrings('titleId', 'errorId', 'setIsFocused')(m?.render), { searchExports: true })
+const Switch = Webpack.getModule(Filters.byStrings('checkbox', 'animated.rect'), { searchExports: true })
+const Stack = Webpack.getModule(m => Filters.byStrings('stack', 'data-justify')(m?.render), { searchExports: true })
+const Divider = Webpack.getModule(Filters.byStrings('.divider', 'marginTop:'), { searchExports: true })
+const FormControl = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
+const { Checkbox, CheckboxTypes } = Webpack.getMangled(Filters.bySource('Checkbox:', 'is not a valid hex color'), {
+  Checkbox: Filters.byStrings('checkboxWrapper'),
+  CheckboxTypes: Filters.byKeys('INVERTED')
+})
 
 const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'))]
 const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('PrivateChannel', 'getTypingUsers'))]
@@ -123,13 +125,6 @@ const FocusRing = Webpack.getModule(m => Filters.byStrings('focusProps', '"li"')
 function forceAppUpdate () {
   Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
   requestIdleCallback(() => Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_SKIP' }))
-}
-
-function FormDivider ({ className, style }) {
-  return React.createElement('div', {
-    className: Utils.className('divider__46c3b', className),
-    style
-  })
 }
 
 const ReducerStore = (() => {
@@ -761,45 +756,32 @@ module.exports = class ChannelsPreview {
         forceUpdate()
       }, [])
 
-      return React.createElement('div', {
+      return React.createElement(Stack, {
         id: plugin.getSettingsPanelId(),
+        gap: 40,
         children: [
-          React.createElement(FormDivider, {
-            className: `${Selectors.Margins.marginBottom20}`
-          }),
-          React.createElement(FormTitle, {
-            tag: FormTitleTags.H1,
-            className: Selectors.Margins.marginBottom20,
-            children: 'Trigger'
-          }),
           React.createElement(FormSection, {
-            children: [
-              React.createElement(RadioGroup, {
-                className: Selectors.Margins.marginBottom20,
-                options: [
-                  { name: 'Hover', value: 'hover' },
-                  { name: 'Shift + Hover', value: 'shift-hover' },
-                  { name: 'Mouse Wheel Click', value: 'mwheel' }
-                ],
-                value: plugin.settings.trigger.displayOn,
-                onChange: ({ value }) => {
-                  plugin.settings.trigger.displayOn = value
-                  onUpdate()
-                }
-              }),
-              ['hover', 'shift-hover'].includes(plugin.settings.trigger.displayOn)
-              && React.createElement(FormSection, {
-                children: [
-                  React.createElement(FormTitle, {
-                    className: Selectors.Margins.marginBottom4,
-                    children: 'Hover Delay'
-                  }),
-                  React.createElement(FormText, {
-                    className: Selectors.Margins.marginBottom20,
-                    type: FormTextTypes.DESCRIPTION,
-                    children: 'The amount of time to hover before triggering the preview.'
-                  }),
+            title: 'Trigger',
+            tag: FormTitleTags.H1,
+            children: React.createElement(Stack, {
+              gap: 16,
+              children: [
+                React.createElement(RadioGroup, {
+                  options: [
+                    { name: 'Hover', value: 'hover' },
+                    { name: 'Shift + Hover', value: 'shift-hover' },
+                    { name: 'Mouse Wheel Click', value: 'mwheel' }
+                  ],
+                  value: plugin.settings.trigger.displayOn,
+                  onChange: ({ value }) => {
+                    plugin.settings.trigger.displayOn = value
+                    onUpdate()
+                  }
+                }),
+                ['hover', 'shift-hover'].includes(plugin.settings.trigger.displayOn) && (
                   React.createElement(Slider, {
+                    label: 'Hover Delay',
+                    description: 'The amount of time to hover before triggering the preview.',
                     initialValue: plugin.settings.trigger.hoverDelay,
                     onValueChange: value => {
                       plugin.settings.trigger.hoverDelay = value
@@ -813,195 +795,166 @@ module.exports = class ChannelsPreview {
                     onMarkerRender: m => m % .5 === 0 || m === .1 || m === plugin.defaultSettings.trigger.hoverDelay
                       ? m.toFixed(1) + 's' : ''
                   })
-                ]
-              })
-            ]
+                )
+              ]
+            })
           }),
-          React.createElement(FormDivider, {
-            className: `${Selectors.Margins.marginBottom40} ${Selectors.Margins.marginTop40}`
-          }),
-          React.createElement(FormTitle, {
+          React.createElement(Divider),
+          React.createElement(FormSection, {
+            title: 'Behavior',
             tag: FormTitleTags.H1,
-            className: Selectors.Margins.marginBottom20,
-            children: 'Behavior'
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom4,
-                children: 'Message Count Limit'
-              }),
-              React.createElement(FormText, {
-                className: Selectors.Margins.marginBottom20,
-                type: FormTextTypes.DESCRIPTION,
-                children: 'Sets the maximum amount of messages to fetch and display in the preview.'
-              }),
-              React.createElement(Slider, {
-                initialValue: plugin.settings.appearance.messagesCount,
-                onValueChange: value => {
-                  plugin.settings.appearance.messagesCount = value
-                  onUpdate()
-                },
-                defaultValue: plugin.defaultSettings.appearance.messagesCount,
-                minValue: 10,
-                maxValue: 100,
-                markers: [...Array(10).keys()].map(n => (n + 1) * 10),
-                stickToMarkers: true
-              }),
-              plugin.settings.appearance.messagesCount > 40 && React.createElement(FormText, {
-                className: Selectors.Margins.marginTop8,
-                type: FormTextTypes.ERROR,
-                children: [
-                  React.createElement('b', { children: 'WARNING' }),
-                  ': Rendering a lot of messages at once can cause performance issues and freezing.'
-                ]
-              }),
-              React.createElement(FormDivider, {
-                className: Selectors.Margins.marginTop20
-              }),
-            ]
-          }),
-          React.createElement(FormSwitch, {
-            className: Selectors.Margins.marginBottom20,
-            value: plugin.settings.appearance.typingUsers,
-            onChange: value => {
-              plugin.settings.appearance.typingUsers = value
-              onUpdate()
-            },
-            children: 'Show typing users',
-            note: 'Shows who\'s typing in the previewed channel.'
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom8,
-                children: 'Scrolling'
-              }),
-              React.createElement(RadioGroup, {
-                options: [
-                  {
-                    name: 'Scroll',
-                    value: 'default',
-                    desc: 'Redirect scroll to the preview while it is open.'
+            children: React.createElement(Stack, {
+              gap: 16,
+              children: [
+                React.createElement(Slider, {
+                  label: 'Message Count Limit',
+                  description: 'Sets the maximum amount of messages to fetch and display in the preview.',
+                  initialValue: plugin.settings.appearance.messagesCount,
+                  onValueChange: value => {
+                    plugin.settings.appearance.messagesCount = value
+                    onUpdate()
                   },
-                  {
-                    name: 'Shift + Scroll',
-                    value: 'shift',
-                    desc: 'Redirect scroll to the preview only while holding Shift.'
+                  defaultValue: plugin.defaultSettings.appearance.messagesCount,
+                  minValue: 10,
+                  maxValue: 100,
+                  markers: [...Array(10).keys()].map(n => (n + 1) * 10),
+                  stickToMarkers: true
+                }),
+                React.createElement(Switch, {
+                  label: 'Show typing users',
+                  description: 'Shows who\'s typing in the previewed channel.',
+                  className: Selectors.Margins.marginBottom20,
+                  checked: plugin.settings.appearance.typingUsers,
+                  onChange: value => {
+                    plugin.settings.appearance.typingUsers = value
+                    onUpdate()
                   }
-                ],
-                value: plugin.settings.behaviour.scroll,
-                onChange: ({ value }) => {
-                  plugin.settings.behaviour.scroll = value
-                  onUpdate()
-                }
-              }),
-              React.createElement(FormDivider, {
-                className: Selectors.Margins.marginTop20
-              }),
-            ]
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom8,
-                children: 'NSFW'
-              }),
-              React.createElement(RadioGroup, {
-                options: [
-                  {
-                    name: 'Show',
-                    value: 'show',
-                    desc: 'Enable the preview for NSFW channels.'
-                  },
-                  {
-                    name: 'Obscure media',
-                    value: 'obscure',
-                    desc: 'Blur all images and videos in the preview of NSFW channels.'
-                  },
-                  {
-                    name: 'Don\'t show',
-                    value: 'hide',
-                    desc: 'Disable the preview for NSFW channels.'
+                }),
+                React.createElement(RadioGroup, {
+                  label: 'Scrolling',
+                  options: [
+                    {
+                      name: 'Scroll',
+                      value: 'default',
+                      desc: 'Redirect scroll to the preview while it is open.'
+                    },
+                    {
+                      name: 'Shift + Scroll',
+                      value: 'shift',
+                      desc: 'Redirect scroll to the preview only while holding Shift.'
+                    }
+                  ],
+                  value: plugin.settings.behaviour.scroll,
+                  onChange: ({ value }) => {
+                    plugin.settings.behaviour.scroll = value
+                    onUpdate()
                   }
-                ],
-                value: plugin.settings.behaviour.nsfw,
-                onChange: ({ value }) => {
-                  plugin.settings.behaviour.nsfw = value
-                  onUpdate()
-                }
-              })
-            ]
+                }),
+                React.createElement(RadioGroup, {
+                  label: 'NSFW',
+                  options: [
+                    {
+                      name: 'Show',
+                      value: 'show',
+                      desc: 'Enable the preview for NSFW channels.'
+                    },
+                    {
+                      name: 'Obscure media',
+                      value: 'obscure',
+                      desc: 'Blur all images and videos in the preview of NSFW channels.'
+                    },
+                    {
+                      name: 'Don\'t show',
+                      value: 'hide',
+                      desc: 'Disable the preview for NSFW channels.'
+                    }
+                  ],
+                  value: plugin.settings.behaviour.nsfw,
+                  onChange: ({ value }) => {
+                    plugin.settings.behaviour.nsfw = value
+                    onUpdate()
+                  }
+                })
+              ]
+            })
           }),
-          React.createElement(FormDivider, {
-            className: `${Selectors.Margins.marginBottom40} ${Selectors.Margins.marginTop40}`
-          }),
-          React.createElement(FormTitle, {
+          React.createElement(Divider),
+          React.createElement(FormSection, {
+            title: 'Appearance',
             tag: FormTitleTags.H1,
-            className: Selectors.Margins.marginBottom20,
-            children: 'Appearance'
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom4,
-                children: 'Preview Height'
-              }),
-              React.createElement(FormText, {
-                className: Selectors.Margins.marginBottom20,
-                type: FormTextTypes.DESCRIPTION,
-                children: 'Sets the height of the preview window relative to the Discord window.'
-              }),
-              React.createElement(Slider, {
-                initialValue: plugin.settings.appearance.popoutHeight,
-                onValueChange: value => {
-                  plugin.settings.appearance.popoutHeight = value
-                  onUpdate()
-                },
-                defaultValue: plugin.defaultSettings.appearance.popoutHeight,
-                minValue: 10,
-                maxValue: 90,
-                markers: [...Array(18).keys()].map(n => (n + 1) * 5).slice(1),
-                stickToMarkers: true,
-                onMarkerRender: m => m % 10 === 0 ? m + '%' : ''
-              }),
-              React.createElement(FormDivider, {
-                className: Selectors.Margins.marginTop20
-              }),
-            ]
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom8,
-                children: 'Backdrop'
-              }),
-              React.createElement(FormText, {
-                className: Selectors.Margins.marginBottom20,
-                type: FormTextTypes.DESCRIPTION,
-                children: 'Darken the chat behind the preview for better contrast.'
-              }),
-              React.createElement(FormSwitch, {
-                children: 'Enable backdrop',
-                value: plugin.settings.appearance.darkenChat,
-                onChange: value => {
-                  plugin.settings.appearance.darkenChat = value
-                  onUpdate()
-                },
-                hideBorder: true
-              }),
-              plugin.settings.appearance.darkenChat && React.createElement(FormItem, {
-                children: [
-                  React.createElement(FormTitle, {
-                    className: Selectors.Margins.marginBottom20,
-                    children: 'Dimming Level'
-                  }),
+            children: React.createElement(Stack, {
+              gap: 16,
+              children: [
+                React.createElement(Slider, {
+                  label: 'Preview Height',
+                  description: 'Sets the height of the preview window relative to the Discord window.',
+                  initialValue: plugin.settings.appearance.popoutHeight,
+                  onValueChange: value => {
+                    plugin.settings.appearance.popoutHeight = value
+                    onUpdate()
+                  },
+                  defaultValue: plugin.defaultSettings.appearance.popoutHeight,
+                  minValue: 10,
+                  maxValue: 90,
+                  markers: [...Array(18).keys()].map(n => (n + 1) * 5).slice(1),
+                  stickToMarkers: true,
+                  onMarkerRender: m => m % 10 === 0 ? m + '%' : ''
+                }),
+                React.createElement(RadioGroup, {
+                  label: 'Message Display',
+                  options: [
+                    { name: 'Cozy', value: 'cozy' },
+                    { name: 'Compact', value: 'compact' }
+                  ],
+                  value: plugin.settings.appearance.displayMode,
+                  onChange: ({ value }) => {
+                    plugin.settings.appearance.displayMode = value
+                    onUpdate()
+                  }
+                }),
+                React.createElement(FormControl, {
+                  label: 'Space between Message Groups',
+                  children: React.createElement(Stack, {
+                    children: [
+                      React.createElement(Checkbox, {
+                        value: plugin.settings.appearance.groupSpacingSync,
+                        onChange: (_, value) => {
+                          plugin.settings.appearance.groupSpacingSync = value
+                          onUpdate()
+                        },
+                        children: 'Sync with app settings'
+                      }),
+                      !plugin.settings.appearance.groupSpacingSync && (
+                        React.createElement(Slider, {
+                          initialValue: plugin.settings.appearance.groupSpacing,
+                          onValueChange: value => {
+                            plugin.settings.appearance.groupSpacing = value
+                            onUpdate()
+                          },
+                          defaultValue: plugin.defaultSettings.appearance.groupSpacing,
+                          minValue: 0,
+                          maxValue: 24,
+                          markers: [0, 4, 8, 16, 24],
+                          stickToMarkers: true,
+                          onMarkerRender: m => m + 'px'
+                        })
+                      )
+                    ]
+                  })
+                }),
+                React.createElement(Divider),
+                React.createElement(Switch, {
+                  label: 'Backdrop',
+                  description: 'Darken the chat behind the preview for better contrast.',
+                  checked: plugin.settings.appearance.darkenChat,
+                  onChange: value => {
+                    plugin.settings.appearance.darkenChat = value
+                    onUpdate()
+                  }
+                }),
+                plugin.settings.appearance.darkenChat && (
                   React.createElement(Slider, {
+                    label: 'Dimming Level',
                     initialValue: plugin.settings.appearance.darkenLevel,
                     onValueChange: value => {
                       plugin.settings.appearance.darkenLevel = value
@@ -1013,70 +966,10 @@ module.exports = class ChannelsPreview {
                     markers: [...Array(10).keys()].map(n => (n + 1) / 10),
                     stickToMarkers: true,
                     onMarkerRender: m => (m * 100) + '%'
-                  }),
-                ]
-              }),
-              React.createElement(FormDivider, {
-                className: Selectors.Margins.marginTop20
-              })
-            ]
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom8,
-                children: 'Message Display'
-              }),
-              React.createElement(RadioGroup, {
-                options: [
-                  { name: 'Cozy', value: 'cozy' },
-                  { name: 'Compact', value: 'compact' }
-                ],
-                value: plugin.settings.appearance.displayMode,
-                onChange: ({ value }) => {
-                  plugin.settings.appearance.displayMode = value
-                  onUpdate()
-                }
-              }),
-              React.createElement(FormDivider, {
-                className: Selectors.Margins.marginTop20
-              })
-            ]
-          }),
-          React.createElement(FormItem, {
-            className: Selectors.Margins.marginBottom20,
-            children: [
-              React.createElement(FormTitle, {
-                className: Selectors.Margins.marginBottom20,
-                children: 'Space between Message Groups'
-              }),
-              React.createElement(FormSwitch, {
-                children: 'Sync with app settings',
-                value: plugin.settings.appearance.groupSpacingSync,
-                onChange: value => {
-                  plugin.settings.appearance.groupSpacingSync = value
-                  onUpdate()
-                },
-                hideBorder: true
-              }),
-              !plugin.settings.appearance.groupSpacingSync && React.createElement(Slider, {
-                initialValue: plugin.settings.appearance.groupSpacing,
-                onValueChange: value => {
-                  plugin.settings.appearance.groupSpacing = value
-                  onUpdate()
-                },
-                defaultValue: plugin.defaultSettings.appearance.groupSpacing,
-                minValue: 0,
-                maxValue: 24,
-                markers: [0, 4, 8, 16, 24],
-                stickToMarkers: true,
-                onMarkerRender: m => m + 'px'
-              }),
-              React.createElement(FormDivider, {
-                className: Selectors.Margins.marginTop20
-              })
-            ]
+                  })
+                )
+              ]
+            })
           })
         ]
       })
