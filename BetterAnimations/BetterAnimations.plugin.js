@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.6
+ * @version 2.0.7
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.6",
+    "version": "2.0.7",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Modals Backdrop: Updated to work in the latest release of Discord."
+        "Settings: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -153,12 +153,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Switch$1,
     CheckboxModule,
     FormTitleModule,
-    FormTextModule,
     FormSection,
     Breadcrumbs,
     RadioGroupModule,
-    FormSwitch,
-    FormItem,
     Slider$1,
     ReferencePositionLayer,
     SearchableSelect,
@@ -293,10 +290,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("defaultMargin", "errorMessage", "H4")
     },
-    // FormTextModule
-    {
-      filter: Filters.bySource('"description"', '"modeDefault"')
-    },
     // FormSection
     {
       filter: (m) => Filters.byStrings("titleId", "sectionTitle")(m?.render),
@@ -310,16 +303,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     // RadioGroupModule
     {
       filter: Filters.bySource('"radiogroup"', "getFocusableElements")
-    },
-    // FormSwitch
-    {
-      filter: Filters.byStrings("labelRow", "checked"),
-      searchExports: true
-    },
-    // FormItem
-    {
-      filter: (m) => Filters.byStrings("titleId", "errorId", "setIsFocused")(m?.render),
-      searchExports: true
     },
     // Slider
     {
@@ -767,10 +750,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     FormTitle: Filters.byStrings("errorMessage"),
     FormTitleTags: Filters.byKeys("H1", "H2")
   });
-  const { FormText, FormTextTypes } = mangled(FormTextModule, {
-    FormText: Filters.byStrings("variant", "text"),
-    FormTextTypes: Filters.byKeys("DESCRIPTION")
-  });
   const { RadioGroup } = mangled(RadioGroupModule, {
     RadioGroup: Filters.byStrings("label", "description")
   });
@@ -938,12 +917,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Flux,
     FocusLock,
     FocusLockModule,
-    FormItem,
     FormSection,
-    FormSwitch,
-    FormText,
-    FormTextModule,
-    FormTextTypes,
     FormTitle,
     FormTitleModule,
     FormTitleTags,
@@ -1449,7 +1423,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.6";
+  const version$1 = "2.0.7";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -23067,20 +23041,31 @@ img.BAP__viewport {
     );
   }
   function SettingControl({ label, doc: doc2, onReset, children: children2 }) {
-    return /* @__PURE__ */ BdApi.React.createElement(FormItem, { className: "BA__settingControl" }, /* @__PURE__ */ BdApi.React.createElement(FormTitle, { tag: "h5", className: "BA__settingControlHeader" }, /* @__PURE__ */ BdApi.React.createElement("span", null, label), doc2 && /* @__PURE__ */ BdApi.React.createElement(Hint, { href: Documentation.getSettingUrl(doc2) }), onReset && /* @__PURE__ */ BdApi.React.createElement(
-      IconButton,
+    return /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__settingControl" }, /* @__PURE__ */ BdApi.React.createElement(
+      Text$1,
       {
-        className: "BA__settingControlReset",
-        tooltip: "Reset",
-        onClick: onReset
+        className: "BA__settingControlHeader",
+        variant: "text-md/semibold",
+        color: "header-primary"
       },
-      /* @__PURE__ */ BdApi.React.createElement(RedoIcon, { size: "xs", color: "currentColor" })
-    )), children2);
+      /* @__PURE__ */ BdApi.React.createElement("span", null, label),
+      doc2 && /* @__PURE__ */ BdApi.React.createElement(Hint, { href: Documentation.getSettingUrl(doc2) }),
+      onReset && /* @__PURE__ */ BdApi.React.createElement(
+        IconButton,
+        {
+          className: "BA__settingControlReset",
+          tooltip: "Reset",
+          onClick: onReset
+        },
+        /* @__PURE__ */ BdApi.React.createElement(RedoIcon, { size: "xs", color: "currentColor" })
+      )
+    ), children2);
   }
   css`.BA__settingControlHeader {
     display: flex;
     align-items: center;
     gap: 4px;
+    margin-bottom: 8px;
 }
 .BA__settingControlReset {
     margin-left: auto;
@@ -23679,6 +23664,18 @@ img.BAP__viewport {
 .BA__overflowControlReset {
     margin-left: auto;
 }``OverflowControl`;
+  function SwitchIndicator(props) {
+    try {
+      const value = Switch$1(props);
+      try {
+        return value.props.children({});
+      } catch {
+        return value;
+      }
+    } catch {
+      return /* @__PURE__ */ BdApi.React.createElement(Switch$1, { ...props });
+    }
+  }
   function SettingList({ children: children2, className = "BA__animationSettingsList" }) {
     return /* @__PURE__ */ BdApi.React.createElement("div", { className }, typeof children2 === "function" ? children2() : children2.map((item) => {
       if (!item) return /* @__PURE__ */ BdApi.React.createElement("div", null);
@@ -23712,7 +23709,14 @@ img.BAP__viewport {
         color: "header-muted"
       },
       subtitle
-    ), headerAfter), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__animationSettingsHeaderControls" }, onReset && /* @__PURE__ */ BdApi.React.createElement(IconButton, { tooltip: "Reset all", onClick: onReset }, /* @__PURE__ */ BdApi.React.createElement(RedoIcon, { size: "sm", color: "currentColor" })), typeof enabled === "boolean" && /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: switchTooltip, hideOnClick: false }, (props) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props }, /* @__PURE__ */ BdApi.React.createElement(Switch$1, { checked: enabled, disabled: !setEnabled, onChange: setEnabled })))))));
+    ), headerAfter), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__animationSettingsHeaderControls" }, onReset && /* @__PURE__ */ BdApi.React.createElement(IconButton, { tooltip: "Reset all", onClick: onReset }, /* @__PURE__ */ BdApi.React.createElement(RedoIcon, { size: "sm", color: "currentColor" })), typeof enabled === "boolean" && /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: switchTooltip, hideOnClick: false }, (props) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props }, /* @__PURE__ */ BdApi.React.createElement(
+      SwitchIndicator,
+      {
+        checked: enabled,
+        disabled: !setEnabled,
+        onChange: setEnabled
+      }
+    )))))));
   }
   function AnimationSettings({ headers, settings }) {
     return /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__animationSettings" }, /* @__PURE__ */ BdApi.React.createElement(AnimationSettingsHeader, { headers }), settings.map(Setting));
@@ -25399,7 +25403,6 @@ img.BAP__viewport {
       id: m.id,
       label: m.name
     }));
-    const toggleSwitch = /* @__PURE__ */ BdApi.React.createElement(Switch$1, { checked: enabled, onChange: setEnabled });
     const handleSetSettings = (pack, animation, type) => (value) => Config.pack(pack.slug).setAnimationConfig(animation.key, module2.id, type, value);
     const defaultSettings = (animation, type) => module2.buildDefaultSettings(animation, type);
     const handleResetSettings = (pack, animation, type) => {
@@ -25506,7 +25509,14 @@ img.BAP__viewport {
         ),
         onBreadcrumbClick: ({ id }) => setSection2(id)
       }
-    ), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: `${enabled ? "Disable" : "Enable"} ${module2.name} animations`, hideOnClick: false }, (props2) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props2 }, toggleSwitch))), module2.description && /* @__PURE__ */ BdApi.React.createElement(FormText, { type: FormTextTypes.DESCRIPTION, className: DiscordClasses.Margins.marginTop8 }, typeof module2.description === "function" ? module2.description(setSection2) : module2.description), module2.controls && /* @__PURE__ */ BdApi.React.createElement("div", { className: DiscordClasses.Margins.marginTop8 }, module2.controls({ module: module2 })), childModules.map((m) => /* @__PURE__ */ BdApi.React.createElement(Clickable, { tag: "div", onClick: () => setSection2(m.id) }, /* @__PURE__ */ BdApi.React.createElement(
+    ), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: `${enabled ? "Disable" : "Enable"} ${module2.name} animations`, hideOnClick: false }, (props2) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props2 }, /* @__PURE__ */ BdApi.React.createElement(SwitchIndicator, { checked: enabled, onChange: setEnabled })))), module2.description && /* @__PURE__ */ BdApi.React.createElement(
+      Text$1,
+      {
+        className: DiscordClasses.Margins.marginTop8,
+        variant: "text-sm/normal"
+      },
+      typeof module2.description === "function" ? module2.description(setSection2) : module2.description
+    ), module2.controls && /* @__PURE__ */ BdApi.React.createElement("div", { className: DiscordClasses.Margins.marginTop8 }, module2.controls({ module: module2 })), childModules.map((m) => /* @__PURE__ */ BdApi.React.createElement(Clickable, { tag: "div", onClick: () => setSection2(m.id) }, /* @__PURE__ */ BdApi.React.createElement(
       FormTitle,
       {
         key: m.id,
@@ -27296,35 +27306,35 @@ img.BAP__viewport {
           className: DiscordClasses.Margins.marginTop20,
           titleClassName: DiscordClasses.Margins.marginBottom8
         },
-        /* @__PURE__ */ BdApi.React.createElement(
-          FormSwitch,
+        /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__settingsStack" }, /* @__PURE__ */ BdApi.React.createElement(
+          Switch$1,
           {
             className: DiscordClasses.Margins.marginBottom20,
-            children: "Quick Preview",
-            note: "Play the animation preview when hovering over an animation card. Disable to play it only when an animation card is expanded.",
-            value: config2.general.quickPreview,
+            label: "Quick Preview",
+            description: "Play the animation preview when hovering over an animation card. Disable to play it only when an animation card is expanded.",
+            checked: config2.general.quickPreview,
             onChange: (value) => {
               config2.general.quickPreview = value;
               onChange();
             }
           }
-        ),
-        /* @__PURE__ */ BdApi.React.createElement(
-          FormSwitch,
+        ), /* @__PURE__ */ BdApi.React.createElement(
+          Switch$1,
           {
             className: DiscordClasses.Margins.marginBottom20,
-            children: "Disable Hints",
-            note: `Hide reference links to ${meta$1.name} documentation in the module settings, animation settings, etc.`,
-            value: config2.general.disableHints,
+            label: "Disable Hints",
+            description: `Hide reference links to ${meta$1.name} documentation in the module settings, animation settings, etc.`,
+            checked: config2.general.disableHints,
             onChange: (value) => {
               config2.general.disableHints = value;
               onChange();
             }
           }
-        ),
-        /* @__PURE__ */ BdApi.React.createElement(FormItem, { className: DiscordClasses.Margins.marginBottom20 }, /* @__PURE__ */ BdApi.React.createElement(FormTitle, { className: DiscordClasses.Margins.marginBottom8 }, "Suppress Errors"), /* @__PURE__ */ BdApi.React.createElement(FormText, { className: DiscordClasses.Margins.marginBottom20 }, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."), /* @__PURE__ */ BdApi.React.createElement(
+        ), /* @__PURE__ */ BdApi.React.createElement(
           RadioGroup,
           {
+            label: "Suppress Errors",
+            description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
             options: [
               { value: SuppressErrors.All, name: "Suppress all errors" },
               { value: SuppressErrors.Animation, name: "Suppress animation errors" },
@@ -27336,7 +27346,7 @@ img.BAP__viewport {
               onChange();
             }
           }
-        ), /* @__PURE__ */ BdApi.React.createElement(Divider$2, { className: DiscordClasses.Margins.marginTop20 }))
+        ), /* @__PURE__ */ BdApi.React.createElement(Divider$2, null))
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         FormSection,
@@ -27346,45 +27356,43 @@ img.BAP__viewport {
           className: DiscordClasses.Margins.marginTop20,
           titleClassName: DiscordClasses.Margins.marginBottom8
         },
-        /* @__PURE__ */ BdApi.React.createElement(
-          FormSwitch,
+        /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__settingsStack" }, /* @__PURE__ */ BdApi.React.createElement(
+          Switch$1,
           {
             className: DiscordClasses.Margins.marginBottom20,
-            children: Messages.PRIORITIZE_ANIMATION_SMOOTHNESS,
-            note: "Delay resource-intensive operations until after animations finish to avoid most of the stuttering that occurs while they are running.",
-            value: config2.general.prioritizeAnimationSmoothness,
+            label: Messages.PRIORITIZE_ANIMATION_SMOOTHNESS,
+            description: "Delay resource-intensive operations until after animations finish to avoid most of the stuttering that occurs while they are running.",
+            checked: config2.general.prioritizeAnimationSmoothness,
             onChange: (value) => {
               config2.general.prioritizeAnimationSmoothness = value;
               onChange();
             }
           }
-        ),
-        /* @__PURE__ */ BdApi.React.createElement(
-          FormSwitch,
+        ), /* @__PURE__ */ BdApi.React.createElement(
+          Switch$1,
           {
             className: DiscordClasses.Margins.marginBottom20,
-            children: "Preload Layers",
-            note: "Load full-screen pages (User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
-            value: config2.general.preloadLayers,
+            label: "Preload Layers",
+            description: "Load full-screen pages (User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
+            checked: config2.general.preloadLayers,
             onChange: (value) => {
               config2.general.preloadLayers = value;
               onChange();
             }
           }
-        ),
-        /* @__PURE__ */ BdApi.React.createElement(
-          FormSwitch,
+        ), /* @__PURE__ */ BdApi.React.createElement(
+          Switch$1,
           {
             className: DiscordClasses.Margins.marginBottom20,
-            children: Messages.CACHE_USER_SETTINGS_SECTIONS,
-            note: "Significantly improves performance when opening User Settings.",
-            value: config2.general.cacheUserSettingsSections,
+            label: Messages.CACHE_USER_SETTINGS_SECTIONS,
+            description: "Significantly improves performance when opening User Settings.",
+            checked: config2.general.cacheUserSettingsSections,
             onChange: (value) => {
               config2.general.cacheUserSettingsSections = value;
               onChange();
             }
           }
-        )
+        ), /* @__PURE__ */ BdApi.React.createElement(Divider$2, null))
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         FormSection,
@@ -27394,9 +27402,11 @@ img.BAP__viewport {
           className: DiscordClasses.Margins.marginTop20,
           titleClassName: DiscordClasses.Margins.marginBottom8
         },
-        /* @__PURE__ */ BdApi.React.createElement(FormItem, { className: DiscordClasses.Margins.marginBottom20 }, /* @__PURE__ */ BdApi.React.createElement(FormTitle, { className: DiscordClasses.Margins.marginBottom8 }, "Switch Cooldown Duration"), /* @__PURE__ */ BdApi.React.createElement(FormText, { className: DiscordClasses.Margins.marginBottom20 }, "If switch animations overlap, they cancel each other and trigger a cooldown preventing new switch animations from playing for a period of time."), /* @__PURE__ */ BdApi.React.createElement(
+        /* @__PURE__ */ BdApi.React.createElement(
           DurationSlider,
           {
+            label: "Switch Cooldown Duration",
+            description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
             from: 100,
             to: 2e3,
             defaultValue: configDefaults.general.switchCooldownDuration,
@@ -27406,10 +27416,15 @@ img.BAP__viewport {
               onChange();
             }
           }
-        ))
+        )
       )
     ));
   }
+  css`.BA__settingsStack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}``GeneralSettings`;
   function BetterDiscordIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
@@ -28313,44 +28328,44 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   }
   const moduleOptions = {
     [ModuleKey.Servers]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between servers and other full-screen pages, such as DMs and Discover. Supports auto-direction for applicable animations determined by the order of elements in the server list."),
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between servers and other full-screen pages, such as DMs and Discover."),
       controls: ServerModuleControls
     },
     [ModuleKey.Channels]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between channels and other pages sharing the same sidebar. Supports auto-direction for applicable animations determined by the order of elements in the sidebar.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between channels and other pages sharing the same sidebar.")
     },
     [ModuleKey.Settings]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between sections of the settings. Supports auto-direction for applicable animations determined by the order of sections in the navigation sidebar.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between sections of the settings.")
     },
     [ModuleKey.Layers]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen views of the Discord app, such as User Settings, Server Settings, ", meta$1.name, " Settings, etc. Supports auto-direction for applicable animations determined by the user’s navigation history across layered views.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen views of the Discord app, such as User Settings, Server Settings, ", meta$1.name, " Settings, etc.")
     },
     [ModuleKey.Tooltips]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of informative floating UI elements application-wide, such as various control descriptions, server titles in the server list and other non-interactive elements that provide clarity to Discord's interfaces. Supports auto-position and auto-direction for applicable animations determined by the location of the anchor element.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of informative floating UI elements application-wide, such as various control descriptions, server titles in the server list and other non-interactive elements that provide clarity to Discord's interfaces.")
     },
     [ModuleKey.Popouts]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of interactive floating UI elements application-wide, such as User Profiles, Select Inputs, Pinned Messages, etc. Supports auto-position and auto-direction for applicable animations determined by the location of the anchor element. Context Menus that have a strictly defined anchor element are controlled by this module.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of interactive floating UI elements application-wide, such as User Profiles, Select Inputs, Pinned Messages, etc.")
     },
     [ModuleKey.ContextMenu]: {
-      description: (setSection2) => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of a context menu that is activated by right-clicking on various UI elements. Supports auto-position and auto-direction for applicable animations determined by the location of the pointer. Context Menus that have a strictly defined anchor element, with the exception of context submenus, are controlled by ", /* @__PURE__ */ BdApi.React.createElement(Anchor, { onClick: () => setSection2(ModuleKey.Popouts) }, "Popouts"), ".")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of a context menu that is activated by right-clicking on various UI elements.")
     },
     [ModuleKey.Messages]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance of new messages and the disappearance of deleted messages and other UI elements in the chat. Supports smooth expand and collapse transitions to prevent abrupt layout shifts during dynamic content updates.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance of new messages and the disappearance of deleted messages and other UI elements in the chat.")
     },
     [ModuleKey.ChannelList]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of channels in the channel list triggered by switching categories, creating or deleting a channel, and other actions that change the contents of the channel list. Supports smooth expand and collapse transitions to prevent abrupt layout shifts during dynamic content updates.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of channels in the channel list triggered by switching categories, creating or deleting a channel, and other actions that change the contents of the channel list.")
     },
     [ModuleKey.Modals]: {
       description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of full-screen modal windows.")
     },
     [ModuleKey.ModalsBackdrop]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of a dimming overlay behind modal windows. Backdrop animations can alter the static styles of the backdrop.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of a dimming overlay behind modal windows.")
     },
     [ModuleKey.MembersSidebar]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of sidebars inside the chat area, such as Member List, Message Search Results, etc. Supports smooth expand and collapse transitions to prevent abrupt layout shifts during the switch.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of sidebars inside the chat area, such as Member List, Message Search Results, etc.")
     },
     [ModuleKey.ThreadSidebar]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of full-screen sidebars, such as Thread Chat, Forum Post Chat, etc. Supports smooth expand and collapse transitions to prevent abrupt layout shifts during the switch.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of full-screen sidebars, such as Thread Chat, Forum Post Chat, etc.")
     },
     [ModuleKey.ThreadSidebarSwitch]: {
       description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen sidebars, such as between threads or forum posts.")
@@ -31144,7 +31159,8 @@ ${DiscordSelectors.Select.measurement} {
     "2.0.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.0.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.0.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Channels: Fixed the animation direction being incorrectly determined for the Quests page.", "Updated to work in the latest release of Discord."] }] },
-    "2.0.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Modals Backdrop: Updated to work in the latest release of Discord."] }] }
+    "2.0.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Modals Backdrop: Updated to work in the latest release of Discord."] }] },
+    "2.0.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
