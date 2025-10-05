@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.11
+ * @version 1.2.12
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.11',
+    version: '1.2.12',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Settings: Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -72,22 +72,21 @@ const EmojiIconSizes = {
   MEDIUM: 'medium'
 }
 
-const Button = Webpack.getModule(Filters.byKeys('Looks', 'Link'), { searchExports: true })
+const Button = Webpack.getModule(Filters.byStrings('button', 'hasText', 'expressiveWrapper'), { searchExports: true })
 const Text = Webpack.getModule(m => Filters.byStrings('WebkitLineClamp', 'data-text-variant')(m?.render), { searchExports: true })
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
-const FormSwitch = Webpack.getModule(Filters.byStrings('labelRow', 'checked'), { searchExports: true })
+const Switch = Webpack.getModule(Filters.byStrings('checkbox', 'animated.rect'), { searchExports: true })
 const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
 const { FormTitle, FormTitleTags } = Webpack.getMangled(Filters.bySource('defaultMargin', 'errorMessage', 'H4'), {
   FormTitle: Filters.byStrings('errorMessage'),
   FormTitleTags: Filters.byKeys('H1', 'H2')
 })
-const { FormText, FormTextTypes } = Webpack.getMangled(Filters.bySource('"description"', '"modeDefault"'), {
-  FormText: Filters.byStrings('variant', 'text'),
-  FormTextTypes: Filters.byKeys('DESCRIPTION')
-})
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
   RadioGroup: Filters.byStrings('label', 'description')
 })
+const Stack = Webpack.getModule(m => Filters.byStrings('stack', 'data-justify')(m?.render), { searchExports: true })
+const Divider = Webpack.getModule(Filters.byStrings('.divider', 'marginTop:'), { searchExports: true })
+const FormControl = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
 
 const { getSocket } = Webpack.getByKeys('getSocket')
 const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
@@ -116,7 +115,6 @@ const EmojiPicker = Webpack.getModule(m => Filters.byStrings('pickerIntention')(
 const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RELATED_EMOJI', 'SOUNDBOARD'), { searchExports: true })
 const Alert = Webpack.getModule(Filters.byStrings('messageType', 'iconDiv'), { searchExports: true })
 const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
-const Flex = Webpack.getByKeys('Child', 'Direction')
 const ReplyMessageHeader = Webpack.getByStrings('replyReference', 'isReplySpineClickable', 'showReplySpine')?.({ replyReference: {} })?.type?.type
 const createMessage = Webpack.getByStrings('createMessage: author cannot be undefined')
 
@@ -134,15 +132,7 @@ const Selectors = {
   GuildHeader: Webpack.getByKeys('bannerImage', 'bannerImg'),
   Margins: Webpack.getByKeys('marginBottom40', 'marginTop40'),
   SidebarFooter: Webpack.getByKeys('nameTag', 'avatarWrapper'),
-  FormSwitch: Webpack.getByKeys('dividerDefault', 'note'),
   Diversity: Webpack.getByKeys('diversitySelectorOptions')
-}
-
-function FormDivider ({ className, style }) {
-  return React.createElement('div', {
-    className: Utils.className('divider__46c3b', className),
-    style
-  })
 }
 
 function deepEqual (x, y) {
@@ -1070,15 +1060,15 @@ module.exports = class BetterChannelList {
     const settings = this.settings
     const saveSettings = this.saveSettings.bind(this)
 
-    function Switch (props) {
-      const [value, setValue] = React.useState(props.value)
+    function FormSwitch (props) {
+      const [checked, setChecked] = React.useState(props.checked)
 
-      return React.createElement(FormSwitch, {
+      return React.createElement(Switch, {
         ...props,
-        value,
+        checked,
         onChange: e => {
           props.onChange(e)
-          setValue(e)
+          setChecked(e)
           saveSettings()
         }
       })
@@ -1094,108 +1084,77 @@ module.exports = class BetterChannelList {
       }, [])
 
       return React.createElement(
-        React.Fragment, {},
+        Stack,
+        { gap: 24 },
         [
-          React.createElement(FormSection, {
-            title: 'Last message',
-            className: `${Selectors.Margins.marginBottom20} ${Selectors.Margins.marginTop8}`,
+          React.createElement(Stack, {
+            gap: 16,
             children: [
-              React.createElement(Switch, {
-                children: 'Enable Last message',
-                note: 'Shows the most recent message for each channel in the channel list.',
-                value: settings.lastMessage.enabled,
+              React.createElement(FormSwitch, {
+                label: 'Last message',
+                description: 'Shows the most recent message for each channel in the channel list.',
+                checked: settings.lastMessage.enabled,
                 onChange: e => {
                   settings.lastMessage.enabled = e
                   forceUpdate()
                 }
               }),
-              React.createElement(Switch, {
-                children: 'Enable role color',
-                note: 'Paints author\'s username according to color of their role.',
-                value: settings.lastMessage.roleColors,
+              React.createElement(FormSwitch, {
+                label: 'Enable role color',
+                description: 'Paints author\'s username according to color of their role.',
+                checked: settings.lastMessage.roleColors,
                 onChange: e => settings.lastMessage.roleColors = e,
                 disabled: !settings.lastMessage.enabled
               })
             ]
           }),
-          React.createElement(FormSection, {
-            title: 'Redesign',
+          React.createElement(Divider),
+          React.createElement(Stack, {
+            gap: 16,
             children: [
-              React.createElement(Switch, {
-                children: 'Enable Redesign',
-                note: 'Brings channel list redesign from the new mobile UI.',
-                value: settings.redesign.enabled,
+              React.createElement(FormSwitch, {
+                label: 'Redesign',
+                description: 'Brings channel list redesign from the new mobile UI.',
+                checked: settings.redesign.enabled,
                 onChange: e => {
                   settings.redesign.enabled = e
                   forceUpdate()
                 }
               }),
-              React.createElement(FormSection, {
-                className: Selectors.Margins.marginBottom20,
-                children: [
-                  React.createElement(FormTitle, {
-                    tag: FormTitleTags.H3,
-                    className: Selectors.Margins.marginBottom8,
-                    children: 'Emoji Icons',
-                    disabled: !settings.redesign.enabled
-                  }),
-                  React.createElement(Flex, {
-                    children: [
-                      React.createElement(Flex.Child, {
-                        children: React.createElement(Alert, {
-                          messageType: AlertMessageTypes.INFO,
-                          children: 'Edit the channel emoji icons using their context menu.',
-                          className: !settings.redesign.enabled ? 'BCL--disabled' : null
-                        })
-                      }),
-                      resetShown && React.createElement(Flex.Child, {
-                        wrap: true,
-                        style: { marginLeft: '0' },
-                        children: React.createElement(Button, {
-                          size: Button.Sizes.LARGE,
-                          color: Button.Colors.RED,
-                          look: Button.Looks.OUTLINED,
-                          children: 'Reset All Icons',
-                          onClick: () => this.openResetConfirmationModal(),
-                          disabled: !settings.redesign.enabled
-                        })
-                      })
-                    ]
-                  }),
-                  React.createElement(FormDivider, {
-                    className: Selectors.FormSwitch.dividerDefault
-                  })
-                ]
+              React.createElement(FormControl, {
+                label: 'Emoji Icons',
+                children: React.createElement(Stack, {
+                  direction: 'horizontal',
+                  children: [
+                    React.createElement(Alert, {
+                      messageType: AlertMessageTypes.INFO,
+                      children: 'Edit the channel emoji icons using their context menu.',
+                      className: !settings.redesign.enabled ? 'BCL--disabled' : null
+                    }),
+                    resetShown && React.createElement(Button, {
+                      variant: 'critical-primary',
+                      text: 'Reset All Icons',
+                      onClick: () => this.openResetConfirmationModal(),
+                      disabled: !settings.redesign.enabled
+                    })
+                  ]
+                })
               }),
-              React.createElement(FormSection, {
-                children: [
-                  React.createElement(FormTitle, {
-                    tag: FormTitleTags.H3,
-                    className: Selectors.Margins.marginBottom8,
-                    children: 'Icon Size',
-                    disabled: !settings.redesign.enabled
-                  }),
-                  React.createElement(FormText, {
-                    type: FormTextTypes.DESCRIPTION,
-                    className: Selectors.Margins.marginBottom8,
-                    children: 'Controls the size of the channel emoji icons.',
-                    disabled: !settings.redesign.enabled
-                  }),
-                  React.createElement(RadioGroup, {
-                    options: [
-                      { name: 'Medium', value: EmojiIconSizes.MEDIUM },
-                      { name: 'Small', value: EmojiIconSizes.SMALL },
-                      { name: 'Tiny', value: EmojiIconSizes.TINY }
-                    ],
-                    value: settings.redesign.iconSize,
-                    onChange: e => {
-                      settings.redesign.iconSize = e.value
-                      forceUpdate()
-                      saveSettings()
-                    },
-                    disabled: !settings.redesign.enabled
-                  })
-                ]
+              React.createElement(RadioGroup, {
+                label: 'Icon Size',
+                description: 'Controls the size of the channel emoji icons.',
+                options: [
+                  { name: 'Medium', value: EmojiIconSizes.MEDIUM },
+                  { name: 'Small', value: EmojiIconSizes.SMALL },
+                  { name: 'Tiny', value: EmojiIconSizes.TINY }
+                ],
+                value: settings.redesign.iconSize,
+                onChange: e => {
+                  settings.redesign.iconSize = e.value
+                  forceUpdate()
+                  saveSettings()
+                },
+                disabled: !settings.redesign.enabled
               })
             ]
           })
