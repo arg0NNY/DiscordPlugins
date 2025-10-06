@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.7
+ * @version 2.0.8
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.7",
+    "version": "2.0.8",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Settings: Updated to work in the latest release of Discord."
+        "Catalog & Library: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -440,7 +440,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     },
     // Timestamp
     {
-      filter: (m) => Filters.byStrings("timestamp", "timestampTooltip")(m?.type),
+      filter: (m) => Filters.byStrings("timestamp", "timestampInline")(m?.type),
       searchExports: true
     },
     // getThemeClass
@@ -1423,7 +1423,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.7";
+  const version$1 = "2.0.8";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -24838,7 +24838,7 @@ img.BAP__viewport {
           module: module2,
           pack: loadedPack
         }
-      )), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packModalPreviewFooter" }, /* @__PURE__ */ BdApi.React.createElement(PackMeta, { pack })))))
+      )), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packModalPreviewFooter" }, /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, /* @__PURE__ */ BdApi.React.createElement(PackMeta, { pack }))))))
     );
   }
   css`.BA__packModal {
@@ -31160,7 +31160,8 @@ ${DiscordSelectors.Select.measurement} {
     "2.0.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.0.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Channels: Fixed the animation direction being incorrectly determined for the Quests page.", "Updated to work in the latest release of Discord."] }] },
     "2.0.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Modals Backdrop: Updated to work in the latest release of Discord."] }] },
-    "2.0.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord."] }] }
+    "2.0.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord."] }] },
+    "2.0.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Catalog & Library: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
