@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.10
+ * @version 2.1.11
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.10',
+    version: '2.1.11',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -65,8 +65,7 @@ const Selectors = {
   Typing: Webpack.getByKeys('typing', 'ellipsis'),
   ChatLayout: Webpack.getByKeys('sidebar', 'guilds'),
   AppView: Webpack.getByKeys('base', 'content'),
-  Chat: Webpack.getByKeys('messagesWrapper', 'scrollerContent'),
-  Margins: Webpack.getByKeys('marginBottom40', 'marginTop40')
+  Chat: Webpack.getByKeys('messagesWrapper', 'scrollerContent')
 }
 
 let settings = {}
@@ -83,11 +82,7 @@ const SUPPORTED_CHANNEL_TYPES = [
 
 const [PinToBottomScrollerAuto] = Object.values(Webpack.getBySource('disableScrollAnchor', 'ResizeObserver'))
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
-const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
-const { FormTitle, FormTitleTags } = Webpack.getMangled(Filters.bySource('defaultMargin', 'errorMessage', 'H4'), {
-  FormTitle: Filters.byStrings('errorMessage'),
-  FormTitleTags: Filters.byKeys('H1', 'H2')
-})
+const FieldSet = Webpack.getModule(Filters.byStrings('.fieldset', '"legend"'), { searchExports: true })
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
   RadioGroup: Filters.byStrings('label', 'description')
 })
@@ -95,7 +90,7 @@ const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialV
 const Switch = Webpack.getModule(Filters.byStrings('checkbox', 'animated.rect'), { searchExports: true })
 const Stack = Webpack.getModule(m => Filters.byStrings('stack', 'data-justify')(m?.render), { searchExports: true })
 const Divider = Webpack.getModule(Filters.byStrings('.divider', 'marginTop:'), { searchExports: true })
-const FormControl = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
+const Field = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
 const { Checkbox, CheckboxTypes } = Webpack.getMangled(Filters.bySource('Checkbox:', 'is not a valid hex color'), {
   Checkbox: Filters.byStrings('checkboxWrapper'),
   CheckboxTypes: Filters.byKeys('INVERTED')
@@ -758,11 +753,10 @@ module.exports = class ChannelsPreview {
 
       return React.createElement(Stack, {
         id: plugin.getSettingsPanelId(),
-        gap: 40,
+        gap: 32,
         children: [
-          React.createElement(FormSection, {
-            title: 'Trigger',
-            tag: FormTitleTags.H1,
+          React.createElement(FieldSet, {
+            label: 'Trigger',
             children: React.createElement(Stack, {
               gap: 16,
               children: [
@@ -800,9 +794,8 @@ module.exports = class ChannelsPreview {
             })
           }),
           React.createElement(Divider),
-          React.createElement(FormSection, {
-            title: 'Behavior',
-            tag: FormTitleTags.H1,
+          React.createElement(FieldSet, {
+            label: 'Behavior',
             children: React.createElement(Stack, {
               gap: 16,
               children: [
@@ -823,7 +816,6 @@ module.exports = class ChannelsPreview {
                 React.createElement(Switch, {
                   label: 'Show typing users',
                   description: 'Shows who\'s typing in the previewed channel.',
-                  className: Selectors.Margins.marginBottom20,
                   checked: plugin.settings.appearance.typingUsers,
                   onChange: value => {
                     plugin.settings.appearance.typingUsers = value
@@ -879,9 +871,8 @@ module.exports = class ChannelsPreview {
             })
           }),
           React.createElement(Divider),
-          React.createElement(FormSection, {
-            title: 'Appearance',
-            tag: FormTitleTags.H1,
+          React.createElement(FieldSet, {
+            label: 'Appearance',
             children: React.createElement(Stack, {
               gap: 16,
               children: [
@@ -912,7 +903,7 @@ module.exports = class ChannelsPreview {
                     onUpdate()
                   }
                 }),
-                React.createElement(FormControl, {
+                React.createElement(Field, {
                   label: 'Space between Message Groups',
                   children: React.createElement(Stack, {
                     children: [
