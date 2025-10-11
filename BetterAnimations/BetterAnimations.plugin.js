@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.8
+ * @version 2.0.9
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.8",
+    "version": "2.0.9",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Catalog & Library: Updated to work in the latest release of Discord."
+        "Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -152,13 +152,11 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Clickable,
     Switch$1,
     CheckboxModule,
-    FormTitleModule,
-    FormSection,
+    FieldSet,
     Breadcrumbs,
     RadioGroupModule,
     Slider$1,
     ReferencePositionLayer,
-    SearchableSelect,
     TextBadge,
     SearchBar,
     Paginator,
@@ -199,7 +197,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     Transition,
     Flux,
     App,
-    Flex$1,
+    Stack$1,
     { defaultRules: Parser } = {},
     InviteEmbed,
     InviteActions,
@@ -286,13 +284,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("Checkbox:", "is not a valid hex color")
     },
-    // FormTitleModule
+    // FieldSet
     {
-      filter: Filters.bySource("defaultMargin", "errorMessage", "H4")
-    },
-    // FormSection
-    {
-      filter: (m) => Filters.byStrings("titleId", "sectionTitle")(m?.render),
+      filter: Filters.byStrings(".fieldset", '"legend"'),
       searchExports: true
     },
     // Breadcrumbs
@@ -312,11 +306,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     // ReferencePositionLayer
     {
       filter: Filters.byPrototypeKeys("getHorizontalAlignmentStyle", "nudgeLeftAlignment"),
-      searchExports: true
-    },
-    // SearchableSelect
-    {
-      filter: (m) => Filters.byStrings("searchable", "select")(m?.render),
       searchExports: true
     },
     // TextBadge
@@ -509,9 +498,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.byKeys("setEnableHardwareAcceleration", "releaseChannel")
     },
-    // Flex
+    // Stack
     {
-      filter: Filters.byKeys("Direction", "Justify", "Child")
+      filter: (m) => Filters.byStrings("stack", "data-justify")(m?.render),
+      searchExports: true
     },
     // Parser
     {
@@ -746,10 +736,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
       searchExports: true
     }
   );
-  const { FormTitle, FormTitleTags } = mangled(FormTitleModule, {
-    FormTitle: Filters.byStrings("errorMessage"),
-    FormTitleTags: Filters.byKeys("H1", "H2")
-  });
   const { RadioGroup } = mangled(RadioGroupModule, {
     RadioGroup: Filters.byStrings("label", "description")
   });
@@ -767,7 +753,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   });
   const { Tooltip: Tooltip$1, TooltipLayer } = mangled(TooltipModule, {
     Tooltip: Filters.byPrototypeKeys("renderTooltip"),
-    TooltipLayer: Filters.byStrings("tooltipPointer")
+    TooltipLayer: Filters.byStrings("tooltipPointerBg")
   });
   const ListThin = (() => {
     if (!ListRawModule) return;
@@ -809,9 +795,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   const ChatSidebarKeyed = keyed(ChatSidebarModule, Filters.byStrings("chatLayerWrapper"));
   const VoiceChannelViewKeyed = keyed(VoiceChannelViewModule, Filters.byStrings("shouldUseVoiceEffectsActionBar"));
   const CallChatSidebarKeyed = keyed(CallChatSidebarModule, Filters.byStrings("CallChatSidebar", "chatInputType"));
-  const SelectKeyed = keyed(SelectModule, Filters.byStrings("listbox", "renderPopout", "closeOnSelect"));
-  const SingleSelectKeyed = keyed(SelectModule, (m) => Filters.byStrings("value", "onChange")(m) && !Filters.byStrings("isSelected")(m));
-  const SingleSelect = unkeyedFn(SingleSelectKeyed);
+  const { SingleSelect } = mangled(SelectModule, {
+    SingleSelect: (m) => Filters.byStrings("value", "onChange")(m) && !Filters.byStrings("isSelected")(m)
+  });
   const LayerActions = mangled(LayerActionsModule, {
     pushLayer: Filters.byStrings('"LAYER_PUSH"'),
     popLayer: Filters.byStrings('"LAYER_POP"'),
@@ -913,14 +899,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     EmojiModule,
     ExpressionPicker,
     ExpressionPickerStoreModule,
-    Flex: Flex$1,
+    FieldSet,
     Flux,
     FocusLock,
     FocusLockModule,
-    FormSection,
-    FormTitle,
-    FormTitleModule,
-    FormTitleTags,
     GatewaySocket,
     GenerateUserSettingsSectionsModule,
     GuildActionRow,
@@ -986,18 +968,16 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     RouterModule,
     Routes,
     SearchBar,
-    SearchableSelect,
-    SelectKeyed,
     SelectModule,
     SelectedChannelStore,
     SelectedGuildStore,
     SettingsNotice,
     SingleSelect,
-    SingleSelectKeyed,
     Slider: Slider$1,
     SortedGuildStore,
     Spinner,
     SpringTransitionPhases,
+    Stack: Stack$1,
     StageVoiceChannelItemKeyed,
     StageVoiceChannelItemModule,
     StandardSidebarViewKeyed,
@@ -1364,11 +1344,15 @@ ${style2}
 .BA__modalButtonGroup {
     width: auto;
 }``Modal`;
-  function Divider$2({ className, ...props }) {
+  function Divider$2({ className, gap, ...props }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "div",
       {
         className: classNames("BA__divider", className),
+        style: {
+          marginTop: gap,
+          marginBottom: gap
+        },
         ...props
       }
     );
@@ -1378,13 +1362,48 @@ ${style2}
     height: 1px;
     width: 100%;
 }``Divider`;
+  function buildIndent(level) {
+    return " ".repeat(level * 2);
+  }
+  function indent(text2, level = 1) {
+    const indent2 = buildIndent(level);
+    return (text2.slice(0, 2) !== "\n" ? indent2 : "") + text2.replaceAll("\n", `
+${indent2}`);
+  }
+  function capitalize(text2) {
+    return text2.charAt(0).toUpperCase() + text2.slice(1);
+  }
+  function sanitize$1(text2) {
+    return text2.replace(
+      /([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g,
+      ""
+    ).replace(/\s+/g, " ").trim();
+  }
+  const version$1 = "2.0.9";
+  class BaseError extends Error {
+    constructor(message, options = {}, additionalMeta = []) {
+      const { module: module2, pack } = options;
+      const meta2 = [
+        `${config.name} ${version$1}`,
+        module2 && `Module: ${module2.name}`,
+        pack && "Pack: " + [
+          pack.name,
+          pack.version && `v${pack.version}`,
+          pack.author && `by ${pack.author}`
+        ].filter(Boolean).join(" "),
+        ...additionalMeta
+      ];
+      super(message + "\n\n" + indent(meta2.filter(Boolean).join("\n"), 2) + "\n");
+      this.module = module2;
+      this.pack = pack;
+    }
+  }
   const _Classes = {
     ChatSidebar: Webpack.getByKeys("chatLayerWrapper", "chatTarget"),
     StandardSidebarView: () => Webpack.getByKeys("standardSidebarView", "contentRegion"),
     Modal: Webpack.getByKeys("root", "rootWithShadow"),
     ModalBackdrop: Webpack.getByKeys("backdrop", "withLayer"),
     Layers: Webpack.getByKeys("layer", "baseLayer"),
-    Margins: Webpack.getByKeys("marginTop20", "marginLeft8"),
     AppMount: Webpack.getByKeys("appMount"),
     AppView: Webpack.getByKeys("base", "content"),
     ChannelView: Webpack.getByKeys("chat", "chatContent"),
@@ -1406,42 +1425,6 @@ ${style2}
       return obj[prop] = resolved;
     }
   });
-  function buildIndent(level) {
-    return " ".repeat(level * 2);
-  }
-  function indent(text2, level = 1) {
-    const indent2 = buildIndent(level);
-    return (text2.slice(0, 2) !== "\n" ? indent2 : "") + text2.replaceAll("\n", `
-${indent2}`);
-  }
-  function capitalize(text2) {
-    return text2.charAt(0).toUpperCase() + text2.slice(1);
-  }
-  function sanitize$1(text2) {
-    return text2.replace(
-      /([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g,
-      ""
-    ).replace(/\s+/g, " ").trim();
-  }
-  const version$1 = "2.0.8";
-  class BaseError extends Error {
-    constructor(message, options = {}, additionalMeta = []) {
-      const { module: module2, pack } = options;
-      const meta2 = [
-        `${config.name} ${version$1}`,
-        module2 && `Module: ${module2.name}`,
-        pack && "Pack: " + [
-          pack.name,
-          pack.version && `v${pack.version}`,
-          pack.author && `by ${pack.author}`
-        ].filter(Boolean).join(" "),
-        ...additionalMeta
-      ];
-      super(message + "\n\n" + indent(meta2.filter(Boolean).join("\n"), 2) + "\n");
-      this.module = module2;
-      this.pack = pack;
-    }
-  }
   class Validator {
     get name() {
       return "Validator";
@@ -18578,15 +18561,7 @@ ${buildStyles(styles)}}
         ...props,
         messageType: AlertTypes.WARNING
       },
-      message,
-      /* @__PURE__ */ BdApi.React.createElement(
-        ButtonGroup$1,
-        {
-          className: DiscordClasses.Margins.marginTop8,
-          size: "sm"
-        },
-        actions.map((props2) => /* @__PURE__ */ BdApi.React.createElement(Button$1, { ...props2, size: "sm" }))
-      )
+      /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, message, /* @__PURE__ */ BdApi.React.createElement(ButtonGroup$1, { size: "sm" }, actions.map((props2) => /* @__PURE__ */ BdApi.React.createElement(Button$1, { ...props2, size: "sm" }))))
     );
   }
   function MigratorContainer({ migrator, children: children2, className, contentClassName }) {
@@ -19740,8 +19715,7 @@ ${buildStyles(styles)}}
           cancelText: "Cancel",
           onConfirm: () => registry.delete(pack.filename)
         },
-        /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-md/normal" }, "Are you sure you want to delete pack ", /* @__PURE__ */ BdApi.React.createElement("b", null, pack.name), "?", isPublished ? " It can always be reinstalled from the Catalog." : " It is not published in the Catalog, so it cannot be reinstalled."),
-        affectedModules.length > 0 && /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-md/normal", className: DiscordClasses.Margins.marginTop8 }, "Animations of this pack are currently applied for: ", affectedModules.map((module2, i, { length }) => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement("b", null, module2.name), i < length - 1 ? ", " : ".")), " They will be automatically deselected.")
+        /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-md/normal" }, "Are you sure you want to delete pack ", /* @__PURE__ */ BdApi.React.createElement("b", null, pack.name), "?", isPublished ? " It can always be reinstalled from the Catalog." : " It is not published in the Catalog, so it cannot be reinstalled."), affectedModules.length > 0 && /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-md/normal" }, "Animations of this pack are currently applied for: ", affectedModules.map((module2, i, { length }) => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement("b", null, module2.name), i < length - 1 ? ", " : ".")), " They will be automatically deselected."))
       ));
     }, [pack]);
     return /* @__PURE__ */ BdApi.React.createElement(
@@ -22441,14 +22415,16 @@ img.BAP__viewport {
     gap: 4px;
     background-color: var(--input-background);
     border-style: solid;
-    border-color: var(--input-border);
+    border-color: var(--input-border-default);
     border-top-width: 1px;
     border-bottom-width: 1px;
     color: var(--interactive-normal);
     flex: 1;
+    transition: background-color .1s, border-color .1s, color .1s;
 }
 .BA__buttonGroupItem:hover {
     background-color: var(--background-modifier-hover);
+    border-color: var(--input-border-default-hover);
 }
 .BA__buttonGroupItem.BA__buttonGroupItem--disabled {
     color: var(--interactive-muted);
@@ -23061,11 +23037,15 @@ img.BAP__viewport {
       )
     ), children2);
   }
-  css`.BA__settingControlHeader {
+  css`.BA__settingControl {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.BA__settingControlHeader {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-bottom: 8px;
 }
 .BA__settingControlReset {
     margin-left: auto;
@@ -23296,7 +23276,6 @@ img.BAP__viewport {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-top: 8px;
 }
 .BA__easingFieldLabel {
     text-transform: uppercase;
@@ -23347,7 +23326,6 @@ img.BAP__viewport {
     return /* @__PURE__ */ BdApi.React.createElement(
       Checkbox,
       {
-        className: DiscordClasses.Margins.marginTop8,
         value,
         onChange: (_, value2) => onChange(value2),
         type: CheckboxTypes.INVERTED
@@ -23582,7 +23560,6 @@ img.BAP__viewport {
     return /* @__PURE__ */ BdApi.React.createElement(
       ButtonGroup,
       {
-        className: DiscordClasses.Margins.marginTop8,
         size: "lg",
         options,
         selected: value,
@@ -23627,7 +23604,6 @@ img.BAP__viewport {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 8px;
 }
 .BA__directionAxisControlSelect {
     flex-grow: 1;
@@ -25472,11 +25448,10 @@ img.BAP__viewport {
       selected.exit.error
     ].filter(Boolean);
     const [alertDismissed, setAlertDismissed] = useDismissible(`moduleAlert:${module2.id}`);
-    return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, module2.alert && !alertDismissed && /* @__PURE__ */ BdApi.React.createElement(
+    return /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, module2.alert && !alertDismissed && /* @__PURE__ */ BdApi.React.createElement(
       DismissibleAlert,
       {
         messageType: AlertTypes.WARNING,
-        className: DiscordClasses.Margins.marginBottom8,
         onDismiss: () => setAlertDismissed(true)
       },
       module2.alert
@@ -25500,27 +25475,20 @@ img.BAP__viewport {
         breadcrumbs,
         activeId: module2.id,
         renderCustomBreadcrumb: ({ label }, active) => /* @__PURE__ */ BdApi.React.createElement(
-          FormTitle,
+          Text$1,
           {
-            tag: "h1",
+            variant: "heading-lg/semibold",
             className: `BA__moduleSettingsBreadcrumb ${active ? "BA__moduleSettingsBreadcrumb--active" : ""}`
           },
           label
         ),
         onBreadcrumbClick: ({ id }) => setSection2(id)
       }
-    ), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: `${enabled ? "Disable" : "Enable"} ${module2.name} animations`, hideOnClick: false }, (props2) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props2 }, /* @__PURE__ */ BdApi.React.createElement(SwitchIndicator, { checked: enabled, onChange: setEnabled })))), module2.description && /* @__PURE__ */ BdApi.React.createElement(
+    ), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: `${enabled ? "Disable" : "Enable"} ${module2.name} animations`, hideOnClick: false }, (props2) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props2 }, /* @__PURE__ */ BdApi.React.createElement(SwitchIndicator, { checked: enabled, onChange: setEnabled })))), module2.description && /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, typeof module2.description === "function" ? module2.description(setSection2) : module2.description), module2.controls && /* @__PURE__ */ BdApi.React.createElement("div", null, module2.controls({ module: module2 })), childModules.map((m) => /* @__PURE__ */ BdApi.React.createElement(Clickable, { tag: "div", onClick: () => setSection2(m.id) }, /* @__PURE__ */ BdApi.React.createElement(
       Text$1,
       {
-        className: DiscordClasses.Margins.marginTop8,
-        variant: "text-sm/normal"
-      },
-      typeof module2.description === "function" ? module2.description(setSection2) : module2.description
-    ), module2.controls && /* @__PURE__ */ BdApi.React.createElement("div", { className: DiscordClasses.Margins.marginTop8 }, module2.controls({ module: module2 })), childModules.map((m) => /* @__PURE__ */ BdApi.React.createElement(Clickable, { tag: "div", onClick: () => setSection2(m.id) }, /* @__PURE__ */ BdApi.React.createElement(
-      FormTitle,
-      {
         key: m.id,
-        tag: "label",
+        variant: "text-md/normal",
         className: "BA__moduleSettingsLink"
       },
       m.name,
@@ -25529,7 +25497,6 @@ img.BAP__viewport {
     ))))));
   }
   css`.BA__moduleSettingsHeader {
-    margin-bottom: 32px;
     display: flex;
     gap: 20px;
 }
@@ -25539,6 +25506,9 @@ img.BAP__viewport {
 }
 
 .BA__moduleSettingsHeading {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     padding: 12px 0;
     flex-grow: 1;
 }
@@ -25550,7 +25520,6 @@ img.BAP__viewport {
 }
 
 .BA__moduleSettingsBreadcrumb {
-    margin-bottom: 0;
     color: var(--header-muted);
 }
 .BA__moduleSettingsBreadcrumb:not(.BA__moduleSettingsBreadcrumb--active) {
@@ -25566,7 +25535,7 @@ img.BAP__viewport {
     align-items: center;
     gap: 2px;
     color: var(--header-secondary);
-    margin-top: 16px;
+    margin-top: 8px;
     cursor: pointer;
 }
 .BA__moduleSettingsLink:hover {
@@ -26702,7 +26671,7 @@ img.BAP__viewport {
 }``SettingsSidebarHeader`;
   function ModeSwitch() {
     const [mode, setMode] = useMode();
-    return /* @__PURE__ */ BdApi.React.createElement("div", { className: `BA__modeSwitch ${DiscordClasses.Margins.marginBottom8}` }, /* @__PURE__ */ BdApi.React.createElement(
+    return /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__modeSwitch" }, /* @__PURE__ */ BdApi.React.createElement(
       ButtonGroup,
       {
         options: [
@@ -26714,6 +26683,9 @@ img.BAP__viewport {
       }
     ));
   }
+  css`.BA__modeSwitch {
+  margin-bottom: 8px;
+}``ModeSwitch`;
   const SettingsNoticeComponent = require$$0$1.lazy(async () => ({ default: await SettingsNotice }));
   function FormNotice() {
     const onSave = require$$0$1.useCallback(() => Config.save(), []);
@@ -27292,138 +27264,104 @@ img.BAP__viewport {
 }``Catalog`;
   function GeneralSettings() {
     const { config: config2, onChange } = useConfig();
-    return /* @__PURE__ */ BdApi.React.createElement(MigratorContainer, { migrator: Config.migrator }, /* @__PURE__ */ BdApi.React.createElement(
-      FormSection,
+    return /* @__PURE__ */ BdApi.React.createElement(MigratorContainer, { migrator: Config.migrator }, /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__generalSettings" }, /* @__PURE__ */ BdApi.React.createElement(
+      Text$1,
       {
-        tag: FormTitleTags.H1,
-        title: "General Settings"
+        variant: "heading-xl/semibold",
+        color: "header-primary"
       },
-      /* @__PURE__ */ BdApi.React.createElement(
-        FormSection,
-        {
-          tag: FormTitleTags.H2,
-          title: "Appearance",
-          className: DiscordClasses.Margins.marginTop20,
-          titleClassName: DiscordClasses.Margins.marginBottom8
-        },
-        /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__settingsStack" }, /* @__PURE__ */ BdApi.React.createElement(
-          Switch$1,
-          {
-            className: DiscordClasses.Margins.marginBottom20,
-            label: "Quick Preview",
-            description: "Play the animation preview when hovering over an animation card. Disable to play it only when an animation card is expanded.",
-            checked: config2.general.quickPreview,
-            onChange: (value) => {
-              config2.general.quickPreview = value;
-              onChange();
-            }
-          }
-        ), /* @__PURE__ */ BdApi.React.createElement(
-          Switch$1,
-          {
-            className: DiscordClasses.Margins.marginBottom20,
-            label: "Disable Hints",
-            description: `Hide reference links to ${meta$1.name} documentation in the module settings, animation settings, etc.`,
-            checked: config2.general.disableHints,
-            onChange: (value) => {
-              config2.general.disableHints = value;
-              onChange();
-            }
-          }
-        ), /* @__PURE__ */ BdApi.React.createElement(
-          RadioGroup,
-          {
-            label: "Suppress Errors",
-            description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
-            options: [
-              { value: SuppressErrors.All, name: "Suppress all errors" },
-              { value: SuppressErrors.Animation, name: "Suppress animation errors" },
-              { value: SuppressErrors.None, name: "Do not suppress errors" }
-            ],
-            value: config2.general.suppressErrors,
-            onChange: ({ value }) => {
-              config2.general.suppressErrors = value;
-              onChange();
-            }
-          }
-        ), /* @__PURE__ */ BdApi.React.createElement(Divider$2, null))
-      ),
-      /* @__PURE__ */ BdApi.React.createElement(
-        FormSection,
-        {
-          tag: FormTitleTags.H2,
-          title: "Optimizations",
-          className: DiscordClasses.Margins.marginTop20,
-          titleClassName: DiscordClasses.Margins.marginBottom8
-        },
-        /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__settingsStack" }, /* @__PURE__ */ BdApi.React.createElement(
-          Switch$1,
-          {
-            className: DiscordClasses.Margins.marginBottom20,
-            label: Messages.PRIORITIZE_ANIMATION_SMOOTHNESS,
-            description: "Delay resource-intensive operations until after animations finish to avoid most of the stuttering that occurs while they are running.",
-            checked: config2.general.prioritizeAnimationSmoothness,
-            onChange: (value) => {
-              config2.general.prioritizeAnimationSmoothness = value;
-              onChange();
-            }
-          }
-        ), /* @__PURE__ */ BdApi.React.createElement(
-          Switch$1,
-          {
-            className: DiscordClasses.Margins.marginBottom20,
-            label: "Preload Layers",
-            description: "Load full-screen pages (User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
-            checked: config2.general.preloadLayers,
-            onChange: (value) => {
-              config2.general.preloadLayers = value;
-              onChange();
-            }
-          }
-        ), /* @__PURE__ */ BdApi.React.createElement(
-          Switch$1,
-          {
-            className: DiscordClasses.Margins.marginBottom20,
-            label: Messages.CACHE_USER_SETTINGS_SECTIONS,
-            description: "Significantly improves performance when opening User Settings.",
-            checked: config2.general.cacheUserSettingsSections,
-            onChange: (value) => {
-              config2.general.cacheUserSettingsSections = value;
-              onChange();
-            }
-          }
-        ), /* @__PURE__ */ BdApi.React.createElement(Divider$2, null))
-      ),
-      /* @__PURE__ */ BdApi.React.createElement(
-        FormSection,
-        {
-          tag: FormTitleTags.H2,
-          title: "Behavior",
-          className: DiscordClasses.Margins.marginTop20,
-          titleClassName: DiscordClasses.Margins.marginBottom8
-        },
-        /* @__PURE__ */ BdApi.React.createElement(
-          DurationSlider,
-          {
-            label: "Switch Cooldown Duration",
-            description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
-            from: 100,
-            to: 2e3,
-            defaultValue: configDefaults.general.switchCooldownDuration,
-            initialValue: config2.general.switchCooldownDuration,
-            onValueChange: (value) => {
-              config2.general.switchCooldownDuration = value;
-              onChange();
-            }
-          }
-        )
-      )
-    ));
+      "General Settings"
+    ), /* @__PURE__ */ BdApi.React.createElement(FieldSet, { label: "Appearance" }, /* @__PURE__ */ BdApi.React.createElement(
+      Switch$1,
+      {
+        label: "Quick Preview",
+        description: "Play the animation preview when hovering over an animation card. Disable to play it only when an animation card is expanded.",
+        checked: config2.general.quickPreview,
+        onChange: (value) => {
+          config2.general.quickPreview = value;
+          onChange();
+        }
+      }
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      Switch$1,
+      {
+        label: "Disable Hints",
+        description: `Hide reference links to ${meta$1.name} documentation in the module settings, animation settings, etc.`,
+        checked: config2.general.disableHints,
+        onChange: (value) => {
+          config2.general.disableHints = value;
+          onChange();
+        }
+      }
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      RadioGroup,
+      {
+        label: "Suppress Errors",
+        description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
+        options: [
+          { value: SuppressErrors.All, name: "Suppress all errors" },
+          { value: SuppressErrors.Animation, name: "Suppress animation errors" },
+          { value: SuppressErrors.None, name: "Do not suppress errors" }
+        ],
+        value: config2.general.suppressErrors,
+        onChange: ({ value }) => {
+          config2.general.suppressErrors = value;
+          onChange();
+        }
+      }
+    )), /* @__PURE__ */ BdApi.React.createElement(Divider$2, null), /* @__PURE__ */ BdApi.React.createElement(FieldSet, { label: "Optimizations" }, /* @__PURE__ */ BdApi.React.createElement(
+      Switch$1,
+      {
+        label: Messages.PRIORITIZE_ANIMATION_SMOOTHNESS,
+        description: "Delay resource-intensive operations until after animations finish to avoid most of the stuttering that occurs while they are running.",
+        checked: config2.general.prioritizeAnimationSmoothness,
+        onChange: (value) => {
+          config2.general.prioritizeAnimationSmoothness = value;
+          onChange();
+        }
+      }
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      Switch$1,
+      {
+        label: "Preload Layers",
+        description: "Load full-screen pages (User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
+        checked: config2.general.preloadLayers,
+        onChange: (value) => {
+          config2.general.preloadLayers = value;
+          onChange();
+        }
+      }
+    ), /* @__PURE__ */ BdApi.React.createElement(
+      Switch$1,
+      {
+        label: Messages.CACHE_USER_SETTINGS_SECTIONS,
+        description: "Significantly improves performance when opening User Settings.",
+        checked: config2.general.cacheUserSettingsSections,
+        onChange: (value) => {
+          config2.general.cacheUserSettingsSections = value;
+          onChange();
+        }
+      }
+    )), /* @__PURE__ */ BdApi.React.createElement(Divider$2, null), /* @__PURE__ */ BdApi.React.createElement(FieldSet, { label: "Behavior" }, /* @__PURE__ */ BdApi.React.createElement(
+      DurationSlider,
+      {
+        label: "Switch Cooldown Duration",
+        description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
+        from: 100,
+        to: 2e3,
+        defaultValue: configDefaults.general.switchCooldownDuration,
+        initialValue: config2.general.switchCooldownDuration,
+        onValueChange: (value) => {
+          config2.general.switchCooldownDuration = value;
+          onChange();
+        }
+      }
+    ))));
   }
-  css`.BA__settingsStack {
+  css`.BA__generalSettings {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 32px;
 }``GeneralSettings`;
   function BetterDiscordIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
     return /* @__PURE__ */ BdApi.React.createElement(
@@ -28298,13 +28236,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
           Emitter.emit(Events.ModuleSettingsChanged, module2.id);
         }
       },
-      /* @__PURE__ */ BdApi.React.createElement(Flex$1, null, /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, "Enhance layout"), /* @__PURE__ */ BdApi.React.createElement(
-        Hint,
-        {
-          className: DiscordClasses.Margins.marginLeft8,
-          href: Documentation.enhanceLayoutUrl
-        }
-      ))
+      /* @__PURE__ */ BdApi.React.createElement(Stack$1, { direction: "horizontal", gap: 8 }, /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, "Enhance layout"), /* @__PURE__ */ BdApi.React.createElement(Hint, { href: Documentation.enhanceLayoutUrl }))
     );
   }
   class Module extends Module$1 {
@@ -28557,7 +28489,14 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   function ErrorDetailsActions({ error: error2, className }) {
     const actions = useActions(error2);
     if (!actions.length) return null;
-    return /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, /* @__PURE__ */ BdApi.React.createElement(FormTitle, null, "Suggested actions"), /* @__PURE__ */ BdApi.React.createElement("div", { className: classNames("BA__errorDetailsActions", className) }, actions));
+    return /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, /* @__PURE__ */ BdApi.React.createElement(
+      Text$1,
+      {
+        variant: "heading-md/medium",
+        color: "header-primary"
+      },
+      "Suggested actions"
+    ), /* @__PURE__ */ BdApi.React.createElement("div", { className: classNames("BA__errorDetailsActions", className) }, actions));
   }
   const ErrorDetailsActions$1 = require$$0$1.memo(ErrorDetailsActions);
   css`.BA__errorDetailsActions {
@@ -28615,30 +28554,23 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
         color: "header-secondary"
       },
       hint
-    ))), /* @__PURE__ */ BdApi.React.createElement("svg", { className: "BA__errorDetailsExpander", width: "24", height: "24", viewBox: "0 0 24 24" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", d: "M7 10L12 15 17 10", "aria-hidden": "true" }))), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsBody" }, /* @__PURE__ */ BdApi.React.createElement(Divider$2, null), /* @__PURE__ */ BdApi.React.createElement(
-      ErrorDetailsActions$1,
+    ))), /* @__PURE__ */ BdApi.React.createElement("svg", { className: "BA__errorDetailsExpander", width: "24", height: "24", viewBox: "0 0 24 24" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", d: "M7 10L12 15 17 10", "aria-hidden": "true" }))), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsBody" }, /* @__PURE__ */ BdApi.React.createElement(Divider$2, null), /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 20 }, /* @__PURE__ */ BdApi.React.createElement(ErrorDetailsActions$1, { error: error2 }), /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, /* @__PURE__ */ BdApi.React.createElement(
+      Text$1,
       {
-        className: DiscordClasses.Margins.marginBottom20,
-        error: error2
-      }
-    ), /* @__PURE__ */ BdApi.React.createElement(FormTitle, null, "Error"), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsStack" }, codeBlock), /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, alert ? /* @__PURE__ */ BdApi.React.createElement(
-      Alert,
-      {
-        messageType: AlertTypes.INFO,
-        className: DiscordClasses.Margins.marginTop20
+        variant: "heading-md/medium",
+        color: "header-primary"
       },
-      /* @__PURE__ */ BdApi.React.createElement("div", null, alert),
-      invite2 ? /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsInvite" }, /* @__PURE__ */ BdApi.React.createElement(
-        InviteEmbed,
-        {
-          code: invite2,
-          message: {
-            author: { username: error2.pack?.author }
-          },
-          getAcceptInviteContext: () => ({})
-        }
-      )) : null
-    ) : null)));
+      "Error"
+    ), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsStack" }, codeBlock)), /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, alert ? /* @__PURE__ */ BdApi.React.createElement(Alert, { messageType: AlertTypes.INFO }, /* @__PURE__ */ BdApi.React.createElement("div", null, alert), invite2 ? /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsInvite" }, /* @__PURE__ */ BdApi.React.createElement(
+      InviteEmbed,
+      {
+        code: invite2,
+        message: {
+          author: { username: error2.pack?.author }
+        },
+        getAcceptInviteContext: () => ({})
+      }
+    )) : null) : null))));
   }
   css`.BA__errorDetails {
     position: relative;
@@ -30561,8 +30493,7 @@ ${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelIte
               App.setEnableHardwareAcceleration(true);
             }
           },
-          /* @__PURE__ */ BdApi.React.createElement(Heading, { variant: "heading-md/semibold", className: DiscordClasses.Margins.marginBottom8 }, "HARDWARE ACCELERATION IS DISABLED"),
-          /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, "The animations might be choppy, turn the Hardware Acceleration on to drastically improve the performance. Discord will quit and re-launch.")
+          /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, /* @__PURE__ */ BdApi.React.createElement(Heading, { variant: "heading-md/semibold" }, "HARDWARE ACCELERATION IS DISABLED"), /* @__PURE__ */ BdApi.React.createElement(Text$1, { variant: "text-sm/normal" }, "The animations might be choppy, turn the Hardware Acceleration on to drastically improve the performance. Discord will quit and re-launch."))
         ))
       );
     }
@@ -30583,42 +30514,6 @@ ${DiscordSelectors.Layer.layerContainer} > * {
 ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     pointer-events: none !important;
 }``ReferencePositionLayer`;
-  function createPatcher() {
-    let patchedPopout = null;
-    return (self2, args, value) => {
-      const popout = findInReactTree(value, (m) => m?.renderPopout);
-      if (!popout) return;
-      popout.align = Position.Center;
-      TinyPatcher.after(popout, "renderPopout", (self3, args2, value2) => {
-        if (!patchedPopout) {
-          const { type: original } = value2;
-          patchedPopout = (props) => {
-            const value3 = original(props);
-            const [v, setV] = require$$0$1.useState(0);
-            require$$0$1.useLayoutEffect(() => setV(1), []);
-            require$$0$1.useLayoutEffect(() => {
-              if (v === 1) props.updatePosition();
-            }, [v]);
-            return value3;
-          };
-        }
-        value2.type = patchedPopout;
-      });
-    };
-  }
-  function patchSelect() {
-    const patcher = createPatcher();
-    Patcher.after(...SelectKeyed, patcher);
-    Patcher.after(...SingleSelectKeyed, (...[, , value]) => {
-      TinyPatcher.after(value, "type", patcher);
-    });
-    Patcher.after(SearchableSelect, "render", createPatcher());
-  }
-  css`/* Fixes a bug where the measurement element may interfere with the select inner element positioning */
-${DiscordSelectors.Select.measurement} {
-    top: 0;
-    left: 0;
-}``Select`;
   function patchMenuItem() {
     Patcher.after(...MenuItemKeyed, (self2, [props], value) => {
       if (!value?.props?.onClick) return;
@@ -31161,7 +31056,8 @@ ${DiscordSelectors.Select.measurement} {
     "2.0.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Channels: Fixed the animation direction being incorrectly determined for the Quests page.", "Updated to work in the latest release of Discord."] }] },
     "2.0.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Modals Backdrop: Updated to work in the latest release of Discord."] }] },
     "2.0.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord."] }] },
-    "2.0.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Catalog & Library: Updated to work in the latest release of Discord."] }] }
+    "2.0.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Catalog & Library: Updated to work in the latest release of Discord."] }] },
+    "2.0.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
@@ -31339,7 +31235,6 @@ ${DiscordSelectors.Select.measurement} {
         patchListThin();
         patchGuildChannelList();
         patchReferencePositionLayer();
-        patchSelect();
         patchChannelTextArea();
         patchPopToast();
         patchRootElementContext();
