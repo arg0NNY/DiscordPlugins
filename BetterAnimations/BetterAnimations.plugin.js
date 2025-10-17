@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.9
+ * @version 2.0.10
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.9",
+    "version": "2.0.10",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,9 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Updated to work in the latest release of Discord."
+        "Servers and Channels: Updated to work in the latest release of Discord.",
+        "Settings: Fixed the tooltip for the Duration slider not being displayed.",
+        "Fixed an issue where the search sidebar sometimes doesn't open when trying to search messages with Servers or Channels animations enabled."
       ]
     }
   ]
@@ -254,7 +256,8 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     BasePopoverModule,
     ChannelThreadList,
     matchSorter,
-    CopiableField
+    CopiableField,
+    SidebarActions
   ] = Webpack.getBulk(
     // Text
     {
@@ -734,6 +737,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.byStrings("copyValue", "TEXT_COPIED"),
       searchExports: true
+    },
+    // SidebarActions
+    {
+      filter: Filters.byKeys("setSelectedSearchContext")
     }
   );
   const { RadioGroup } = mangled(RadioGroupModule, {
@@ -972,6 +979,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     SelectedChannelStore,
     SelectedGuildStore,
     SettingsNotice,
+    SidebarActions,
     SingleSelect,
     Slider: Slider$1,
     SortedGuildStore,
@@ -1379,7 +1387,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.9";
+  const version$1 = "2.0.10";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -23070,9 +23078,11 @@ img.BAP__viewport {
       const value = super.render();
       if (forceShowBubble) {
         TinyPatcher.after(value.props, "children", (self2, args, value2) => {
-          const tooltip = findInReactTree(value2, (m) => m?.type === Tooltip$1);
-          if (!tooltip) return;
-          tooltip.props.text = onValueRender(this.state.value);
+          TinyPatcher.after(value2.props, "children", (self22, args2, value3) => {
+            const tooltip = findInReactTree(value3, (m) => m?.type === Tooltip$1);
+            if (!tooltip) return;
+            tooltip.props.text = onValueRender(this.state.value);
+          });
         });
       }
       return value;
@@ -28967,14 +28977,16 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       [GuildActionRow.GUILD_SCHEDULED_EVENTS]: StaticChannelRoute.GUILD_SCHEDULED_EVENTS,
       [GuildActionRow.GUILD_ROLE_SUBSCRIPTIONS]: StaticChannelRoute.ROLE_SUBSCRIPTIONS,
       [GuildActionRow.GUILD_SHOP]: StaticChannelRoute.GUILD_SHOP,
+      [GuildActionRow.GUILD_GAME_SHOP]: StaticChannelRoute.GAME_SHOP,
       [GuildActionRow.CHANNELS_AND_ROLES]: [StaticChannelRoute.CHANNEL_BROWSER, StaticChannelRoute.CUSTOMIZE_COMMUNITY],
       [GuildActionRow.GUILD_MOD_DASH_MEMBER_SAFETY]: StaticChannelRoute.MEMBER_SAFETY,
       [GuildActionRow.GUILD_BOOSTS]: StaticChannelRoute.GUILD_BOOSTS,
-      [GuildActionRow.PORTKEY]: StaticChannelRoute.PORTKEY
+      [GuildActionRow.GAME_SERVERS]: StaticChannelRoute.GAME_SERVERS
     }[guildActionRow] ?? guildActionRow;
   }
   function getStaticDMRouteIndex(pathname) {
     return [
+      (p) => p === Routes.ME_ACTIVITY,
       (p) => p === Routes.FRIENDS,
       (p) => p.startsWith(Routes.APPLICATION_LIBRARY),
       (p) => p.startsWith(Routes.MESSAGE_REQUESTS),
@@ -29016,7 +29028,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   function shouldSwitchContent(next, prev) {
     const [nextChannel, prevChannel] = matchChannelRoutes(next, prev);
     const nextOrPrev = (fn, n = next, p = prev) => fn(n) + fn(p);
-    if (nextOrPrev((l) => l.pathname.startsWith(Routes.GLOBAL_DISCOVERY)) === 1 || nextOrPrev((l) => l.pathname.startsWith(Routes.GUILD_MEMBER_VERIFICATION(""))) || nextOrPrev((l) => l.pathname.startsWith(Routes.GUILD_MEMBER_VERIFICATION_FOR_HUB(""))) || nextOrPrev((l) => matchExact(l.pathname, Routes.GUILD_BOOSTING_MARKETING(GuildChannelRouteParams.guildId()))) || nextOrPrev((l) => matchExact(l.pathname, Routes.COLLECTIBLES_SHOP_FULLSCREEN)) || nextOrPrev((l) => l?.params?.channelId === StaticChannelRoute.GUILD_ONBOARDING, nextChannel, prevChannel)) return true;
+    if (nextOrPrev((l) => l.pathname.startsWith(Routes.GLOBAL_DISCOVERY)) === 1 || nextOrPrev((l) => l.pathname.startsWith(Routes.GUILD_MEMBER_VERIFICATION(""))) || nextOrPrev((l) => l.pathname.startsWith(Routes.GUILD_MEMBER_VERIFICATION_FOR_HUB(""))) || nextOrPrev((l) => matchExact(l.pathname, Routes.GUILD_BOOSTING_MARKETING(GuildChannelRouteParams.guildId()))) || nextOrPrev((l) => l?.params?.channelId === StaticChannelRoute.GUILD_ONBOARDING, nextChannel, prevChannel)) return true;
     if (nextChannel && prevChannel)
       return nextChannel.params.guildId !== prevChannel.params.guildId;
     if (nextChannel || prevChannel)
@@ -29243,7 +29255,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
         page
       ));
       const routes = findInReactTree(page, (m) => m?.type === Router.Switch)?.props.children;
-      const guildChannelRoute = routes?.find((r) => r?.props?.impressionName === ImpressionNames.GUILD_CHANNEL);
+      const guildChannelRoute = routes?.find((r) => r?.props?.impressionName === ImpressionNames.GUILD_CHANNEL && Array.isArray(r.props.path));
       if (guildChannelRoute) guildChannelPath = guildChannelRoute.props.path;
       if (!isEnhancedLayout) return;
       base.props.className = classNames(base.props.className, "BA__baseEnhancedLayout");
@@ -29876,6 +29888,13 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     });
     patchCallChatSidebar();
   }
+  function patchSidebarActions() {
+    if (!SidebarActions) return;
+    Patcher.instead(SidebarActions, "setSelectedSearchContext", (self2, [id], original) => {
+      if (id === null) return;
+      original(id);
+    });
+  }
   function patchChannelView() {
     const once = ensureOnce();
     Patcher.after(ChannelView, "type", (self2, args, value) => {
@@ -29923,6 +29942,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     patchChatSidebar();
     patchVoiceChannelView();
     patchMembersModViewSidebar();
+    patchSidebarActions();
   }
   css`.BA__sidebar {
     position: relative;
@@ -31057,7 +31077,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.0.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Modals Backdrop: Updated to work in the latest release of Discord."] }] },
     "2.0.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord."] }] },
     "2.0.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Catalog & Library: Updated to work in the latest release of Discord."] }] },
-    "2.0.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.0.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.0.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers and Channels: Updated to work in the latest release of Discord.", "Settings: Fixed the tooltip for the Duration slider not being displayed.", "Fixed an issue where the search sidebar sometimes doesn't open when trying to search messages with Servers or Channels animations enabled."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
