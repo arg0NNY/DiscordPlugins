@@ -7,30 +7,41 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.0.11
+ * @version 2.1.0
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.0.11",
+    "version": "2.1.0",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
     {
+      "type": "added",
+      "title": "What's new",
+      "items": [
+        "Tooltips: Integrated the new Mana Discord Tooltips.",
+        "Settings: Integrated the new Discord User Settings Modal.",
+        "Modals: Added support for the Discord Layer Modals.",
+        "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."
+      ]
+    },
+    {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Thread Sidebar: Fixed the animations misfiring while navigating the Mod View.",
-        "Updated to work in the latest release of Discord."
+        "Popouts: Updated Apps & Commands integration to work in the latest release of Discord.",
+        "Modals: Inactive modals are now correctly dimmed.",
+        "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."
       ]
     }
   ]
 }
 /* ### CONFIG END ### */
 
-var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path, reactDom) {
+var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, path, reactDom) {
   "use strict";
   const name$1 = "BetterAnimations";
   const author = "arg0NNY";
@@ -179,7 +190,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ChannelTextArea,
     ExpressionPicker,
     ChannelTextAreaButtons,
-    ChannelAppLauncher,
     AppLauncherPopup,
     GuildIcon,
     Timestamp,
@@ -237,7 +247,7 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     SelectModule,
     LayerActionsModule,
     AlertModule,
-    UserSettingsModal,
+    UserSettings,
     ModalModule,
     MenuItemModule,
     ChannelItemModule,
@@ -257,7 +267,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     matchSorter,
     CopiableField,
     SidebarActions,
-    SidebarType
+    SidebarType,
+    ManaTooltipLayer,
+    ManaUseTooltipTransitionModule,
+    ManaLayerModalModule
   ] = Webpack.getBulk(
     // Text
     {
@@ -413,11 +426,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     // ChannelTextAreaButtons
     {
       filter: (m) => Filters.byStrings("buttons", "sticker", "gif")(m?.type),
-      searchExports: true
-    },
-    // ChannelAppLauncher
-    {
-      filter: (m) => Filters.byStrings("channelAppLauncher")(m?.type),
       searchExports: true
     },
     // AppLauncherPopup
@@ -659,9 +667,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.bySource("messageType", "iconDiv")
     },
-    // UserSettingsModal
+    // UserSettings
     {
-      filter: Filters.byKeys("open", "setSection", "updateAccount")
+      filter: Filters.byKeys("openUserSettings", "openUserSettingsFromParsedUrl")
     },
     // ModalModule
     {
@@ -746,6 +754,19 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     {
       filter: Filters.byKeys("VIEW_THREAD", "VIEW_MOD_REPORT"),
       searchExports: true
+    },
+    // ManaTooltipLayer
+    {
+      filter: Filters.byStrings("tooltipContent", "richTooltip"),
+      searchExports: true
+    },
+    // ManaUseTooltipTransitionModule
+    {
+      filter: Filters.bySource("onExitComplete", '"tooltip"')
+    },
+    // ManaLayerModalModule
+    {
+      filter: Filters.bySource("MODAL", "modalContent", "modalContentInner")
     }
   );
   const { RadioGroup } = mangled(RadioGroupModule, {
@@ -769,9 +790,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   });
   const ListThin = (() => {
     if (!ListRawModule) return;
-    const { id, exports: exports2 } = ListRawModule;
+    const { id, exports: exports$1 } = ListRawModule;
     const source = Webpack.modules[id].toString();
-    return exports2[source.match(new RegExp(`(\\w+):\\(\\)=>${source.match(/let (\w+)=/)[1]}`))[1]];
+    return exports$1[source.match(new RegExp(`(\\w+):\\(\\)=>${source.match(/let (\w+)=/)[1]}`))[1]];
   })();
   const { showToast, useToastStore } = mangled(ToastStoreModule, {
     showToast: Filters.byStrings("currentToastMap.has"),
@@ -852,7 +873,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ModalRootKeyed: keyed(ManaModalRootModule, Filters.byStrings("MODAL", '"padding-size-"')),
     get ModalRoot() {
       return unkeyed(this.ModalRootKeyed);
-    }
+    },
+    TooltipLayer: ManaTooltipLayer,
+    useTooltipTransitionKeyed: keyed(ManaUseTooltipTransitionModule, Filters.byStrings("onExitComplete", '"tooltip"')),
+    LayerModalKeyed: keyed(ManaLayerModalModule, Filters.byStrings("MODAL", "modalContent", "modalContentInner"))
   };
   const BasePopoverKeyed = keyed(BasePopoverModule, Filters.byStrings("popoverGradientWrapper", "spacing"));
   const StandardSidebarViewWrapper = Webpack.waitForModule(Filters.byPrototypeKeys("getPredicateSections", "renderSidebar"));
@@ -863,12 +887,16 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
   const MembersModViewSidebarKeyed = lazyKeyed(MembersModViewSidebarModule, Filters.byStrings("MEMBER_SAFETY_PAGE", "closeGuildSidebar"));
   const GenerateUserSettingsSectionsModule = Webpack.waitForModule(Filters.bySource("ACCOUNT_PROFILE", "CUSTOM", '"logout"'));
   const generateUserSettingsSectionsKeyed = lazyKeyed(GenerateUserSettingsSectionsModule, Filters.byStrings("ACCOUNT_PROFILE", "CUSTOM", '"logout"'));
+  const SettingsContent = Webpack.waitForModule((m) => Filters.byStrings("useTitle", "contentBody")(m?.type));
+  const SettingsNodeType = { ROOT: 0, SECTION: 1, SIDEBAR_ITEM: 2, PANEL: 3, PANE: 4 };
   const DiscordModules = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,
     Alert,
     AlertModule,
     AlertTypes,
-    Anchor,
+    get Anchor() {
+      return Anchor;
+    },
     App,
     AppContext,
     AppContextModule,
@@ -887,7 +915,6 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     CSSTransition,
     CallChatSidebarKeyed,
     CallChatSidebarModule,
-    ChannelAppLauncher,
     ChannelItemKeyed,
     ChannelItemModule,
     ChannelMessageList,
@@ -924,7 +951,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     GuildIcon,
     GuildStore,
     Heading,
-    ImpressionNames,
+    get ImpressionNames() {
+      return ImpressionNames;
+    },
     InviteActions,
     InviteEmbed,
     InviteStates,
@@ -940,7 +969,10 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ListRawModule,
     ListThin,
     Mana,
+    ManaLayerModalModule,
     ManaModalRootModule,
+    ManaTooltipLayer,
+    ManaUseTooltipTransitionModule,
     MembersModViewSidebarKeyed,
     MembersModViewSidebarModule,
     MenuItemKeyed,
@@ -965,7 +997,9 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     ModalsKeyed,
     ModalsModule,
     Paginator,
-    Parser,
+    get Parser() {
+      return Parser;
+    },
     Popout,
     PopoutCSSAnimatorKeyed,
     PopoutCSSAnimatorModule,
@@ -983,6 +1017,8 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     SelectModule,
     SelectedChannelStore,
     SelectedGuildStore,
+    SettingsContent,
+    SettingsNodeType,
     SettingsNotice,
     SidebarActions,
     SidebarType,
@@ -1016,13 +1052,15 @@ var BetterAnimations = function(require$$0$1, EventEmitter, classNames, fs, path
     TransitionGroup,
     TransitionGroupContext,
     UseIsVisibleModule,
-    UserSettingsModal,
+    UserSettings,
     VoiceChannelItemKeyed,
     VoiceChannelItemModule,
     VoiceChannelViewKeyed,
     VoiceChannelViewModule,
     appLayerContext,
-    colors,
+    get colors() {
+      return colors;
+    },
     createToast,
     generateUserSettingsSectionsKeyed,
     getThemeClass,
@@ -1393,7 +1431,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.0.11";
+  const version$1 = "2.1.0";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -1415,6 +1453,7 @@ ${indent2}`);
   const _Classes = {
     ChatSidebar: Webpack.getByKeys("chatLayerWrapper", "chatTarget"),
     StandardSidebarView: () => Webpack.getByKeys("standardSidebarView", "contentRegion"),
+    SettingsSidebar: () => Webpack.getByKeys("sidebar", "section", "nav"),
     Modal: Webpack.getByKeys("root", "rootWithShadow"),
     ModalBackdrop: Webpack.getByKeys("backdrop", "withLayer"),
     Layers: Webpack.getByKeys("layer", "baseLayer"),
@@ -1428,7 +1467,8 @@ ${indent2}`);
     Toast: Webpack.getByKeys("toast", "icon"),
     Scroller: Webpack.getByKeys("thin", "disableScrollAnchor"),
     Select: Webpack.getByKeys("select", "measurement"),
-    ManaModal: Webpack.getByKeys("actionBar", "headerTrailing")
+    ManaModal: Webpack.getByKeys("actionBar", "headerTrailing"),
+    Modals: Webpack.getByKeys("layer", "inactive")
   };
   const DiscordClasses = new Proxy(_Classes, {
     get(obj, prop) {
@@ -2231,10 +2271,10 @@ ${indent2}`);
     return tag == funcTag$2 || tag == genTag$1 || tag == asyncTag || tag == proxyTag;
   }
   var coreJsData = root$2["__core-js_shared__"];
-  var maskSrcKey = function() {
+  var maskSrcKey = (function() {
     var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || "");
     return uid ? "Symbol(src)_1." + uid : "";
-  }();
+  })();
   function isMasked(func) {
     return !!maskSrcKey && maskSrcKey in func;
   }
@@ -2403,14 +2443,14 @@ ${indent2}`);
     }
     return array;
   }
-  var defineProperty = function() {
+  var defineProperty = (function() {
     try {
       var func = getNative(Object, "defineProperty");
       func({}, "", {});
       return func;
     } catch (e) {
     }
-  }();
+  })();
   function baseAssignValue(object, key2, value) {
     if (key2 == "__proto__" && defineProperty) {
       defineProperty(object, key2, {
@@ -2448,9 +2488,9 @@ ${indent2}`);
   var objectProto$8 = Object.prototype;
   var hasOwnProperty$6 = objectProto$8.hasOwnProperty;
   var propertyIsEnumerable$1 = objectProto$8.propertyIsEnumerable;
-  var isArguments = baseIsArguments(/* @__PURE__ */ function() {
+  var isArguments = baseIsArguments(/* @__PURE__ */ (function() {
     return arguments;
-  }()) ? baseIsArguments : function(value) {
+  })()) ? baseIsArguments : function(value) {
     return isObjectLike(value) && hasOwnProperty$6.call(value, "callee") && !propertyIsEnumerable$1.call(value, "callee");
   };
   var isArray = Array.isArray;
@@ -2491,7 +2531,7 @@ ${indent2}`);
   var freeModule$1 = freeExports$1 && typeof module == "object" && module && !module.nodeType && module;
   var moduleExports$1 = freeModule$1 && freeModule$1.exports === freeExports$1;
   var freeProcess = moduleExports$1 && freeGlobal.process;
-  var nodeUtil = function() {
+  var nodeUtil = (function() {
     try {
       var types2 = freeModule$1 && freeModule$1.require && freeModule$1.require("util").types;
       if (types2) {
@@ -2500,7 +2540,7 @@ ${indent2}`);
       return freeProcess && freeProcess.binding && freeProcess.binding("util");
     } catch (e) {
     }
-  }();
+  })();
   var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
   var isTypedArray = nodeIsTypedArray ? baseUnary(nodeIsTypedArray) : baseIsTypedArray;
   var objectProto$7 = Object.prototype;
@@ -2697,7 +2737,7 @@ ${indent2}`);
     }
   }
   var objectCreate = Object.create;
-  var baseCreate = /* @__PURE__ */ function() {
+  var baseCreate = /* @__PURE__ */ (function() {
     function object() {
     }
     return function(proto) {
@@ -2712,7 +2752,7 @@ ${indent2}`);
       object.prototype = void 0;
       return result;
     };
-  }();
+  })();
   function initCloneObject(object) {
     return typeof object.constructor == "function" && !isPrototype(object) ? baseCreate(getPrototype(object)) : {};
   }
@@ -6936,14 +6976,6 @@ ${buildStyles(styles)}}
     boundary[zodErrorBoundarySymbol] = name2;
     return trust(boundary);
   }
-  /**
-   * anime.js - ESM
-   * @version v4.1.4
-   * @author Julian Garnier
-   * @license MIT
-   * @copyright (c) 2025 Julian Garnier
-   * @see https://animejs.com
-   */
   const isBrowser = typeof window !== "undefined";
   const doc = isBrowser ? document : null;
   const tweenTypes = {
@@ -7101,7 +7133,7 @@ ${buildStyles(styles)}}
     if (!p) p = powCache[decimalLength] = 10 ** decimalLength;
     return _round(v * p) / p;
   };
-  const snap = (v, increment2) => isArr(increment2) ? increment2.reduce((closest, cv) => abs(cv - v) < abs(closest - v) ? cv : closest) : increment2 ? _round(v / increment2) * increment2 : v;
+  const snap = (v, increment2) => isArr(increment2) ? increment2.reduce((closest2, cv) => abs(cv - v) < abs(closest2 - v) ? cv : closest2) : increment2 ? _round(v / increment2) * increment2 : v;
   const interpolate = (start, end, progress) => start + (end - start) * progress;
   const random = (min, max2, decimalLength) => {
     const m = 10 ** (decimalLength || 0);
@@ -16224,7 +16256,7 @@ ${buildStyles(styles)}}
     IMPLEMENTED_BY_ANIMATION: (animationName) => `Implemented by selected animation: ${animationName}`,
     SHOULD_BE_VALID_URL: "Should be a valid URL",
     PRIORITIZE_ANIMATION_SMOOTHNESS: "Prioritize Animation Smoothness",
-    CACHE_USER_SETTINGS_SECTIONS: "Cache User Settings Sections",
+    CACHE_USER_SETTINGS_SECTIONS: "Cache Legacy User Settings Sections",
     CATALOG_OUT_OF_DATE: "The last attempt to load the Catalog was unsuccessful. The information below may be out of date.",
     SETTINGS_MIGRATOR: "Settings Migrator"
   };
@@ -22816,15 +22848,6 @@ img.BAP__viewport {
   }
   var shim = { exports: {} };
   var useSyncExternalStoreShim_production = {};
-  /**
-   * @license React
-   * use-sync-external-store-shim.production.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   */
   var hasRequiredUseSyncExternalStoreShim_production;
   function requireUseSyncExternalStoreShim_production() {
     if (hasRequiredUseSyncExternalStoreShim_production) return useSyncExternalStoreShim_production;
@@ -22874,20 +22897,11 @@ img.BAP__viewport {
     return useSyncExternalStoreShim_production;
   }
   var useSyncExternalStoreShim_development = {};
-  /**
-   * @license React
-   * use-sync-external-store-shim.development.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   */
   var hasRequiredUseSyncExternalStoreShim_development;
   function requireUseSyncExternalStoreShim_development() {
     if (hasRequiredUseSyncExternalStoreShim_development) return useSyncExternalStoreShim_development;
     hasRequiredUseSyncExternalStoreShim_development = 1;
-    "production" !== process.env.NODE_ENV && function() {
+    "production" !== process.env.NODE_ENV && (function() {
       function is(x, y) {
         return x === y && (0 !== x || 1 / x === 1 / y) || x !== x && y !== y;
       }
@@ -22943,7 +22957,7 @@ img.BAP__viewport {
       var React = require$$0$1, objectIs = "function" === typeof Object.is ? Object.is : is, useState = React.useState, useEffect = React.useEffect, useLayoutEffect = React.useLayoutEffect, useDebugValue = React.useDebugValue, didWarnOld18Alpha = false, didWarnUncachedGetSnapshot = false, shim2 = "undefined" === typeof window || "undefined" === typeof window.document || "undefined" === typeof window.document.createElement ? useSyncExternalStore$1 : useSyncExternalStore$2;
       useSyncExternalStoreShim_development.useSyncExternalStore = void 0 !== React.useSyncExternalStore ? React.useSyncExternalStore : shim2;
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
-    }();
+    })();
     return useSyncExternalStoreShim_development;
   }
   var hasRequiredShim;
@@ -27340,7 +27354,7 @@ img.BAP__viewport {
       Switch$1,
       {
         label: "Preload Layers",
-        description: "Load full-screen pages (User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
+        description: "Load full-screen pages (Legacy User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
         checked: config2.general.preloadLayers,
         onChange: (value) => {
           config2.general.preloadLayers = value;
@@ -27351,7 +27365,7 @@ img.BAP__viewport {
       Switch$1,
       {
         label: Messages.CACHE_USER_SETTINGS_SECTIONS,
-        description: "Significantly improves performance when opening User Settings.",
+        description: "Significantly improves performance when opening Legacy User Settings.",
         checked: config2.general.cacheUserSettingsSections,
         onChange: (value) => {
           config2.general.cacheUserSettingsSections = value;
@@ -27624,8 +27638,6 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     }
     openSettingsModal(section2 = SettingsSection.Home) {
       if (this.isSettingsModalOpen()) return;
-      if (!LayerStore$1.getLayers().includes("USER_SETTINGS"))
-        UserSettingsModal.open("plugins");
       setSection(section2);
       const component = () => /* @__PURE__ */ BdApi.React.createElement(SettingsModal, null);
       component.__BA_isSettingsModal = true;
@@ -28286,7 +28298,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between sections of the settings.")
     },
     [ModuleKey.Layers]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen views of the Discord app, such as User Settings, Server Settings, ", meta$1.name, " Settings, etc.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen views of the Discord app, such as Legacy User Settings, Server Settings, ", meta$1.name, " Settings, etc.")
     },
     [ModuleKey.Tooltips]: {
       description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of informative floating UI elements application-wide, such as various control descriptions, server titles in the server list and other non-interactive elements that provide clarity to Discord's interfaces.")
@@ -28449,11 +28461,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
           {
             size: "sm",
             text: "Check for updates",
-            onClick: () => {
-              UserSettingsModal.open("updates");
-              Settings.closeSettingsModal();
-              ModalActions.closeAllModals();
-            }
+            onClick: () => UserSettings.openUserSettings("betterdiscord_updates_panel")
           }
         )
       );
@@ -28833,6 +28841,9 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       return fallback(...args);
     };
   }
+  function moduleErrorBoundary(moduleId, callback, fallback) {
+    return errorBoundary(callback, fallback, { module: Core.getModule(moduleId) });
+  }
   function attempt(callback, fallback, options) {
     return errorBoundary(callback, fallback, options)();
   }
@@ -28957,8 +28968,19 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   const Patcher = new PatcherWrapper(BDPatcher);
   const TinyPatcher = new PatcherWrapper(BaseTinyPatcher);
   function forceAppUpdate() {
-    Dispatcher.dispatch({ type: "DOMAIN_MIGRATION_START" });
-    requestIdleCallback(() => Dispatcher.dispatch({ type: "DOMAIN_MIGRATION_SKIP" }));
+    const appMount = document.getElementById("app-mount");
+    const reactContainerKey = Object.keys(appMount).find((m) => m.startsWith("__reactContainer$"));
+    let container = appMount[reactContainerKey];
+    while (!container.stateNode?.isReactComponent) {
+      container = container.child;
+    }
+    const { render: render2 } = container.stateNode;
+    if (render2.toString().includes("null")) return;
+    container.stateNode.render = () => null;
+    container.stateNode.forceUpdate(() => {
+      container.stateNode.render = render2;
+      container.stateNode.forceUpdate();
+    });
   }
   function usePrevious(value) {
     const ref = require$$0$1.useRef(value);
@@ -29509,12 +29531,82 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   }
   function useSafeBoolean(value, store = AnimationStore$1) {
     const [safeValue, setSafeValue] = require$$0$1.useState(value);
-    require$$0$1.useEffect(() => {
+    require$$0$1.useLayoutEffect(() => {
       if (store.isSafe) return setSafeValue(value);
       setSafeValue(false);
       return store.onceSafe(() => setSafeValue(value));
     }, [value]);
     return safeValue;
+  }
+  function TooltipTransition$1({ module: module2, shouldShow: shouldShow2, onExitComplete, onAnimationRest, ...props }) {
+    const value = Mana.TooltipLayer({
+      ...props,
+      isVisible: true,
+      isRendered: true
+    });
+    const layer = findInReactTree(value, (m) => m?.props?.position);
+    if (!layer) throw new Error("Unable to find ReferencePositionLayer");
+    const layerRef = require$$0$1.useRef();
+    const { autoRef, setPosition } = useAutoPosition(null);
+    const safeShouldShow = useSafeBoolean(shouldShow2);
+    Object.assign(layer.props, {
+      ref: layerRef,
+      onPositionChange: setPosition
+    });
+    const onRest = (isVisible) => () => {
+      if (!isVisible) onExitComplete?.();
+      onAnimationRest?.(
+        { value: {}, finished: true },
+        {
+          ctrl: {},
+          expired: !isVisible,
+          item: isVisible,
+          key: isVisible ? "tooltip" : "empty",
+          phase: isVisible ? SpringTransitionPhases.ENTER : SpringTransitionPhases.LEAVE
+        }
+      );
+    };
+    return /* @__PURE__ */ BdApi.React.createElement(
+      AnimeTransition,
+      {
+        in: safeShouldShow,
+        layerRef,
+        module: module2,
+        autoRef,
+        anchor: layer.props.targetRef,
+        onEntered: onRest(true),
+        onExited: onRest(false)
+      },
+      value
+    );
+  }
+  function patchUseTooltipTransition() {
+    Patcher.instead(ModuleKey.Tooltips, ...Mana.useTooltipTransitionKeyed, (self2, [options], original) => {
+      const { shouldShow: shouldShow2, onExitComplete, onAnimationRest } = options;
+      const { isMainWindow } = useWindow();
+      const module2 = useModule(ModuleKey.Tooltips);
+      if (!isMainWindow || !module2.isEnabled()) return original(options);
+      original({ ...options, shouldShow: false });
+      return moduleErrorBoundary(ModuleKey.Tooltips, (render2) => {
+        const value = render2({}, true);
+        const tooltipLayer = findInReactTree(value, (m) => m?.props?.position);
+        if (!tooltipLayer) throw new Error("Unable to find TooltipLayer");
+        Object.assign(tooltipLayer, /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: value }, /* @__PURE__ */ BdApi.React.createElement(
+          TooltipTransition$1,
+          {
+            ...tooltipLayer.props,
+            module: module2,
+            shouldShow: shouldShow2,
+            onExitComplete,
+            onAnimationRest
+          }
+        )));
+        return value;
+      }, (render2) => render2({}, shouldShow2));
+    });
+  }
+  function patchManaTooltip() {
+    patchUseTooltipTransition();
   }
   function TooltipTransition(props) {
     const { module: module2, isVisible, onAnimationRest, ...rest } = props;
@@ -29565,6 +29657,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
         }
       )));
     });
+    patchManaTooltip();
   }
   function getMessageKey(message) {
     return message?.nonce ?? message?.id;
@@ -30077,25 +30170,39 @@ ${DiscordSelectors.StandardSidebarView.contentRegionScroller}:has(.BA__home) {
     }, [props.in]);
     return isShown;
   }
-  function patchManaModalRoot() {
+  function renderContainer(value) {
+    const container = findInReactTree(value, byClassName(DiscordClasses.ManaModal.container));
+    if (!container) return;
+    Object.assign(container, /* @__PURE__ */ BdApi.React.createElement(
+      AnimeContainer,
+      {
+        id: ModuleKey.Modals,
+        container: {
+          className: classNames(
+            "BA__manaModalContainer",
+            container.props.className
+          )
+        }
+      },
+      require$$0$1.cloneElement(container)
+    ));
+  }
+  function patchManaModals() {
     Patcher.after(ModuleKey.Modals, ...Mana.ModalRootKeyed, (self2, args, value) => {
-      const module2 = Core.getModule(ModuleKey.Modals);
-      if (!module2.isEnabled()) return;
-      const container = findInReactTree(value, byClassName(DiscordClasses.ManaModal.container));
-      if (!container) return;
-      Object.assign(container, /* @__PURE__ */ BdApi.React.createElement(
-        AnimeContainer,
-        {
-          id: ModuleKey.Modals,
-          container: {
-            className: classNames(
-              "BA__manaModalContainer",
-              container.props.className
-            )
-          }
-        },
-        require$$0$1.cloneElement(container)
-      ));
+      const { isMainWindow } = useWindow();
+      const module2 = useModule(ModuleKey.Modals);
+      if (!isMainWindow || !module2.isEnabled()) return;
+      renderContainer(value);
+    });
+    Patcher.after(ModuleKey.Modals, ...Mana.LayerModalKeyed, (self2, args, value) => {
+      const { isMainWindow } = useWindow();
+      const module2 = useModule(ModuleKey.Modals);
+      if (!isMainWindow || !module2.isEnabled()) return;
+      const wrapper = findInReactTree(value, (m) => typeof m?.children === "function");
+      if (!wrapper) return;
+      TinyPatcher.after(ModuleKey.Modals, wrapper, "children", (self22, args2, value2) => {
+        renderContainer(value2);
+      });
     });
   }
   css`.BA__manaModalContainer {
@@ -30104,10 +30211,15 @@ ${DiscordSelectors.StandardSidebarView.contentRegionScroller}:has(.BA__home) {
     box-shadow: none !important;
     padding: 0 !important;
     border-radius: 0 !important;
+    overflow: visible;
 }
 
 ${DiscordSelectors.ManaModal.container} {
     min-height: 0;
+}
+${DiscordSelectors.ManaModal.container} > ${DiscordSelectors.ManaModal.container} {
+    width: 100% !important;
+    height: 100% !important;
 }``ManaModalRoot`;
   function ModalBackdrop({ isVisible, onClick, disabled = false, disablePointerEvents = false, ...props }) {
     return /* @__PURE__ */ BdApi.React.createElement(
@@ -30206,7 +30318,7 @@ ${DiscordSelectors.ManaModal.container} {
       ))));
     });
     patchModalScrim();
-    patchManaModalRoot();
+    patchManaModals();
   }
   css`${DiscordSelectors.Modal.root}, .bd-modal-root {
     isolation: isolate;
@@ -30218,6 +30330,9 @@ ${DiscordSelectors.Modal.focusLock}:has(> [class*="carouselModal"]) {
 .BA__modal--hidden {
     visibility: hidden;
     pointer-events: none;
+}
+${DiscordSelectors.Modals.inactive} {
+    z-index: -1;
 }``Modals`;
   let LayersComponent = null;
   function getWindowCenterAnchor() {
@@ -30626,33 +30741,6 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
       positionLayer.props.onPositionChange = props.onPositionChange;
     });
   }
-  function patchChannelAppLauncher() {
-    Patcher.after(ModuleKey.Popouts, ChannelAppLauncher, "type", (self2, args, value) => {
-      const layerRef = require$$0$1.useRef();
-      const { autoRef, setPosition } = useAutoPosition(Position.Top, { align: Position.Right });
-      const { isMainWindow } = useWindow();
-      const module2 = useModule(ModuleKey.Popouts);
-      if (!isMainWindow || !module2.isEnabled()) return;
-      const wrapper = findInReactTree(value, (m) => Array.isArray(m?.children));
-      if (!wrapper) return;
-      const { children: children2 } = wrapper;
-      const popupIndex = children2.length - 1;
-      children2[popupIndex] = /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: children2[popupIndex] }, /* @__PURE__ */ BdApi.React.createElement(TransitionGroup, { component: null }, children2[popupIndex] && /* @__PURE__ */ BdApi.React.createElement(
-        AnimeTransition,
-        {
-          module: module2,
-          layerRef,
-          autoRef,
-          anchor: children2[popupIndex].props?.positionTargetRef
-        },
-        require$$0$1.cloneElement(children2[popupIndex], {
-          layerRef,
-          onPositionChange: setPosition
-        })
-      )));
-    });
-    patchAppLauncherPopup();
-  }
   function patchChannelTextAreaButtons() {
     Patcher.after(ModuleKey.Popouts, ChannelTextAreaButtons, "type", (self2, [{ buttonRefs }], value) => {
       const { isMainWindow } = useWindow();
@@ -30666,42 +30754,77 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
       }
     });
   }
+  function useButtonRefs(value) {
+    const buttonRefs = require$$0$1.useRef({});
+    const { isMainWindow } = useWindow();
+    const module2 = useModule(ModuleKey.Popouts);
+    if (!isMainWindow || !module2.isEnabled()) return buttonRefs;
+    const buttons = findInReactTree(value, (m) => m?.type === ChannelTextAreaButtons);
+    if (buttons) buttons.props.buttonRefs = buttonRefs;
+    return buttonRefs;
+  }
+  function useExpressionPicker(value, buttonRefs) {
+    const { autoRef, setPosition } = useAutoPosition(Position.Top, { align: Position.Right });
+    const anchorRef = require$$0$1.useCallback(() => {
+      const { activeView, lastActiveView } = unkeyed(useExpressionPickerStoreKeyed).getState();
+      return buttonRefs.current[activeView ?? lastActiveView] ?? buttonRefs.current["emoji"];
+    }, [buttonRefs]);
+    const { isMainWindow } = useWindow();
+    const module2 = useModule(ModuleKey.Popouts);
+    if (!isMainWindow || !module2.isEnabled()) return;
+    const wrapper = findInReactTree(value, (m) => Array.isArray(m?.children));
+    if (!wrapper) return;
+    const { children: children2 } = wrapper;
+    const expressionPickerIndex = children2.length - 1;
+    const injectContainerRef2 = (children22, ref) => {
+      if (children22?.props) children22.props.__containerRef = ref;
+    };
+    children2[expressionPickerIndex] = /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: children2[expressionPickerIndex] }, /* @__PURE__ */ BdApi.React.createElement(TransitionGroup, { component: null }, children2[expressionPickerIndex] && /* @__PURE__ */ BdApi.React.createElement(
+      AnimeTransition,
+      {
+        module: module2,
+        injectContainerRef: injectContainerRef2,
+        autoRef,
+        anchor: anchorRef
+      },
+      require$$0$1.cloneElement(children2[expressionPickerIndex], {
+        onPositionChange: setPosition
+      })
+    )));
+  }
+  function useAppLauncherPopup(value, buttonRefs) {
+    const layerRef = require$$0$1.useRef();
+    const { autoRef, setPosition } = useAutoPosition(Position.Top, { align: Position.Right });
+    const { isMainWindow } = useWindow();
+    const module2 = useModule(ModuleKey.Popouts);
+    if (!isMainWindow || !module2.isEnabled()) return;
+    const inner = findInReactTree(value, byClassName("inner"));
+    if (!inner) return;
+    const { children: children2 } = inner.props;
+    const popupIndex = 0;
+    children2[popupIndex] = /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: children2[popupIndex] }, /* @__PURE__ */ BdApi.React.createElement(TransitionGroup, { component: null }, children2[popupIndex] && /* @__PURE__ */ BdApi.React.createElement(
+      AnimeTransition,
+      {
+        module: module2,
+        layerRef,
+        autoRef,
+        anchor: () => buttonRefs.current["appLauncher"] ?? children2[popupIndex].props?.positionTargetRef
+      },
+      require$$0$1.cloneElement(children2[popupIndex], {
+        layerRef,
+        onPositionChange: setPosition
+      })
+    )));
+  }
   function patchChannelTextArea() {
     Patcher.after(ModuleKey.Popouts, ChannelTextArea?.type, "render", (self2, args, value) => {
-      const { autoRef, setPosition } = useAutoPosition(Position.Top, { align: Position.Right });
-      const buttonRefs = require$$0$1.useRef({});
-      const anchorRef = require$$0$1.useCallback(() => {
-        const { activeView, lastActiveView } = unkeyed(useExpressionPickerStoreKeyed).getState();
-        return buttonRefs.current[activeView ?? lastActiveView] ?? buttonRefs.current["emoji"];
-      }, [buttonRefs]);
-      const { isMainWindow } = useWindow();
-      const module2 = useModule(ModuleKey.Popouts);
-      if (!isMainWindow || !module2.isEnabled()) return;
-      const buttons = findInReactTree(value, (m) => m?.type === ChannelTextAreaButtons);
-      if (buttons) buttons.props.buttonRefs = buttonRefs;
-      const wrapper = findInReactTree(value, (m) => Array.isArray(m?.children));
-      if (!wrapper) return;
-      const { children: children2 } = wrapper;
-      const expressionPickerIndex = children2.length - 1;
-      const injectContainerRef2 = (children22, ref) => {
-        if (children22?.props) children22.props.__containerRef = ref;
-      };
-      children2[expressionPickerIndex] = /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: children2[expressionPickerIndex] }, /* @__PURE__ */ BdApi.React.createElement(TransitionGroup, { component: null }, children2[expressionPickerIndex] && /* @__PURE__ */ BdApi.React.createElement(
-        AnimeTransition,
-        {
-          module: module2,
-          injectContainerRef: injectContainerRef2,
-          autoRef,
-          anchor: anchorRef
-        },
-        require$$0$1.cloneElement(children2[expressionPickerIndex], {
-          onPositionChange: setPosition
-        })
-      )));
+      const buttonRefs = useButtonRefs(value);
+      useExpressionPicker(value, buttonRefs);
+      useAppLauncherPopup(value, buttonRefs);
     });
     patchChannelTextAreaButtons();
     patchExpressionPicker();
-    patchChannelAppLauncher();
+    patchAppLauncherPopup();
   }
   function patchPopToast() {
     Patcher.instead(...popToastKeyed, (self2, [key2, force], original) => {
@@ -31103,7 +31226,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.0.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Catalog & Library: Updated to work in the latest release of Discord."] }] },
     "2.0.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.0.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers and Channels: Updated to work in the latest release of Discord.", "Settings: Fixed the tooltip for the Duration slider not being displayed.", "Fixed an issue where the search sidebar sometimes doesn't open when trying to search messages with Servers or Channels animations enabled."] }] },
-    "2.0.11": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Thread Sidebar: Fixed the animations misfiring while navigating the Mod View.", "Updated to work in the latest release of Discord."] }] }
+    "2.0.11": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Thread Sidebar: Fixed the animations misfiring while navigating the Mod View.", "Updated to work in the latest release of Discord."] }] },
+    "2.1.0": { "changes": [{ "type": "added", "title": "What's new", "items": ["Tooltips: Integrated the new Mana Discord Tooltips.", "Settings: Integrated the new Discord User Settings Modal.", "Modals: Added support for the Discord Layer Modals.", "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."] }, { "type": "fixed", "title": "Fixes", "items": ["Popouts: Updated Apps & Commands integration to work in the latest release of Discord.", "Modals: Inactive modals are now correctly dimmed.", "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
@@ -31247,6 +31371,66 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     justify-content: space-between;
     width: 100%;
 }``Changelog`;
+  const isNode = (node, type) => typeof type === "function" ? type(node) : node?.type === type;
+  function closest(node, type) {
+    if (isNode(node, type)) return node;
+    if (!node?.parent) return null;
+    return closest(node.parent, type);
+  }
+  function flatten(nodes, type) {
+    return nodes.flatMap((node) => {
+      if (isNode(node, type)) return [node];
+      if (!Array.isArray(node?.layout)) return [];
+      return flatten(node.layout, type);
+    });
+  }
+  async function patchSettingsContent() {
+    Patcher.after(ModuleKey.Settings, await SettingsContent, "type", (self2, [{ setting }], value) => {
+      const root2 = require$$0$1.useMemo(
+        () => setting ? closest(setting, SettingsNodeType.ROOT) : null,
+        [setting]
+      );
+      const panelKeys = require$$0$1.useMemo(
+        () => root2 ? flatten(root2.layout, SettingsNodeType.PANEL).map((node) => node.key) : [],
+        [root2]
+      );
+      const direction = useDirection(panelKeys, setting?.key);
+      const { isMainWindow } = useWindow();
+      const module2 = useModule(ModuleKey.Settings);
+      if (!isMainWindow || !module2.isEnabled()) return;
+      const auto2 = { direction };
+      return /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: value }, /* @__PURE__ */ BdApi.React.createElement(
+        TransitionGroup,
+        {
+          className: "BA__settingsContent",
+          childFactory: passAuto(auto2)
+        },
+        /* @__PURE__ */ BdApi.React.createElement(
+          AnimeTransition,
+          {
+            key: setting?.key ?? "none",
+            container: { className: "BA__settingsContent" },
+            module: module2,
+            auto: auto2
+          },
+          value
+        )
+      ));
+    });
+  }
+  SettingsContent.then(
+    () => css`.BA__settingsContent {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+${DiscordSelectors.SettingsSidebar.sidebar} {
+    isolation: isolate;
+}``SettingsContent`
+  );
   function index(meta2) {
     saveMeta(meta2);
     return {
@@ -31276,6 +31460,7 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
         patchChannelMessageList();
         patchChannelView();
         patchStandardSidebarView();
+        patchSettingsContent();
         patchModals();
         patchLayers();
         patchListThin();
@@ -31286,7 +31471,7 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
         patchRootElementContext();
         applyOptimizationPatches();
         Logger.info("Startup", "Forcing app update...");
-        forceAppUpdate();
+        queueMicrotask(() => forceAppUpdate());
         Logger.info("Startup", "Finished.");
       },
       stop() {
@@ -31323,4 +31508,4 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     overflow: clip;
 }``General`;
   return index;
-}(BdApi.React, require("events"), BdApi.Utils.className, require("fs"), require("path"), BdApi.ReactDOM);
+})(BdApi.React, require("events"), BdApi.Utils.className, require("fs"), require("path"), BdApi.ReactDOM);
