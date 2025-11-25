@@ -7,34 +7,22 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.0
+ * @version 2.1.1
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
     {
-      "type": "added",
-      "title": "What's new",
-      "items": [
-        "Tooltips: Integrated the new Mana Discord Tooltips.",
-        "Settings: Integrated the new Discord User Settings Modal.",
-        "Modals: Added support for the Discord Layer Modals.",
-        "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."
-      ]
-    },
-    {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Popouts: Updated Apps & Commands integration to work in the latest release of Discord.",
-        "Modals: Inactive modals are now correctly dimmed.",
-        "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."
+        "Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -709,7 +697,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // UseIsVisibleModule
     {
-      filter: Filters.bySource("isIntersecting", "threshold:1")
+      filter: Filters.bySource("isIntersecting", "new Map([[1,{threshold:1}]])")
     },
     // RootElementContextModule
     {
@@ -1431,7 +1419,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.0";
+  const version$1 = "2.1.1";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -31227,7 +31215,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.0.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.0.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers and Channels: Updated to work in the latest release of Discord.", "Settings: Fixed the tooltip for the Duration slider not being displayed.", "Fixed an issue where the search sidebar sometimes doesn't open when trying to search messages with Servers or Channels animations enabled."] }] },
     "2.0.11": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Thread Sidebar: Fixed the animations misfiring while navigating the Mod View.", "Updated to work in the latest release of Discord."] }] },
-    "2.1.0": { "changes": [{ "type": "added", "title": "What's new", "items": ["Tooltips: Integrated the new Mana Discord Tooltips.", "Settings: Integrated the new Discord User Settings Modal.", "Modals: Added support for the Discord Layer Modals.", "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."] }, { "type": "fixed", "title": "Fixes", "items": ["Popouts: Updated Apps & Commands integration to work in the latest release of Discord.", "Modals: Inactive modals are now correctly dimmed.", "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."] }] }
+    "2.1.0": { "changes": [{ "type": "added", "title": "What's new", "items": ["Tooltips: Integrated the new Mana Discord Tooltips.", "Settings: Integrated the new Discord User Settings Modal.", "Modals: Added support for the Discord Layer Modals.", "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."] }, { "type": "fixed", "title": "Fixes", "items": ["Popouts: Updated Apps & Commands integration to work in the latest release of Discord.", "Modals: Inactive modals are now correctly dimmed.", "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."] }] },
+    "2.1.1": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
