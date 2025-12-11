@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.1
+ * @version 2.1.2
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -29,7 +29,7 @@ const config = {
 }
 /* ### CONFIG END ### */
 
-var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, path, reactDom) {
+var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, path, electron, reactDom) {
   "use strict";
   const name$1 = "BetterAnimations";
   const author = "arg0NNY";
@@ -1107,13 +1107,13 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
         "path",
         {
           d: "M43.48,153.61c0,.51,0,1,0,1.55a13.16,13.16,0,0,1-.15,1.54,15.3,15.3,0,0,1-.75,3,12,12,0,0,1-.6,1.43,15.12,15.12,0,0,1-.74,1.37c-2.67,4.32-6.48,6.14-11.2,7.35-3.57,0-6.64-.38-9.76-2.24-.43-.26-.84-.53-1.24-.82s-.78-.61-1.14-.94a13,13,0,0,1-1.05-1.05c-.33-.36-.64-.75-.94-1.14s-.57-.81-.82-1.23a13.75,13.75,0,0,1-.7-1.31,15.77,15.77,0,0,1-1-2.79c-.13-.5-.23-1-.31-1.52s-.12-1-.14-1.55a13.36,13.36,0,0,1,0-1.55c0-.52.08-1,.16-1.55s.19-1,.32-1.52a15,15,0,0,1,.47-1.48c.18-.49.39-1,.61-1.43a13.89,13.89,0,0,1,.76-1.36c2.73-4.32,6.61-6.1,11.37-7.22a17.55,17.55,0,0,1,9,1.94,14.46,14.46,0,0,1,1.32.8c.42.29.83.61,1.22.94a14,14,0,0,1,1.13,1c.35.37.69.76,1,1.16a13.79,13.79,0,0,1,.89,1.27c.27.43.52.88.75,1.34a13.73,13.73,0,0,1,.6,1.42,14.74,14.74,0,0,1,.46,1.47,15.17,15.17,0,0,1,.32,1.52C43.39,152.58,43.45,153.09,43.48,153.61ZM149.61,266.66a13.24,13.24,0,0,0,.48,1.51,13.79,13.79,0,0,0,.61,1.42,13.41,13.41,0,0,0,.74,1.34,14.24,14.24,0,0,0,.89,1.26,13.87,13.87,0,0,0,1,1.16,14.16,14.16,0,0,0,1.13,1.06c.39.33.8.64,1.22.93a13.48,13.48,0,0,0,1.31.8,12.58,12.58,0,0,0,1.39.66,16.84,16.84,0,0,0,9.18.9c4.61-1.5,8.28-3.72,10.53-8.2a14.8,14.8,0,0,0,.61-1.42c.18-.49.34-1,.47-1.48a15.17,15.17,0,0,0,.32-1.52c.08-.51.13-1,.16-1.54s0-1,0-1.55-.08-1-.15-1.54-.18-1-.31-1.52a12.63,12.63,0,0,0-.45-1.48c-.17-.48-.37-.95-.59-1.42s-.47-.91-.74-1.34-.56-.86-.87-1.27-.63-.79-1-1.17a12.26,12.26,0,0,0-1.1-1.06,13.51,13.51,0,0,0-1.2-.95c-.42-.3-.85-.57-1.3-.83a13.43,13.43,0,0,0-1.37-.68c-3.15-1.39-6-1.39-9.37-1.16-4.6,1.52-8.28,3.71-10.53,8.21q-.34.72-.63,1.47a15.73,15.73,0,0,0-.47,1.52,13.47,13.47,0,0,0-.32,1.56c-.08.53-.13,1.05-.16,1.59a14.06,14.06,0,0,0,0,1.59c0,.53.09,1.06.17,1.59A14.45,14.45,0,0,0,149.61,266.66ZM139,214c.19-.43.35-.86.5-1.3s.26-.89.36-1.35a12.63,12.63,0,0,0,.23-1.37,13,13,0,0,0,.08-1.39,12.82,12.82,0,0,0,0-1.39c-.05-.47-.11-.93-.2-1.38a12.11,12.11,0,0,0-.34-1.35,11.3,11.3,0,0,0-.47-1.31,12.89,12.89,0,0,0-7.81-7.14c-5.5-1.89-36.88-1.26-44.37-.74-4.16,1.48-7.23,3.46-9.19,7.59-.2.41-.37.83-.53,1.26s-.29.88-.4,1.32-.2.89-.27,1.35-.11.91-.13,1.37,0,.91,0,1.37a12.72,12.72,0,0,0,.14,1.37,10.75,10.75,0,0,0,.27,1.35,12.33,12.33,0,0,0,.4,1.31,12.58,12.58,0,0,0,6.73,7.15,16.52,16.52,0,0,0,5.48,1.35c5.55.48,11.31,0,16.88,0,7.77,0,15.57.28,23.32-.1C133.91,220.35,137.07,218.29,139,214ZM563.65,356.72c16.78-20.29,29.88-50.55,35.31-76.23,6.57-31.05,4.69-64.76-13.18-91.9-15.27-23.2-41-38.35-68-43.69-24.91-4.92-52.95-3.17-78.45-3.24l-115-.19-173.55-.42H95c-8,0-16.15-.47-24.12-.08A16.54,16.54,0,0,0,62,143.7a12.72,12.72,0,0,0-5.18,8.35c-.07.46-.13.92-.16,1.38a12.71,12.71,0,0,0,0,1.38,12.85,12.85,0,0,0,.12,1.38,12.51,12.51,0,0,0,.25,1.36,15.27,15.27,0,0,0,.92,2.62c.2.41.41.82.65,1.22s.5.78.77,1.15a14.22,14.22,0,0,0,7.93,5.3c5.3,1.09,25.27.2,31.65.2H216.36c5.11,0,10.61-.53,15.67.33,3.8.65,7,2.26,9.15,5.58a14.42,14.42,0,0,1,2.08,10.58,12.76,12.76,0,0,1-8.55,9.41c-5.61,2-12.67,1.23-18.58,1.21L180,195c-6,0-12.57-.61-18.46.26a16.73,16.73,0,0,0-6.87,2.48,11.76,11.76,0,0,0-5.34,8c-.61,3.64,0,8,2.32,10.92a13.13,13.13,0,0,0,7.28,4.85c6.46,1.62,14.69.68,21.37.63H225c6.67,0,14.08-.76,20.66.08,3.9.5,7.37,1.88,9.8,5.08A13.56,13.56,0,0,1,258.15,238a12.9,12.9,0,0,1-8.06,9.95c-11.9,4.67-45.6-3.16-55.29,4.25a12.9,12.9,0,0,0-4.7,9,13.34,13.34,0,0,0,3,10.4,13.59,13.59,0,0,0,9.09,4.59c5.95.7,12.57.14,18.59.14H259.7l133.11,0h41.63c8.22,0,16.67-.38,24.87.3,4.67,1.68,8.62,3.88,10.93,8.54,2.12,4.27,1.83,8.63,1,13.15a31.48,31.48,0,0,1-15.81,19.08,27.83,27.83,0,0,1-8.06,2.78c-8,.59-16.21.28-24.27.28-16.27,0-32.58-.27-48.84,0-8.59,34.28-18.2,68.38-26.38,102.75l48.68,0c8.09,0,16.86-.72,24.85.32,4.41,1.41,8.4,3.74,10.7,7.92,2.52,4.6,2.36,10.29.78,15.16a31.67,31.67,0,0,1-16.36,18.2,26.42,26.42,0,0,1-9.23,2.4c-5.45.47-11.08.12-16.55.09H365.42c-24.21,0-48.52.48-72.72,0,.6-5.14,2.44-10.51,3.75-15.55l7.94-30.55,26-100.7-134.54-.06C183,369.2,171.12,418.36,157.91,467.14c-7.7,32.21-16.48,64.25-24.75,96.32l-6.87,26.72c-.67,2.69-1.77,5.32-2.32,8a6.12,6.12,0,0,0,0,3.26,3.9,3.9,0,0,0,2.58.35c17.41.72,35.11.09,52.54.09l100.92,0h74.11c26.67,0,53.31.31,79.73-3.91,24.91-4,49.55-11.66,70.65-25.8,39.71-26.61,56.91-68.87,65.69-113.91,6.18-31.69,7-66.64-11.74-94.45l0-.22C560.3,361.35,562,359.06,563.65,356.72Z",
-          fill: typeof color === "string" ? color : color.css
+          fill: typeof color === "string" ? color : color?.css
         }
       ) : /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
           d: "M43.31,152.07c3.1,19.82-27.18,24.62-30.21,4.75C10.21,137.17,40.17,132.39,43.31,152.07ZM179.2,258.93c-5-19.44-34.75-11.8-29.59,7.73C154.63,285.85,184.07,278.1,179.2,258.93ZM139,214c3.22-6.85-.36-15.74-7.7-18-5.5-1.89-36.88-1.26-44.37-.74-4.16,1.48-7.23,3.46-9.19,7.59-7.19,19.7,15,20.55,28.57,19.18C117.26,221,133.2,226.53,139,214Zm378.79-69.07c-48.37-7.35-143.33-1.56-193.47-3.44-40.76,0-191.42-.58-229.28-.43-14.25-.07-45-4.59-37.09,19.13,6,13.42,29,6.67,41,7.87H216.36c8.35.15,19.39-2.15,24.82,5.91,4.85,7,1.86,17.43-6.47,20-12.21,2.88-41.89.43-54.75,1.08-10.58.07-27.67-3-30.67,10.7-2.87,18.25,18.51,17.41,31,16.4H225c12.53-.53,35.47-3.1,33.17,15.85-5.8,23.24-50.14,3.38-63.35,14.19-9.11,7.13-4.39,23.43,7.42,23.94,60.92.54,171-.11,232.22.12,12.09.86,28.84-4.21,35.8,8.84,5.45,12.49-3.57,26.5-14.79,32.23-9.88,5.14-21.61,2.52-32.33,3.06-16.27,0-32.58-.27-48.84,0-7.06,28.18-14.8,56.23-21.87,84.41,52.36-73.63,148.44-111.33,236.94-93.06C619.67,244.72,597.55,158.81,517.78,144.91ZM195.83,320.31C172.48,414,146.4,507.87,124,601.46c52.8,1.61,137.31-.22,190.54.41a237.65,237.65,0,0,1,5.37-134.46c-9.08,0-18.16-.05-27.22-.24,7.23-31.13,29.69-114.61,37.67-146.8Z",
-          fill: typeof color === "string" ? color : color.css
+          fill: typeof color === "string" ? color : color?.css
         }
       ),
       type === IconBrandTypes.SUCCESS && /* @__PURE__ */ BdApi.React.createElement(
@@ -1419,7 +1419,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.1";
+  const version$1 = "2.1.2";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -17253,14 +17253,14 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M9.592 3.2a6 6 0 0 1-.495.399c-.298.2-.633.338-.985.408c-.153.03-.313.043-.632.068c-.801.064-1.202.096-1.536.214a2.71 2.71 0 0 0-1.655 1.655c-.118.334-.15.735-.214 1.536a6 6 0 0 1-.068.632c-.07.352-.208.687-.408.985c-.087.13-.191.252-.399.495c-.521.612-.782.918-.935 1.238c-.353.74-.353 1.6 0 2.34c.153.32.414.626.935 1.238c.208.243.312.365.399.495c.2.298.338.633.408.985c.03.153.043.313.068.632c.064.801.096 1.202.214 1.536a2.71 2.71 0 0 0 1.655 1.655c.334.118.735.15 1.536.214c.319.025.479.038.632.068c.352.07.687.209.985.408c.13.087.252.191.495.399c.612.521.918.782 1.238.935c.74.353 1.6.353 2.34 0c.32-.153.626-.414 1.238-.935c.243-.208.365-.312.495-.399c.298-.2.633-.338.985-.408c.153-.03.313-.043.632-.068c.801-.064 1.202-.096 1.536-.214a2.71 2.71 0 0 0 1.655-1.655c.118-.334.15-.735.214-1.536c.025-.319.038-.479.068-.632c.07-.352.209-.687.408-.985c.087-.13.191-.252.399-.495c.521-.612.782-.918.935-1.238c.353-.74.353-1.6 0-2.34c-.153-.32-.414-.626-.935-1.238a6 6 0 0 1-.399-.495a2.7 2.7 0 0 1-.408-.985a6 6 0 0 1-.068-.632c-.064-.801-.096-1.202-.214-1.536a2.71 2.71 0 0 0-1.655-1.655c-.334-.118-.735-.15-1.536-.214a6 6 0 0 1-.632-.068a2.7 2.7 0 0 1-.985-.408a6 6 0 0 1-.495-.399c-.612-.521-.918-.782-1.238-.935a2.71 2.71 0 0 0-2.34 0c-.32.153-.626.414-1.238.935"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor.css,
+          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor?.css,
           d: "M16.374 9.863a.814.814 0 0 0-1.151-1.151l-4.85 4.85l-1.595-1.595a.814.814 0 0 0-1.151 1.151l2.17 2.17a.814.814 0 0 0 1.15 0z"
         }
       )
@@ -17279,20 +17279,20 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "m16.157 3.802l.686.406c2.029 1.202 3.043 1.803 3.6 2.792c.557.99.557 2.19.557 4.594v.812c0 2.403 0 3.605-.557 4.594s-1.571 1.59-3.6 2.791l-.686.407C14.128 21.399 13.114 22 12 22s-2.128-.6-4.157-1.802l-.686-.407c-2.029-1.2-3.043-1.802-3.6-2.791C3 16.01 3 14.81 3 12.406v-.812C3 9.19 3 7.989 3.557 7s1.571-1.59 3.6-2.792l.686-.406C9.872 2.601 10.886 2 12 2s2.128.6 4.157 1.802"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor.css,
+          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor?.css,
           d: "M12 6.25a.75.75 0 0 1 .75.75v6a.75.75 0 0 1-1.5 0V7a.75.75 0 0 1 .75-.75M12 17a1 1 0 1 0 0-2a1 1 0 0 0 0 2"
         }
       )
     );
   }
-  function TrashIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function TrashIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -17304,14 +17304,14 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M14.25 1c.41 0 .75.34.75.75V3h5.25c.41 0 .75.34.75.75v.5c0 .41-.34.75-.75.75H3.75A.75.75 0 0 1 3 4.25v-.5c0-.41.34-.75.75-.75H9V1.75c0-.41.34-.75.75-.75h4.5Z"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M5.06 7a1 1 0 0 0-1 1.06l.76 12.13a3 3 0 0 0 3 2.81h8.36a3 3 0 0 0 3-2.81l.75-12.13a1 1 0 0 0-1-1.06H5.07ZM11 12a1 1 0 1 0-2 0v6a1 1 0 1 0 2 0v-6Zm3-1a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Z",
           clipRule: "evenodd"
@@ -17319,7 +17319,7 @@ ${buildStyles(styles)}}
       )
     );
   }
-  function DownloadIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function DownloadIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -17331,7 +17331,7 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M12 2a1 1 0 0 1 1 1v10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.42l3.3 3.3V3a1 1 0 0 1 1-1ZM3 20a1 1 0 1 0 0 2h18a1 1 0 1 0 0-2H3Z"
         }
       )
@@ -18861,18 +18861,18 @@ ${buildStyles(styles)}}
   }
   css`.BA__iconButton {
     display: block;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     background: none;
     border: none;
     padding: 0;
     cursor: pointer;
 }
 .BA__iconButton:hover {
-    color: var(--interactive-hover);
+    color: var(--interactive-icon-hover);
 }
 .BA__iconButton:active,
 .BA__iconButton--active {
-    color: var(--interactive-active);
+    color: var(--interactive-icon-active);
 }
 .BA__iconButton:disabled {
     color: var(--interactive-muted);
@@ -18883,7 +18883,7 @@ ${buildStyles(styles)}}
     display: block;
     fill: currentColor;
 }``IconButton`;
-  function CheckIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function CheckIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -18895,7 +18895,7 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M18.7 7.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4l3.3 3.29 7.3-7.3a1 1 0 0 1 1.4 0Z",
           clipRule: "evenodd"
@@ -18903,7 +18903,7 @@ ${buildStyles(styles)}}
       )
     );
   }
-  function CircleQuestionIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL, secondaryColor = "transparent" }) {
+  function CircleQuestionIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT, secondaryColor = "transparent" }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -18918,13 +18918,13 @@ ${buildStyles(styles)}}
           cx: "12",
           cy: "12",
           r: "10",
-          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor.css
+          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor?.css
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm-.28-16c-.98 0-1.81.47-2.27 1.14A1 1 0 1 1 7.8 7.01 4.73 4.73 0 0 1 11.72 5c2.5 0 4.65 1.88 4.65 4.38 0 2.1-1.54 3.77-3.52 4.24l.14 1a1 1 0 0 1-1.98.27l-.28-2a1 1 0 0 1 .99-1.14c1.54 0 2.65-1.14 2.65-2.38 0-1.23-1.1-2.37-2.65-2.37ZM13 17.88a1.13 1.13 0 1 1-2.25 0 1.13 1.13 0 0 1 2.25 0Z",
           clipRule: "evenodd"
@@ -18932,7 +18932,7 @@ ${buildStyles(styles)}}
       )
     );
   }
-  function CircleDollarSignIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function CircleDollarSignIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -18944,7 +18944,7 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m.75-16a.75.75 0 0 0-1.5 0v.317c-1.63.292-3 1.517-3 3.183c0 1.917 1.813 3.25 3.75 3.25c1.377 0 2.25.906 2.25 1.75s-.873 1.75-2.25 1.75c-1.376 0-2.25-.906-2.25-1.75a.75.75 0 0 0-1.5 0c0 1.666 1.37 2.891 3 3.183V18a.75.75 0 0 0 1.5 0v-.317c1.63-.292 3-1.517 3-3.183c0-1.917-1.813-3.25-3.75-3.25c-1.376 0-2.25-.906-2.25-1.75s.874-1.75 2.25-1.75c1.377 0 2.25.906 2.25 1.75a.75.75 0 0 0 1.5 0c0-1.666-1.37-2.891-3-3.183z",
           clipRule: "evenodd"
@@ -18975,7 +18975,7 @@ ${buildStyles(styles)}}
       )
     );
   }
-  function LinkIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function LinkIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -18987,20 +18987,20 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M16.32 14.72a1 1 0 0 1 0-1.41l2.51-2.51a3.98 3.98 0 0 0-5.62-5.63l-2.52 2.51a1 1 0 0 1-1.41-1.41l2.52-2.52a5.98 5.98 0 0 1 8.45 8.46l-2.52 2.51a1 1 0 0 1-1.41 0ZM7.68 9.29a1 1 0 0 1 0 1.41l-2.52 2.51a3.98 3.98 0 1 0 5.63 5.63l2.51-2.52a1 1 0 0 1 1.42 1.42l-2.52 2.51a5.98 5.98 0 0 1-8.45-8.45l2.51-2.51a1 1 0 0 1 1.42 0Z"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M14.7 10.7a1 1 0 0 0-1.4-1.4l-4 4a1 1 0 1 0 1.4 1.4l4-4Z"
         }
       )
     );
   }
-  function ArrowSmallRightIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ArrowSmallRightIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -19012,13 +19012,13 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M20.7 12.7a1 1 0 0 0 0-1.4l-5-5a1 1 0 1 0-1.4 1.4l3.29 3.3H4a1 1 0 1 0 0 2h13.59l-3.3 3.3a1 1 0 0 0 1.42 1.4l5-5Z"
         }
       )
     );
   }
-  function CircleWarningIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL, secondaryColor = "transparent", ...props }) {
+  function CircleWarningIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT, secondaryColor = "transparent", ...props }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -19034,13 +19034,13 @@ ${buildStyles(styles)}}
           cx: "12",
           cy: "12",
           r: "10",
-          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor.css
+          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor?.css
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M12 23a11 11 0 1 0 0-22 11 11 0 0 0 0 22Zm1.44-15.94L13.06 14a1.06 1.06 0 0 1-2.12 0l-.38-6.94a1 1 0 0 1 1-1.06h.88a1 1 0 0 1 1 1.06Zm-.19 10.69a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z",
           clipRule: "evenodd"
@@ -19069,7 +19069,7 @@ ${buildStyles(styles)}}
       callback?.(event);
     };
   }
-  function JSONIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function JSONIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -19081,7 +19081,7 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M284.096 382.755c126.41-96.067 39.609-294.896-69.513-277.86C9.315 136.94 60.658 422.223 129.047 475.258C22.042 422.39-22.426 291.217 10.82 179.74C37.161 91.427 119.287 3.962 243.708.61c196.367-17.91 254.873 364.165 40.388 382.145M219.247 130.2c-112.3 5.728-136.522 119.158-127.29 201.114c13.467 119.577 89.242 197.216 207.553 177.684c181.777-30.01 331.904-318.726 76.441-480.015c94.11 109.624 94.983 331.713-59.624 371.13c-142.981 43.102-208.076-187.725-97.08-269.913"
         }
       )
@@ -19155,7 +19155,7 @@ ${buildStyles(styles)}}
       }
     );
   }
-  function MoreIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function MoreIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -19167,7 +19167,7 @@ ${buildStyles(styles)}}
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z",
           clipRule: "evenodd"
@@ -19289,7 +19289,7 @@ ${buildStyles(styles)}}
       )
     );
   }
-  function RedoIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function RedoIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -19302,7 +19302,7 @@ ${buildStyles(styles)}}
         "g",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2"
@@ -22447,21 +22447,22 @@ img.BAP__viewport {
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background-color: var(--input-background);
+    background-color: var(--input-background-default);
     border-style: solid;
     border-color: var(--input-border-default);
     border-top-width: 1px;
     border-bottom-width: 1px;
-    color: var(--interactive-normal);
+    color: var(--text-subtle);
     flex: 1;
     transition: background-color .1s, border-color .1s, color .1s;
 }
 .BA__buttonGroupItem:hover {
-    background-color: var(--background-modifier-hover);
-    border-color: var(--input-border-default-hover);
+    background-color: var(--background-mod-subtle);
+    border-color: var(--input-border-hover);
+    color: var(--text-strong);
 }
 .BA__buttonGroupItem.BA__buttonGroupItem--disabled {
-    color: var(--interactive-muted);
+    color: var(--text-muted);
     cursor: not-allowed;
 }    
 
@@ -22503,7 +22504,7 @@ img.BAP__viewport {
 .BA__buttonGroup.BA__buttonGroup--single .BA__buttonGroupItem.BA__buttonGroupItem--selected {
     cursor: default;
 }``ButtonGroup`;
-  function DoorEnterIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function DoorEnterIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -22515,14 +22516,14 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M9 12a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Z"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M2.75 3.02A3 3 0 0 1 5 2h10a3 3 0 0 1 3 3v7.5a.5.5 0 0 1-.5.5H16a3 3 0 0 0-3 3v3.5a2.5 2.5 0 0 1-3.68 2.2l-5.8-3.09A3 3 0 0 1 2 16V5a3 3 0 0 1 .76-1.98Zm1.3 1.95A.04.04 0 0 0 4 5v11c0 .36.2.68.49.86l5.77 3.08a.5.5 0 0 0 .74-.44V8.02a.5.5 0 0 0-.32-.46l-6.63-2.6Z",
           clipRule: "evenodd"
@@ -22531,13 +22532,13 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M15 18.5V22a1 1 0 1 0 2 0v-3.59l4.3 4.3a1 1 0 0 0 1.4-1.42L18.42 17H22a1 1 0 1 0 0-2h-6a1 1 0 0 0-1 1v2.5Z"
         }
       )
     );
   }
-  function DoorExitIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function DoorExitIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -22549,14 +22550,14 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M9 12a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Z"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M2.75 3.02A3 3 0 0 1 5 2h10a3 3 0 0 1 3 3v7.64c0 .44-.55.7-.95.55a3 3 0 0 0-3.17 4.93l.02.03a.5.5 0 0 1-.35.85h-.05a.5.5 0 0 0-.5.5 2.5 2.5 0 0 1-3.68 2.2l-5.8-3.09A3 3 0 0 1 2 16V5a3 3 0 0 1 .76-1.98Zm1.3 1.95A.04.04 0 0 0 4 5v11c0 .36.2.68.49.86l5.77 3.08a.5.5 0 0 0 .74-.44V8.02a.5.5 0 0 0-.32-.46l-6.63-2.6Z",
           clipRule: "evenodd"
@@ -22565,7 +22566,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M15.3 16.7a1 1 0 0 1 1.4-1.4l4.3 4.29V16a1 1 0 1 1 2 0v6a1 1 0 0 1-1 1h-6a1 1 0 1 1 0-2h3.59l-4.3-4.3Z"
         }
       )
@@ -22672,7 +22673,7 @@ img.BAP__viewport {
 .BA__animationToggleGroupItem:last-of-type {
     border-bottom-right-radius: 8px !important;
 }``AnimationToggleControl`;
-  function SettingsIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function SettingsIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -22684,7 +22685,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M10.56 1.1c-.46.05-.7.53-.64.98.18 1.16-.19 2.2-.98 2.53-.8.33-1.79-.15-2.49-1.1-.27-.36-.78-.52-1.14-.24-.77.59-1.45 1.27-2.04 2.04-.28.36-.12.87.24 1.14.96.7 1.43 1.7 1.1 2.49-.33.8-1.37 1.16-2.53.98-.45-.07-.93.18-.99.64a11.1 11.1 0 0 0 0 2.88c.06.46.54.7.99.64 1.16-.18 2.2.19 2.53.98.33.8-.14 1.79-1.1 2.49-.36.27-.52.78-.24 1.14.59.77 1.27 1.45 2.04 2.04.36.28.87.12 1.14-.24.7-.95 1.7-1.43 2.49-1.1.8.33 1.16 1.37.98 2.53-.07.45.18.93.64.99a11.1 11.1 0 0 0 2.88 0c.46-.06.7-.54.64-.99-.18-1.16.19-2.2.98-2.53.8-.33 1.79.14 2.49 1.1.27.36.78.52 1.14.24.77-.59 1.45-1.27 2.04-2.04.28-.36.12-.87-.24-1.14-.96-.7-1.43-1.7-1.1-2.49.33-.8 1.37-1.16 2.53-.98.45.07.93-.18.99-.64a11.1 11.1 0 0 0 0-2.88c-.06-.46-.54-.7-.99-.64-1.16.18-2.2-.19-2.53-.98-.33-.8.14-1.79 1.1-2.49.36-.27.52-.78.24-1.14a11.07 11.07 0 0 0-2.04-2.04c-.36-.28-.87-.12-1.14.24-.7.96-1.7 1.43-2.49 1.1-.8-.33-1.16-1.37-.98-2.53.07-.45-.18-.93-.64-.99a11.1 11.1 0 0 0-2.88 0ZM16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z",
           clipRule: "evenodd"
@@ -22692,7 +22693,7 @@ img.BAP__viewport {
       )
     );
   }
-  function CollapseListIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function CollapseListIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -22704,7 +22705,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M7.3 2.3a1 1 0 0 1 1.4 0L12 5.58l3.3-3.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.42ZM2 12a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1ZM8.7 21.7a1 1 0 0 1-1.4-1.4l4-4a1 1 0 0 1 1.4 0l4 4a1 1 0 0 1-1.4 1.4L12 18.42l-3.3 3.3Z",
           clipRule: "evenodd"
@@ -23394,7 +23395,7 @@ img.BAP__viewport {
     { value: false, name: "Away", desc: "Move away from the anchor" },
     { value: true, name: "Towards", desc: "Move towards the anchor" }
   ];
-  function HorizontalIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function HorizontalIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23407,7 +23408,7 @@ img.BAP__viewport {
         "path",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2",
@@ -23416,7 +23417,7 @@ img.BAP__viewport {
       )
     );
   }
-  function VerticalIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function VerticalIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23429,7 +23430,7 @@ img.BAP__viewport {
         "path",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2",
@@ -23438,7 +23439,7 @@ img.BAP__viewport {
       )
     );
   }
-  function DepthIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function DepthIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23450,14 +23451,14 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           strokeWidth: "2",
           d: "M12,22C12,22,12,22,12,22L12,22c-0.5,0-0.9-0.1-1.2-0.2c-0.4-0.2-0.7-0.4-1-0.7l-6.6-6.9c-0.6-0.7-0.2-1.6,0.9-2.2\n	c1-0.5,2.4-0.5,3,0l2.5,2l1.2-10.7L9.3,3.7C8.7,3.9,8,3.9,7.6,3.7C7.2,3.5,7.3,3.3,7.8,3.1l3.5-1c0.1,0,0.2-0.1,0.3-0.1\n	c0.1,0,0.2,0,0.4,0l0,0c0,0,0,0,0,0l0,0c0.1,0,0.3,0,0.4,0c0.1,0,0.2,0,0.3,0.1l3.5,1c0.5,0.2,0.6,0.4,0.2,0.6\n	c-0.4,0.2-1.2,0.2-1.7,0l-1.6-0.5l1.2,10.7l2.5-2c0.7-0.5,2-0.5,3,0c1.1,0.6,1.6,1.5,0.9,2.2l-6.6,6.9c-0.3,0.3-0.6,0.5-1,0.7\n	C12.9,21.9,12.5,22,12,22L12,22C12,22,12,22,12,22z"
         }
       )
     );
   }
-  function RepeatIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function RepeatIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23470,7 +23471,7 @@ img.BAP__viewport {
         "g",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2"
@@ -23481,7 +23482,7 @@ img.BAP__viewport {
       )
     );
   }
-  function ArrowLeftToLineIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ArrowLeftToLineIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23494,7 +23495,7 @@ img.BAP__viewport {
         "path",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2",
@@ -23503,7 +23504,7 @@ img.BAP__viewport {
       )
     );
   }
-  function ArrowRightFromLineIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ArrowRightFromLineIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23516,7 +23517,7 @@ img.BAP__viewport {
         "path",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2",
@@ -23839,7 +23840,7 @@ img.BAP__viewport {
       update
     };
   }
-  function CircleInfoIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL, secondaryColor = "transparent" }) {
+  function CircleInfoIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT, secondaryColor = "transparent" }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -23854,13 +23855,13 @@ img.BAP__viewport {
           cx: "12",
           cy: "12",
           r: "10",
-          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor.css
+          fill: typeof secondaryColor === "string" ? secondaryColor : secondaryColor?.css
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M23 12a11 11 0 1 1-22 0 11 11 0 0 1 22 0Zm-9.5-4.75a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Zm-.77 3.96a1 1 0 1 0-1.96-.42l-1.04 4.86a2.77 2.77 0 0 0 4.31 2.83l.24-.17a1 1 0 1 0-1.16-1.62l-.24.17a.77.77 0 0 1-1.2-.79l1.05-4.86Z",
           clipRule: "evenodd"
@@ -24354,7 +24355,7 @@ img.BAP__viewport {
 :is(.BA__fade-enter-active, .BA__fade-exit-active) > * {
     transition: scale .4s;
 }``AnimationCard`;
-  function EyeIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function EyeIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -24366,14 +24367,14 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M15.56 11.77c.2-.1.44.02.44.23a4 4 0 1 1-4-4c.21 0 .33.25.23.44a2.5 2.5 0 0 0 3.32 3.32Z"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M22.89 11.7c.07.2.07.4 0 .6C22.27 13.9 19.1 21 12 21c-7.11 0-10.27-7.11-10.89-8.7a.83.83 0 0 1 0-.6C1.73 10.1 4.9 3 12 3c7.11 0 10.27 7.11 10.89 8.7Zm-4.5-3.62A15.11 15.11 0 0 1 20.85 12c-.38.88-1.18 2.47-2.46 3.92C16.87 17.62 14.8 19 12 19c-2.8 0-4.87-1.38-6.39-3.08A15.11 15.11 0 0 1 3.15 12c.38-.88 1.18-2.47 2.46-3.92C7.13 6.38 9.2 5 12 5c2.8 0 4.87 1.38 6.39 3.08Z",
           clipRule: "evenodd"
@@ -24381,7 +24382,7 @@ img.BAP__viewport {
       )
     );
   }
-  function RefreshIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function RefreshIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -24393,7 +24394,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           fillRule: "evenodd",
           d: "M21 2a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-6a1 1 0 1 1 0-2h3.93A8 8 0 0 0 6.97 5.78a1 1 0 0 1-1.26-1.56A9.98 9.98 0 0 1 20 6V3a1 1 0 0 1 1-1ZM3 22a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H5.07a8 8 0 0 0 11.96 2.22 1 1 0 1 1 1.26 1.56A9.99 9.99 0 0 1 4 18v3a1 1 0 0 1-1 1Z",
           clipRule: "evenodd"
@@ -24539,7 +24540,7 @@ img.BAP__viewport {
     gap: 8px;
     margin-top: 4px;
 }``AnimationPreview`;
-  function XIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function XIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -24551,13 +24552,13 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M17.3 18.7a1 1 0 0 0 1.4-1.4L13.42 12l5.3-5.3a1 1 0 0 0-1.42-1.4L12 10.58l-5.3-5.3a1 1 0 0 0-1.4 1.42L10.58 12l-5.3 5.3a1 1 0 1 0 1.42 1.4L12 13.42l5.3 5.3Z"
         }
       )
     );
   }
-  function ChevronSmallLeftIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ChevronSmallLeftIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -24569,13 +24570,13 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M14.7 5.3a1 1 0 0 1 0 1.4L9.42 12l5.3 5.3a1 1 0 0 1-1.42 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.42 0Z"
         }
       )
     );
   }
-  function ChevronSmallRightIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ChevronSmallRightIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -24587,7 +24588,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M9.3 5.3a1 1 0 0 0 0 1.4l5.29 5.3-5.3 5.3a1 1 0 1 0 1.42 1.4l6-6a1 1 0 0 0 0-1.4l-6-6a1 1 0 0 0-1.42 0Z"
         }
       )
@@ -25552,7 +25553,7 @@ img.BAP__viewport {
     display: flex;
     align-items: center;
     gap: 2px;
-    color: var(--header-secondary);
+    color: var(--text-subtle);
     margin-top: 8px;
     cursor: pointer;
 }
@@ -25633,7 +25634,7 @@ img.BAP__viewport {
   function PackPicture(props) {
     return /* @__PURE__ */ BdApi.React.createElement("svg", { ...props, width: "160", height: "192", viewBox: "0 0 160 192", fill: "none", xmlns: "http://www.w3.org/2000/svg" }, /* @__PURE__ */ BdApi.React.createElement("g", { "clip-path": "url(#clip0_364_497)" }, /* @__PURE__ */ BdApi.React.createElement("path", { d: "M0.12699 43.8989C-0.863275 37.1255 4.04575 30.863 11.0915 29.911L113.152 16.1221C120.197 15.1702 126.712 19.8893 127.702 26.6627L147.873 164.635C148.863 171.409 143.954 177.671 136.908 178.623L39.1006 191.837C29.7063 193.107 21.0203 186.814 19.7001 177.784L0.12699 43.8989Z", fill: "url(#paint0_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M10.1376 30.5728C9.06483 22.8787 14.3827 15.7647 22.0152 14.6834L124.678 0.138664C132.31 -0.942678 139.367 4.41806 140.44 12.1122L159.862 151.427C160.935 159.121 155.617 166.235 147.985 167.317L45.3224 181.861C37.6899 182.943 30.6329 177.582 29.5602 169.888L10.1376 30.5728Z", fill: "url(#paint1_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M19.0979 33.7417C18.3346 28.2753 22.1183 23.221 27.5489 22.4527L121.946 9.09852C127.376 8.33025 132.397 12.1389 133.161 17.6054L151.402 148.258C152.165 153.725 148.382 158.779 142.951 159.547L48.5544 172.901C43.1238 173.67 38.1027 169.861 37.3394 164.395L19.0979 33.7417Z", fill: "white" }), /* @__PURE__ */ BdApi.React.createElement("path", { "fill-rule": "evenodd", "clip-rule": "evenodd", d: "M91.6298 136.767C104.339 149.771 112.123 129.724 110.522 118.561C108.63 105.362 94.2015 99.8837 86.5377 100.972C74.237 102.719 63.9659 114.548 65.9411 128.458C68.1366 143.918 82.7808 150.575 93.3682 149.072C90.9234 149.067 82.6965 148.49 79.9777 130.116C78.1393 117.689 81.5632 112.133 88.286 113.408C88.4372 113.441 95.755 115.191 97.0231 124.121C98.2858 133.013 91.6298 136.767 91.6298 136.767Z", fill: "url(#paint2_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { "fill-rule": "evenodd", "clip-rule": "evenodd", d: "M88.2981 113.397C80.9178 111.971 73.1222 118.994 74.7716 130.609C77.4648 149.574 91.7633 149.3 93.4668 149.058C105.768 147.311 116.039 135.481 114.063 121.572C111.868 106.111 97.2237 99.4545 86.6364 100.958C89.5111 100.135 102.892 101.887 105.39 119.481C107.02 130.954 98.2947 138.565 91.6643 136.784C91.5131 136.751 84.1953 135.001 82.9272 126.071C81.6645 117.179 88.2981 113.397 88.2981 113.397Z", fill: "url(#paint3_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M47.8507 42.0276C47.8349 41.9761 47.8165 41.9254 47.7955 41.8757C47.775 41.8263 47.752 41.778 47.7266 41.731C47.7016 41.6837 47.6741 41.6378 47.644 41.5935C47.6135 41.5495 47.5812 41.5068 47.5471 41.4665C47.5126 41.4252 47.4757 41.3858 47.4368 41.3487C47.399 41.312 47.3583 41.2768 47.3168 41.2438C47.2747 41.2126 47.231 41.1838 47.1858 41.1573C47.1407 41.129 47.0938 41.1021 47.0463 41.0783C46.9982 41.0547 46.9489 41.0336 46.8986 41.0152C46.5918 40.9079 46.262 40.8844 45.943 40.9471C45.4691 41.1322 45.0954 41.3724 44.8774 41.8574C44.8551 41.9067 44.8356 41.9571 44.819 42.0086C44.8031 42.0592 44.7885 42.1117 44.7771 42.1649C44.7655 42.2175 44.7565 42.2707 44.7504 42.3242C44.7443 42.3776 44.7413 42.4306 44.7396 42.4855C44.738 42.5404 44.7409 42.5904 44.7459 42.6475C44.7503 42.7011 44.7579 42.7544 44.7685 42.8072C44.7762 42.8608 44.7904 42.9092 44.8057 42.9648C44.8209 43.0204 44.8388 43.0652 44.8598 43.1169C44.9176 43.2604 44.9965 43.3944 45.094 43.5145C45.1259 43.5541 45.1607 43.5922 45.1964 43.6292C45.2322 43.6662 45.2707 43.7006 45.31 43.7329C45.3494 43.7662 45.3906 43.7971 45.4335 43.8257C45.4754 43.8544 45.5201 43.8806 45.5647 43.9058C45.6093 43.931 45.6564 43.9517 45.7045 43.9722C46.0531 44.1181 46.3754 44.1154 46.7427 44.0601C47.2113 43.8663 47.5776 43.6261 47.7889 43.1389C47.8103 43.0892 47.829 43.0385 47.8451 42.9869C47.8621 42.9358 47.8758 42.8837 47.886 42.8308C47.9183 42.6723 47.9271 42.51 47.9121 42.3489C47.9045 42.2954 47.8975 42.2459 47.8894 42.1892C47.8814 42.1326 47.8664 42.079 47.8507 42.0276Z", fill: "url(#paint4_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M60.4791 52.2765C60.5 52.3274 60.5239 52.377 60.5507 52.425C60.576 52.4723 60.6039 52.5182 60.6343 52.5624C60.6638 52.6066 60.6958 52.649 60.7301 52.6896C60.7647 52.7305 60.8015 52.7694 60.8403 52.8064C60.8783 52.8435 60.9184 52.8785 60.9603 52.9112C61.0025 52.9445 61.0466 52.9754 61.0922 53.0039C61.1372 53.0322 61.184 53.0581 61.2315 53.0818C61.2792 53.1057 61.3281 53.1268 61.3782 53.1451C61.4281 53.164 61.4792 53.18 61.531 53.1927C61.8483 53.2683 62.1804 53.2539 62.4899 53.151C62.9429 52.929 63.2885 52.6466 63.4547 52.1521C63.4714 52.1012 63.4854 52.0493 63.4967 51.9969C63.5081 51.9438 63.5171 51.8889 63.5235 51.8376C63.5298 51.784 63.5334 51.7302 63.5342 51.6763C63.535 51.6226 63.5329 51.5714 63.5281 51.5153C63.5233 51.4592 63.5135 51.4123 63.5054 51.3556C63.4974 51.299 63.4826 51.2538 63.4674 51.1992C63.4523 51.1446 63.4343 51.0988 63.4133 51.0471C63.3936 50.9971 63.3709 50.9484 63.3452 50.9012C63.3207 50.8543 63.2932 50.8088 63.2637 50.7636C63.2341 50.7184 63.2019 50.6767 63.1678 50.6364C63.1337 50.596 63.0975 50.556 63.0596 50.5183C63.0217 50.4806 62.9831 50.4461 62.9394 50.4124C62.8985 50.3787 62.8555 50.3476 62.8106 50.3193C62.7663 50.2899 62.7204 50.2631 62.6731 50.239C62.6254 50.2142 62.5772 50.1927 62.527 50.1725C62.4776 50.153 62.4272 50.1363 62.3759 50.1225C62.0311 50.0254 61.7375 50.0671 61.3936 50.1402C60.942 50.3641 60.595 50.6436 60.429 51.1401C60.4127 51.1929 60.3983 51.2464 60.3857 51.3008C60.3742 51.3548 60.3654 51.4093 60.3595 51.4642C60.3529 51.5191 60.3495 51.5743 60.3494 51.6296C60.3489 51.6854 60.3513 51.7397 60.3562 51.7958C60.3608 51.8508 60.3686 51.9055 60.3794 51.9596C60.3872 52.0142 60.4042 52.0675 60.4202 52.1209C60.437 52.1738 60.4566 52.2257 60.4791 52.2765Z", fill: "url(#paint5_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M58.6152 47.0068C58.6285 46.9597 58.6387 46.9131 58.6477 46.8656C58.6567 46.818 58.6614 46.7701 58.665 46.7212C58.6689 46.6732 58.6701 46.6249 58.6686 46.5767C58.6672 46.5284 58.6631 46.4802 58.6565 46.4323C58.6523 46.3843 58.6455 46.3365 58.6362 46.2891C58.6241 46.2415 58.6112 46.1949 58.5954 46.1499C58.5797 46.1042 58.5614 46.0594 58.5406 46.0158C58.5207 45.9718 58.4981 45.929 58.473 45.8877C58.374 45.7258 58.2418 45.5866 58.0851 45.4795C57.9284 45.3724 57.7507 45.2998 57.5639 45.2665C56.9696 45.1523 53.7461 45.6766 52.9821 45.8398C52.5752 46.0532 52.2879 46.3021 52.1465 46.7563C52.1318 46.8014 52.1205 46.8472 52.1103 46.8938C52.1001 46.9405 52.0933 46.9887 52.0884 47.0357C52.0835 47.0826 52.0808 47.1303 52.0804 47.1787C52.0799 47.2271 52.0823 47.274 52.087 47.3217C52.0917 47.3694 52.1003 47.4155 52.1071 47.4629C52.1161 47.5098 52.1276 47.5562 52.1416 47.602C52.1545 47.648 52.1704 47.6931 52.1891 47.7371C52.2069 47.7812 52.227 47.8243 52.2495 47.8662C52.333 48.0206 52.4466 48.1567 52.5837 48.2663C52.7208 48.3759 52.8785 48.4568 53.0475 48.5042C53.2375 48.5572 53.4351 48.5771 53.6318 48.5631C54.2106 48.5313 54.797 48.3975 55.3708 48.316C56.1712 48.2022 56.9789 48.1169 57.7717 47.9643C58.1838 47.7355 58.4792 47.477 58.6152 47.0068Z", fill: "url(#paint6_linear_364_497)" }), /* @__PURE__ */ BdApi.React.createElement("path", { d: "M104.452 55.4932C105.883 53.1573 106.79 49.8482 106.973 47.1232C107.196 43.8283 106.508 40.383 104.27 37.8487C102.357 35.6822 99.4849 34.4981 96.6252 34.3432C93.987 34.201 91.124 34.7918 88.4959 35.1579L58.7608 39.3191L53.0144 40.1357C52.1903 40.2528 51.3438 40.3237 50.5284 40.4805C50.2035 40.5312 49.8999 40.6739 49.6536 40.8918C49.5264 41.0127 49.4245 41.1578 49.3539 41.3185C49.2832 41.4792 49.2453 41.6523 49.2422 41.8278C49.2417 41.8762 49.2423 41.9245 49.2459 41.9723C49.2501 42.02 49.2568 42.0675 49.2661 42.1145C49.2744 42.1618 49.2853 42.2087 49.2987 42.2549C49.3114 42.3012 49.3266 42.3467 49.3443 42.3913C49.3808 42.4807 49.4254 42.5665 49.4775 42.6478C49.5041 42.6871 49.5317 42.7262 49.5623 42.7639C49.5929 42.8016 49.6252 42.837 49.6584 42.8711C49.8982 43.1132 50.2142 43.265 50.553 43.3011C51.1149 43.3358 53.1592 42.9517 53.8165 42.8583L65.9119 41.1396C66.4384 41.0648 66.9972 40.9296 67.5311 40.9442C67.9321 40.9555 68.2853 41.0745 68.5554 41.3851C68.8108 41.6772 68.9431 42.057 68.9246 42.4446C68.9072 42.676 68.8294 42.8989 68.6991 43.091C68.5687 43.2831 68.3902 43.4376 68.1815 43.5391C67.6328 43.8273 66.8942 43.8513 66.2851 43.9358L62.5608 44.4492C61.9427 44.5371 61.2569 44.5704 60.6629 44.7463C60.4156 44.814 60.1863 44.9356 59.9915 45.1023C59.8598 45.2137 59.7531 45.3517 59.6785 45.5072C59.6039 45.6627 59.563 45.8322 59.5585 46.0046C59.5489 46.3886 59.6756 46.8288 59.9573 47.0957C60.178 47.3167 60.4678 47.4554 60.7783 47.4887C61.4675 47.561 62.3016 47.3437 62.989 47.2408L67.594 46.5864C68.2811 46.4888 69.0334 46.302 69.7235 46.2922C70.1326 46.2866 70.5103 46.378 70.8075 46.6721C70.9503 46.809 71.0626 46.9743 71.1374 47.1575C71.2121 47.3406 71.2475 47.5374 71.2413 47.735C71.2365 47.9687 71.1708 48.197 71.0508 48.3975C70.9307 48.598 70.7603 48.7636 70.5566 48.8781C69.399 49.5334 65.8126 49.2201 64.9229 50.1253C64.7998 50.2588 64.7051 50.4159 64.6445 50.5871C64.584 50.7583 64.5587 50.94 64.5704 51.1213C64.5713 51.3152 64.6127 51.5069 64.6922 51.6839C64.7716 51.8609 64.8873 52.0192 65.0317 52.1487C65.3096 52.3878 65.6694 52.5096 66.0354 52.4885C66.6586 52.4735 67.3324 52.3189 67.9525 52.2308L89.9636 49.103C90.8104 48.9827 91.6754 48.8199 92.5301 48.7699C93.0358 48.8746 93.4749 49.0434 93.7811 49.4897C94.062 49.8985 94.096 50.3519 94.0766 50.8297C94.012 51.2682 93.8591 51.689 93.6272 52.0666C93.3952 52.4442 93.0891 52.7709 92.7272 53.0268C92.4863 53.2013 92.22 53.3377 91.9376 53.4311C91.1221 53.609 90.2717 53.6973 89.4414 53.8153C87.7653 54.0535 86.0811 54.2644 84.4099 54.5303C84.0268 58.1875 83.536 61.8411 83.1965 65.5016L88.2114 64.789C89.0449 64.6706 89.9378 64.468 90.7761 64.4582C91.2511 64.5389 91.6963 64.7205 91.9944 65.1175C92.3213 65.5545 92.3882 66.143 92.2967 66.6678C92.2122 67.0968 92.0433 67.5046 91.7997 67.8677C91.5561 68.2307 91.2427 68.5416 90.8777 68.7823C90.5982 68.9642 90.2879 69.0938 89.962 69.1646C89.4074 69.2928 88.8223 69.3392 88.2583 69.4162L85.6488 69.787C83.1548 70.1414 80.6574 70.5467 78.1573 70.8515C78.1439 70.3132 78.2548 69.7331 78.316 69.1947L78.6867 65.9312L79.8911 55.1766L66.03 57.1399C65.42 62.3513 64.9158 67.5896 64.269 72.8083C63.9473 76.2392 63.5118 79.6685 63.1293 83.0934L62.8127 85.9466C62.7831 86.2336 62.7083 86.5206 62.6908 86.8047C62.6761 86.9189 62.6926 87.035 62.7386 87.1406C62.8264 87.1711 62.922 87.1705 63.0095 87.1389C64.8136 86.9582 66.6278 86.6342 68.4234 86.379L86.4549 83.8167C89.2024 83.4263 91.9513 83.0683 94.6113 82.2468C97.119 81.47 99.5452 80.3202 101.512 78.5546C105.213 75.232 106.367 70.6266 106.612 65.8581C106.784 62.5029 106.357 58.8904 104.02 56.2998L104.016 56.2771C104.174 56.0193 104.316 55.7585 104.452 55.4932Z", fill: "url(#paint7_linear_364_497)" })), /* @__PURE__ */ BdApi.React.createElement("defs", null, /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint0_linear_364_497", x1: "0.447603", y1: "16.413", x2: "148.448", y2: "191.541", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#508AB7" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#1F2569" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint1_linear_364_497", x1: "11.1858", y1: "19.1536", x2: "158.875", y2: "162.67", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint2_linear_364_497", x1: "73.3725", y1: "107.902", x2: "107.5", y2: "144.392", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#5865F2" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#41D1FF" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint3_linear_364_497", x1: "109.369", y1: "139.553", x2: "70.6513", y2: "110.457", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#5865F2" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#41D1FF" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint4_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint5_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint6_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("linearGradient", { id: "paint7_linear_364_497", x1: "44.7007", y1: "44.5189", x2: "111.604", y2: "78.0676", gradientUnits: "userSpaceOnUse" }, /* @__PURE__ */ BdApi.React.createElement("stop", { "stop-color": "#41D1FF" }), /* @__PURE__ */ BdApi.React.createElement("stop", { offset: "1", "stop-color": "#5865F2" })), /* @__PURE__ */ BdApi.React.createElement("clipPath", { id: "clip0_364_497" }, /* @__PURE__ */ BdApi.React.createElement("rect", { width: "160", height: "192", fill: "white" }))));
   }
-  function ShopIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ShopIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -25645,20 +25646,20 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M2.63 4.19A3 3 0 0 1 5.53 2H7a1 1 0 0 1 1 1v3.98a3.07 3.07 0 0 1-.3 1.35A2.97 2.97 0 0 1 4.98 10c-2 0-3.44-1.9-2.9-3.83l.55-1.98ZM10 2a1 1 0 0 0-1 1v4a3 3 0 0 0 3 3 3 3 0 0 0 3-2.97V3a1 1 0 0 0-1-1h-4ZM17 2a1 1 0 0 0-1 1v3.98a3.65 3.65 0 0 0 0 .05A2.95 2.95 0 0 0 19.02 10c2 0 3.44-1.9 2.9-3.83l-.55-1.98A3 3 0 0 0 18.47 2H17Z"
         }
       ),
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M21 11.42V19a3 3 0 0 1-3 3h-2.75a.25.25 0 0 1-.25-.25V16a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v5.75c0 .14-.11.25-.25.25H6a3 3 0 0 1-3-3v-7.58c0-.18.2-.3.37-.24a4.46 4.46 0 0 0 4.94-1.1c.1-.12.3-.12.4 0a4.49 4.49 0 0 0 6.58 0c.1-.12.3-.12.4 0a4.45 4.45 0 0 0 4.94 1.1c.17-.07.37.06.37.24Z"
         }
       )
     );
   }
-  function LibraryIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function LibraryIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -25670,7 +25671,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M5.5 3A1.5 1.5 0 0 1 7 4.5v15A1.5 1.5 0 0 1 5.5 21h-2A1.5 1.5 0 0 1 2 19.5v-15A1.5 1.5 0 0 1 3.5 3zm6 0A1.5 1.5 0 0 1 13 4.5v15a1.5 1.5 0 0 1-1.5 1.5h-2A1.5 1.5 0 0 1 8 19.5v-15A1.5 1.5 0 0 1 9.5 3zm7.281 3.124l3.214 12.519a1.5 1.5 0 0 1-1.08 1.826l-1.876.48a1.5 1.5 0 0 1-1.826-1.08L13.999 7.354a1.5 1.5 0 0 1 1.08-1.826l1.876-.483a1.5 1.5 0 0 1 1.826 1.08"
         }
       )
@@ -25763,7 +25764,7 @@ img.BAP__viewport {
       items: items2
     };
   }
-  function ChevronSmallDownIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ChevronSmallDownIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -25775,13 +25776,13 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M5.3 9.3a1 1 0 0 1 1.4 0l5.3 5.29 5.3-5.3a1 1 0 1 1 1.4 1.42l-6 6a1 1 0 0 1-1.4 0l-6-6a1 1 0 0 1 0-1.42Z"
         }
       )
     );
   }
-  function ChevronSmallUpIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ChevronSmallUpIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -25793,7 +25794,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M5.3 14.7a1 1 0 0 0 1.4 0L12 9.42l5.3 5.3a1 1 0 0 0 1.4-1.42l-6-6a1 1 0 0 0-1.4 0l-6 6a1 1 0 0 0 0 1.42Z"
         }
       )
@@ -25839,7 +25840,7 @@ img.BAP__viewport {
     }, [initiallyActive, result]);
     return result;
   }
-  function ArrowSmallUpDownIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ArrowSmallUpDownIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -25851,7 +25852,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M16.3 21.7a1 1 0 0 0 1.4 0l4-4a1 1 0 0 0-1.4-1.4L18 18.58V3a1 1 0 1 0-2 0v15.59l-2.3-2.3a1 1 0 0 0-1.4 1.42l4 4ZM6.3 2.3a1 1 0 0 1 1.4 0l4 4a1 1 0 0 1-1.4 1.4L8 5.42V21a1 1 0 1 1-2 0V5.41l-2.3 2.3a1 1 0 0 1-1.4-1.42l4-4Z"
         }
       )
@@ -26132,7 +26133,7 @@ img.BAP__viewport {
 .BA__packListViewSpinner {
     padding: 40px;
 }``PackListView`;
-  function FolderIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function FolderIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -26144,7 +26145,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
         }
       )
@@ -26203,9 +26204,7 @@ img.BAP__viewport {
             ...props,
             variant: "icon-only",
             icon: FolderIcon,
-            onClick: () => DiscordNative.fileManager.showItemInFolder(
-              path.resolve(PackManager.addonFolder, PackManager.addonList[0]?.filename ?? "./")
-            )
+            onClick: () => electron.shell.openPath(PackManager.addonFolder)
           }
         )), /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: "Check for updates" }, (props) => /* @__PURE__ */ BdApi.React.createElement(
           Button$1,
@@ -26421,13 +26420,13 @@ img.BAP__viewport {
           ChevronSmallUpIcon,
           {
             size: "md",
-            color: colors.INTERACTIVE_NORMAL
+            color: colors.INTERACTIVE_ICON_DEFAULT
           }
         ) : /* @__PURE__ */ BdApi.React.createElement(
           ChevronSmallDownIcon,
           {
             size: "md",
-            color: colors.INTERACTIVE_NORMAL
+            color: colors.INTERACTIVE_ICON_DEFAULT
           }
         ))
       )
@@ -26631,7 +26630,7 @@ img.BAP__viewport {
 .BA__moduleSettingsSectionTitle {
     margin-top: 32px;
     margin-bottom: 16px;
-    color: var(--header-secondary);
+    color: var(--text-subtle);
     text-align: center;
     position: relative;
 }
@@ -26730,7 +26729,7 @@ img.BAP__viewport {
       }
     ));
   }
-  function HomeIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function HomeIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -26742,13 +26741,13 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "m2.4 8.4 8.38-6.46a2 2 0 0 1 2.44 0l8.39 6.45a2 2 0 0 1-.79 3.54l-.32.07-.82 8.2a2 2 0 0 1-1.99 1.8H16a1 1 0 0 1-1-1v-5a3 3 0 0 0-6 0v5a1 1 0 0 1-1 1H6.31a2 2 0 0 1-1.99-1.8L3.5 12l-.32-.07a2 2 0 0 1-.79-3.54Z"
         }
       )
     );
   }
-  function ExternalLinkIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function ExternalLinkIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -26761,7 +26760,7 @@ img.BAP__viewport {
         "path",
         {
           fill: "none",
-          stroke: typeof color === "string" ? color : color.css,
+          stroke: typeof color === "string" ? color : color?.css,
           strokeLinecap: "round",
           strokeLinejoin: "round",
           strokeWidth: "2",
@@ -26896,7 +26895,7 @@ img.BAP__viewport {
         opacity: 1;
     }
 }``SpotlightAnimation`;
-  function BookIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function BookIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -26908,7 +26907,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M6.5 2A2.5 2.5 0 0 0 4 4.5v15A2.5 2.5 0 0 0 6.5 22h13.25a.75.75 0 0 0 0-1.5H6.5a1 1 0 0 1-1-1h14.25a.75.75 0 0 0 .75-.75V4.5A2.5 2.5 0 0 0 18 2zM8 5h8a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1"
         }
       )
@@ -27192,7 +27191,7 @@ img.BAP__viewport {
     pointer-events: none;
     position: absolute;
 }``CreateUpsellBanner`;
-  function GitHubIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function GitHubIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -27204,7 +27203,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "m12 .5c-6.63 0-12 5.28-12 11.792 0 5.211 3.438 9.63 8.205 11.188.6.111.82-.254.82-.567 0-.28-.01-1.022-.015-2.005-3.338.711-4.042-1.582-4.042-1.582-.546-1.361-1.335-1.725-1.335-1.725-1.087-.731.084-.716.084-.716 1.205.082 1.838 1.215 1.838 1.215 1.07 1.803 2.809 1.282 3.495.981.108-.763.417-1.282.76-1.577-2.665-.295-5.466-1.309-5.466-5.827 0-1.287.465-2.339 1.235-3.164-.135-.298-.54-1.497.105-3.121 0 0 1.005-.316 3.3 1.209.96-.262 1.98-.392 3-.398 1.02.006 2.04.136 3 .398 2.28-1.525 3.285-1.209 3.285-1.209.645 1.624.24 2.823.12 3.121.765.825 1.23 1.877 1.23 3.164 0 4.53-2.805 5.527-5.475 5.817.42.354.81 1.077.81 2.182 0 1.578-.015 2.846-.015 3.229 0 .309.21.678.825.56 4.801-1.548 8.236-5.97 8.236-11.173 0-6.512-5.373-11.792-12-11.792z"
         }
       )
@@ -27381,7 +27380,7 @@ img.BAP__viewport {
     flex-direction: column;
     gap: 32px;
 }``GeneralSettings`;
-  function BetterDiscordIcon({ size, width, height, color = colors.INTERACTIVE_NORMAL }) {
+  function BetterDiscordIcon({ size, width, height, color = colors.INTERACTIVE_ICON_DEFAULT }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -27393,7 +27392,7 @@ img.BAP__viewport {
       /* @__PURE__ */ BdApi.React.createElement(
         "path",
         {
-          fill: typeof color === "string" ? color : color.css,
+          fill: typeof color === "string" ? color : color?.css,
           d: "M14.393.861q.514.258.964.57a6.6 6.6 0 0 1 2.122 2.387c.513.987.792 2.133.828 3.409v9.556c-.035 1.275-.313 2.422-.828 3.408a6.6 6.6 0 0 1-2.122 2.387a8 8 0 0 1-.933.555h.933c4.46.024 8.643-2.205 8.643-7.315V8.352c.024-5.21-4.16-7.49-8.62-7.49zM0 .867v9.197l5.693 5.127V5.44h3.31c3.537 0 3.537 4.444 0 4.444H6.817v4.244h2.188c3.536 0 3.536 4.441 0 4.441H0v4.57h8.904c4.59 0 8.151-1.836 8.278-6.388c0-2.094-.574-3.66-1.584-4.748c1.01-1.087 1.584-2.652 1.584-4.746c-.125-4.553-3.687-6.39-8.278-6.39z"
         }
       )
@@ -28237,7 +28236,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       return this._getPack((p) => p.filename === filename, includeRestricted);
     }
     showInFolder(filename) {
-      DiscordNative.fileManager.showItemInFolder(
+      electron.shell.showItemInFolder(
         path.resolve(this.addonFolder, filename)
       );
     }
@@ -28507,7 +28506,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
         variant: "heading-md/medium",
         color: "header-primary"
       },
-      "Suggested actions"
+      "Suggested Actions"
     ), /* @__PURE__ */ BdApi.React.createElement("div", { className: classNames("BA__errorDetailsActions", className) }, actions));
   }
   const ErrorDetailsActions$1 = require$$0$1.memo(ErrorDetailsActions);
@@ -28521,7 +28520,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     const icon = require$$0$1.useMemo(() => {
       if (error2 instanceof AnimationError || error2 instanceof AddonError)
         return /* @__PURE__ */ BdApi.React.createElement(JSONIcon, { size: "md" });
-      return /* @__PURE__ */ BdApi.React.createElement(IconBrand, { size: "lg", color: colors.INTERACTIVE_NORMAL });
+      return /* @__PURE__ */ BdApi.React.createElement(IconBrand, { size: "lg", color: colors.INTERACTIVE_ICON_DEFAULT });
     }, [error2]);
     const title = require$$0$1.useMemo(() => {
       if (error2 instanceof InternalError) return "Internal error";
@@ -28563,7 +28562,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       Text$1,
       {
         variant: "text-xs/normal",
-        color: "header-secondary"
+        color: "text-subtle"
       },
       hint
     ))), /* @__PURE__ */ BdApi.React.createElement("svg", { className: "BA__errorDetailsExpander", width: "24", height: "24", viewBox: "0 0 24 24" }, /* @__PURE__ */ BdApi.React.createElement("path", { fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", d: "M7 10L12 15 17 10", "aria-hidden": "true" }))), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsBody" }, /* @__PURE__ */ BdApi.React.createElement(Divider$2, null), /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 20 }, /* @__PURE__ */ BdApi.React.createElement(ErrorDetailsActions$1, { error: error2 }), /* @__PURE__ */ BdApi.React.createElement(Stack$1, { gap: 8 }, /* @__PURE__ */ BdApi.React.createElement(
@@ -28618,12 +28617,12 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
 }
 
 .BA__errorDetailsIcon svg {
-    fill: var(--interactive-normal);
+    fill: var(--interactive-icon-default);
 }
 
 .BA__errorDetailsExpander {
     transform: rotate(-90deg);
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
     transition: transform 0.2s ease;
 }
 
@@ -28659,7 +28658,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
 
 .BA__errorDetailsHeadingIcon {
     margin-right: 4px;
-    color: var(--interactive-normal);
+    color: var(--interactive-icon-default);
 }
 
 .BA__errorDetailsStack code {
@@ -31216,7 +31215,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.0.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers and Channels: Updated to work in the latest release of Discord.", "Settings: Fixed the tooltip for the Duration slider not being displayed.", "Fixed an issue where the search sidebar sometimes doesn't open when trying to search messages with Servers or Channels animations enabled."] }] },
     "2.0.11": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Thread Sidebar: Fixed the animations misfiring while navigating the Mod View.", "Updated to work in the latest release of Discord."] }] },
     "2.1.0": { "changes": [{ "type": "added", "title": "What's new", "items": ["Tooltips: Integrated the new Mana Discord Tooltips.", "Settings: Integrated the new Discord User Settings Modal.", "Modals: Added support for the Discord Layer Modals.", "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."] }, { "type": "fixed", "title": "Fixes", "items": ["Popouts: Updated Apps & Commands integration to work in the latest release of Discord.", "Modals: Inactive modals are now correctly dimmed.", "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."] }] },
-    "2.1.1": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.1.1": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.1.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
@@ -31497,4 +31497,4 @@ ${DiscordSelectors.SettingsSidebar.sidebar} {
     overflow: clip;
 }``General`;
   return index;
-})(BdApi.React, require("events"), BdApi.Utils.className, require("fs"), require("path"), BdApi.ReactDOM);
+})(BdApi.React, require("events"), BdApi.Utils.className, require("fs"), require("path"), require("electron"), BdApi.ReactDOM);
