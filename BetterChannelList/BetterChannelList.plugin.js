@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.12
+ * @version 1.2.13
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.12',
+    version: '1.2.13',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Settings: Updated to work in the latest release of Discord.'
+        'Minor style fixes.'
       ]
     }
   ]
@@ -76,17 +76,12 @@ const Button = Webpack.getModule(Filters.byStrings('button', 'hasText', 'express
 const Text = Webpack.getModule(m => Filters.byStrings('WebkitLineClamp', 'data-text-variant')(m?.render), { searchExports: true })
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
 const Switch = Webpack.getModule(Filters.byStrings('checkbox', 'animated.rect'), { searchExports: true })
-const FormSection = Webpack.getModule(m => Filters.byStrings('titleId', 'sectionTitle')(m?.render), { searchExports: true })
-const { FormTitle, FormTitleTags } = Webpack.getMangled(Filters.bySource('defaultMargin', 'errorMessage', 'H4'), {
-  FormTitle: Filters.byStrings('errorMessage'),
-  FormTitleTags: Filters.byKeys('H1', 'H2')
-})
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
   RadioGroup: Filters.byStrings('label', 'description')
 })
 const Stack = Webpack.getModule(m => Filters.byStrings('stack', 'data-justify')(m?.render), { searchExports: true })
 const Divider = Webpack.getModule(Filters.byStrings('.divider', 'marginTop:'), { searchExports: true })
-const FormControl = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
+const Field = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
 
 const { getSocket } = Webpack.getByKeys('getSocket')
 const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
@@ -130,7 +125,6 @@ const Selectors = {
   Base: Webpack.getByKeys('base', 'sidebar'),
   DirectMessages: Webpack.getByKeys('dm', 'channel'),
   GuildHeader: Webpack.getByKeys('bannerImage', 'bannerImg'),
-  Margins: Webpack.getByKeys('marginBottom40', 'marginTop40'),
   SidebarFooter: Webpack.getByKeys('nameTag', 'avatarWrapper'),
   Diversity: Webpack.getByKeys('diversitySelectorOptions')
 }
@@ -328,7 +322,7 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
     }
   )
 
-  const color = unread ? 'header-secondary' : 'text-muted'
+  const color = unread ? 'text-default' : 'text-muted'
 
   let content
   if (isAuthorBlocked) {
@@ -572,7 +566,7 @@ function ForumActivePostsCount ({ channel, unread }) {
     {
       className: `${Selectors.ForumPost.message} BCL--last-message`,
       variant: 'text-sm/medium',
-      color: unread ? 'header-secondary' : 'text-muted'
+      color: unread ? 'text-default' : 'text-muted'
     },
     intl.format(t['z0qMLy'], { count }) // LocaleStore.Messages.ACTIVE_FORUM_POST_COUNT.format({ count })
   ) : null
@@ -1121,7 +1115,7 @@ module.exports = class BetterChannelList {
                   forceUpdate()
                 }
               }),
-              React.createElement(FormControl, {
+              React.createElement(Field, {
                 label: 'Emoji Icons',
                 children: React.createElement(Stack, {
                   direction: 'horizontal',
