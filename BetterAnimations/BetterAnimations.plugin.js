@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.2
+ * @version 2.1.3
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Updated to work in the latest release of Discord."
+        "Minor style fixes."
       ]
     }
   ]
@@ -1419,7 +1419,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.2";
+  const version$1 = "2.1.3";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -16748,7 +16748,7 @@ ${buildStyles(styles)}}
     ), text2 && /* @__PURE__ */ BdApi.React.createElement(
       Text$1,
       {
-        color: "header-primary",
+        color: "text-strong",
         variant: "text-md/normal"
       },
       text2
@@ -19497,7 +19497,7 @@ ${buildStyles(styles)}}
       {
         tag: "h2",
         variant: size === "md" ? "heading-lg/bold" : "heading-md/bold",
-        color: "header-primary",
+        color: "text-strong",
         lineClamp: 2
       },
       pack.name
@@ -23039,7 +23039,7 @@ img.BAP__viewport {
       {
         className: "BA__settingControlHeader",
         variant: "text-md/semibold",
-        color: "header-primary"
+        color: "text-strong"
       },
       /* @__PURE__ */ BdApi.React.createElement("span", null, label),
       doc2 && /* @__PURE__ */ BdApi.React.createElement(Hint, { href: Documentation.getSettingUrl(doc2) }),
@@ -23701,7 +23701,7 @@ img.BAP__viewport {
       {
         tag: "span",
         variant: "heading-md/normal",
-        color: "header-muted"
+        color: "text-muted"
       },
       subtitle
     ), headerAfter), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__animationSettingsHeaderControls" }, onReset && /* @__PURE__ */ BdApi.React.createElement(IconButton, { tooltip: "Reset all", onClick: onReset }, /* @__PURE__ */ BdApi.React.createElement(RedoIcon, { size: "sm", color: "currentColor" })), typeof enabled === "boolean" && /* @__PURE__ */ BdApi.React.createElement(Tooltip$1, { text: switchTooltip, hideOnClick: false }, (props) => /* @__PURE__ */ BdApi.React.createElement("div", { ...props }, /* @__PURE__ */ BdApi.React.createElement(
@@ -25539,14 +25539,14 @@ img.BAP__viewport {
 }
 
 .BA__moduleSettingsBreadcrumb {
-    color: var(--header-muted);
+    color: var(--text-muted);
 }
 .BA__moduleSettingsBreadcrumb:not(.BA__moduleSettingsBreadcrumb--active) {
     cursor: pointer;
 }
 .BA__moduleSettingsBreadcrumb:hover,
 .BA__moduleSettingsBreadcrumb.BA__moduleSettingsBreadcrumb--active {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .BA__moduleSettingsLink {
@@ -26027,7 +26027,7 @@ img.BAP__viewport {
       Text$1,
       {
         variant: "heading-xl/semibold",
-        color: "header-primary"
+        color: "text-strong"
       },
       title
     ), /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__packListViewSearchBar" }, /* @__PURE__ */ BdApi.React.createElement(
@@ -26679,7 +26679,7 @@ img.BAP__viewport {
     position: absolute;
     top: 26px;
     left: 41px;
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .BA__settingsSidebarHeader--hidden {
@@ -26969,7 +26969,7 @@ img.BAP__viewport {
         className: "BA__homeTitle",
         variant: "heading-xxl/bold",
         tag: "h3",
-        color: "header-primary"
+        color: "text-strong"
       },
       meta$1.name
     ), /* @__PURE__ */ BdApi.React.createElement(
@@ -26977,7 +26977,7 @@ img.BAP__viewport {
       {
         className: "BA__homeDescription",
         variant: "text-md/normal",
-        color: "header-primary"
+        color: "text-strong"
       },
       sanitize$1(meta$1.description)
     ), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__homeHeadingActions" }, /* @__PURE__ */ BdApi.React.createElement(CatalogPromoTooltip, { packs: unknownPacks }, (props) => /* @__PURE__ */ BdApi.React.createElement(
@@ -27285,7 +27285,7 @@ img.BAP__viewport {
       Text$1,
       {
         variant: "heading-xl/semibold",
-        color: "header-primary"
+        color: "text-strong"
       },
       "General Settings"
     ), /* @__PURE__ */ BdApi.React.createElement(FieldSet, { label: "Appearance" }, /* @__PURE__ */ BdApi.React.createElement(
@@ -28504,7 +28504,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       Text$1,
       {
         variant: "heading-md/medium",
-        color: "header-primary"
+        color: "text-strong"
       },
       "Suggested Actions"
     ), /* @__PURE__ */ BdApi.React.createElement("div", { className: classNames("BA__errorDetailsActions", className) }, actions));
@@ -28569,7 +28569,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       Text$1,
       {
         variant: "heading-md/medium",
-        color: "header-primary"
+        color: "text-strong"
       },
       "Error"
     ), /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsStack" }, codeBlock)), /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { noop: true }, alert ? /* @__PURE__ */ BdApi.React.createElement(Alert, { messageType: AlertTypes.INFO }, /* @__PURE__ */ BdApi.React.createElement("div", null, alert), invite2 ? /* @__PURE__ */ BdApi.React.createElement("div", { className: "BA__errorDetailsInvite" }, /* @__PURE__ */ BdApi.React.createElement(
@@ -31216,7 +31216,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.0.11": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Thread Sidebar: Fixed the animations misfiring while navigating the Mod View.", "Updated to work in the latest release of Discord."] }] },
     "2.1.0": { "changes": [{ "type": "added", "title": "What's new", "items": ["Tooltips: Integrated the new Mana Discord Tooltips.", "Settings: Integrated the new Discord User Settings Modal.", "Modals: Added support for the Discord Layer Modals.", "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."] }, { "type": "fixed", "title": "Fixes", "items": ["Popouts: Updated Apps & Commands integration to work in the latest release of Discord.", "Modals: Inactive modals are now correctly dimmed.", "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."] }] },
     "2.1.1": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
-    "2.1.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.1.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.1.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Minor style fixes."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
