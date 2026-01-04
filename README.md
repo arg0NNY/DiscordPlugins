@@ -104,7 +104,7 @@ SOFTWARE.
 
 [inmyvoice-download-link]: https://arg0nny.github.io/bd/download/?id=InMyVoice
 [inmyvoice-view-link]: https://betterdiscord.app/plugin/InMyVoice
-[inmyvoice-version-badge]: https://img.shields.io/badge/version-1.2.0-blue
+[inmyvoice-version-badge]: https://img.shields.io/badge/version-1.2.1-blue
 [inmyvoice-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/InMyVoice
 [inmyvoice-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/InMyVoice
 
