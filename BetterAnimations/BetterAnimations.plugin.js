@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.3
+ * @version 2.1.4
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.3",
+    "version": "2.1.4",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,6 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
+        "Servers: Updated to work in the latest release of Discord.",
         "Minor style fixes."
       ]
     }
@@ -459,7 +460,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // GuildChannelRouteParams
     {
-      filter: (m) => Filters.byStrings("escapeRegExp")(m?.guildId),
+      filter: (m) => Filters.byStrings('"|\\\\d+"')(m?.guildId),
       searchExports: true
     },
     // handleClick
@@ -1419,7 +1420,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.3";
+  const version$1 = "2.1.4";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -17240,7 +17241,7 @@ ${buildStyles(styles)}}
     return jsonSourceMap;
   }
   var jsonSourceMapExports = requireJsonSourceMap();
-  function VerifiedCheckIcon({ size, width, height, color = "var(--green-360)", secondaryColor = "var(--white-400)", ...props }) {
+  function VerifiedCheckIcon({ size, width, height, color = "var(--green-360)", secondaryColor = "#FFFFFF", ...props }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -17266,7 +17267,7 @@ ${buildStyles(styles)}}
       )
     );
   }
-  function DangerIcon({ size, width, height, color = colors.STATUS_DANGER, secondaryColor = "var(--white-400)", ...props }) {
+  function DangerIcon({ size, width, height, color = colors.STATUS_DANGER, secondaryColor = "#FFFFFF", ...props }) {
     return /* @__PURE__ */ BdApi.React.createElement(
       "svg",
       {
@@ -19850,7 +19851,7 @@ ${buildStyles(styles)}}
           {
             size: "md",
             color: colors.STATUS_DANGER,
-            secondaryColor: "var(--white-400)"
+            secondaryColor: "#FFFFFF"
           }
         )
       ), /* @__PURE__ */ BdApi.React.createElement(
@@ -22499,7 +22500,7 @@ img.BAP__viewport {
 .BA__buttonGroupItem.BA__buttonGroupItem--selected {
     background-color: var(--brand-500);
     border-color: var(--brand-500);
-    color: var(--white-500);
+    color: #FFFFFF;
 }
 .BA__buttonGroup.BA__buttonGroup--single .BA__buttonGroupItem.BA__buttonGroupItem--selected {
     cursor: default;
@@ -23178,7 +23179,7 @@ img.BAP__viewport {
         onValueRender: (value2) => value2.toFixed(fractionDigits),
         value,
         initialValue: value,
-        onValueChange: (value2) => onChange(Number(value2.toFixed(fractionDigits))),
+        asValueChanges: (value2) => onChange(Number(value2.toFixed(fractionDigits))),
         ...props
       }
     ), /* @__PURE__ */ BdApi.React.createElement(
@@ -27154,7 +27155,7 @@ img.BAP__viewport {
 }
 
 .BA__mainColumn {
-    color: var(--white-100);
+    color: #FFFFFF;
     flex: 1;
     flex-direction: column;
     margin: auto 0;
@@ -27363,7 +27364,7 @@ img.BAP__viewport {
       DurationSlider,
       {
         label: "Switch Cooldown Duration",
-        description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Disable the toast notification for occurring errors. When an error is suppressed, it can only be seen via the Console."),
+        description: /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "If switch animations overlap, they cancel each other and trigger a cooldown preventing new switch animations from playing for a period of time."),
         from: 100,
         to: 2e3,
         defaultValue: configDefaults.general.switchCooldownDuration,
@@ -28676,7 +28677,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     position: relative;
 }
 
-.BA__errorDetailsStack pre [class^="codeActions"] {
+.BA__errorDetailsStack pre [class*="codeActions"] {
     position: absolute;
     display: none;
     right: 4px;
@@ -28684,11 +28685,11 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     color: var(--text-default);
 }
 
-.BA__errorDetailsStack pre:hover [class^="codeActions"] {
+.BA__errorDetailsStack pre:hover [class*="codeActions"] {
     display: block;
 }
 
-.BA__errorDetailsStack pre [class^="codeActions"] > div {
+.BA__errorDetailsStack pre [class*="codeActions"] > div {
     cursor: pointer;
 }
 
@@ -29042,7 +29043,10 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   }
   function shouldSwitchContent(next, prev) {
     const [nextChannel, prevChannel] = matchChannelRoutes(next, prev);
-    const nextOrPrev = (fn, n = next, p = prev) => fn(n) + fn(p);
+    const nextOrPrev = errorBoundary(
+      (fn, n = next, p = prev) => fn(n) + fn(p),
+      () => 0
+    );
     if (nextOrPrev((l) => l.pathname.startsWith(Routes.GLOBAL_DISCOVERY)) === 1 || nextOrPrev((l) => l.pathname.startsWith(Routes.GUILD_MEMBER_VERIFICATION(""))) || nextOrPrev((l) => l.pathname.startsWith(Routes.GUILD_MEMBER_VERIFICATION_FOR_HUB(""))) || nextOrPrev((l) => matchExact(l.pathname, Routes.GUILD_BOOSTING_MARKETING(GuildChannelRouteParams.guildId()))) || nextOrPrev((l) => l?.params?.channelId === StaticChannelRoute.GUILD_ONBOARDING, nextChannel, prevChannel)) return true;
     if (nextChannel && prevChannel)
       return nextChannel.params.guildId !== prevChannel.params.guildId;
@@ -31217,7 +31221,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.0": { "changes": [{ "type": "added", "title": "What's new", "items": ["Tooltips: Integrated the new Mana Discord Tooltips.", "Settings: Integrated the new Discord User Settings Modal.", "Modals: Added support for the Discord Layer Modals.", "Plugin Settings: Optimized for the new Discord User Settings Modal. Legacy User Settings will no longer be opened when accessing the plugin settings."] }, { "type": "fixed", "title": "Fixes", "items": ["Popouts: Updated Apps & Commands integration to work in the latest release of Discord.", "Modals: Inactive modals are now correctly dimmed.", "Tooltips: Fixed the occasional misfiring of exit animation when rapidly hovering over tooltips."] }] },
     "2.1.1": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.1.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
-    "2.1.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Minor style fixes."] }] }
+    "2.1.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Minor style fixes."] }] },
+    "2.1.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers: Updated to work in the latest release of Discord.", "Minor style fixes."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
