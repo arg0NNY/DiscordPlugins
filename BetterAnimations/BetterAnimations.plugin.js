@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.4
+ * @version 2.1.5
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.4",
+    "version": "2.1.5",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,8 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Servers: Updated to work in the latest release of Discord.",
-        "Minor style fixes."
+        "Tooltips: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -45,6 +44,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     Patcher: BDPatcher,
     Webpack,
     Utils,
+    ReactUtils,
     DOM,
     Data: BDData,
     Plugins,
@@ -773,9 +773,8 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     useModalsStore: Filters.byKeys("setState"),
     useIsModalAtTop: Filters.byStrings("popout:", ".at(-1)")
   });
-  const { Tooltip: Tooltip$1, TooltipLayer } = mangled(TooltipModule, {
-    Tooltip: Filters.byPrototypeKeys("renderTooltip"),
-    TooltipLayer: Filters.byStrings("tooltipPointerBg")
+  const { Tooltip: Tooltip$1 } = mangled(TooltipModule, {
+    Tooltip: Filters.byPrototypeKeys("renderTooltip")
   });
   const ListThin = (() => {
     if (!ListRawModule) return;
@@ -1035,7 +1034,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     ToastModule,
     ToastStoreModule,
     Tooltip: Tooltip$1,
-    TooltipLayer,
     TooltipModule,
     Transition,
     TransitionGroup,
@@ -1420,7 +1418,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.4";
+  const version$1 = "2.1.5";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -29599,6 +29597,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
   function patchManaTooltip() {
     patchUseTooltipTransition();
   }
+  let TooltipLayer = null;
   function TooltipTransition(props) {
     const { module: module2, isVisible, onAnimationRest, ...rest } = props;
     const onRest = (isVisible2) => () => onAnimationRest?.(
@@ -29613,6 +29612,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     );
     const layerRef = require$$0$1.useRef();
     const { autoRef, setPosition } = useAutoPosition(props.position, { align: props.align });
+    if (!TooltipLayer) throw new Error("Unable to resolve TooltipLayer");
     const layer = TooltipLayer(rest);
     const safeIsVisible = useSafeBoolean(isVisible);
     return /* @__PURE__ */ BdApi.React.createElement(
@@ -29638,6 +29638,11 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     Patcher.after(ModuleKey.Tooltips, Tooltip$1?.prototype, "renderTooltip", (self2, args, value) => {
       const module2 = Core.getModule(ModuleKey.Tooltips);
       if (!module2.isEnabled()) return;
+      if (!TooltipLayer) {
+        const rendered = ReactUtils.wrapInHooks(value.type)({ ...value.props, isVisible: true });
+        const tooltipLayer = findInReactTree(rendered, (m) => m?.key === "tooltip");
+        TooltipLayer = tooltipLayer?.type;
+      }
       const { text: text2 } = self2.props;
       return /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: value }, /* @__PURE__ */ BdApi.React.createElement(MainWindowOnly, { fallback: value }, () => /* @__PURE__ */ BdApi.React.createElement(
         TooltipTransition,
@@ -31222,7 +31227,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.1": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.1.2": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.1.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Minor style fixes."] }] },
-    "2.1.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers: Updated to work in the latest release of Discord.", "Minor style fixes."] }] }
+    "2.1.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers: Updated to work in the latest release of Discord.", "Minor style fixes."] }] },
+    "2.1.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Tooltips: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
