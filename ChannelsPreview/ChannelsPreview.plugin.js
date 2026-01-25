@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.11
+ * @version 2.1.12
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.11',
+    version: '2.1.12',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Settings: Updated to work in the latest release of Discord.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -47,7 +47,7 @@ const { ErrorBoundary } = Components
 const MessageActions = Webpack.getByKeys('jumpToMessage', '_sendMessage')
 const MessageStore = Webpack.getStore('MessageStore')
 const Flux = Webpack.getByKeys('Store', 'connectStores')
-const Dispatcher = Webpack.getByKeys('dispatch', 'subscribe')
+const Dispatcher = Webpack.getModule(Filters.byKeys('dispatch', 'subscribe'), { searchExports: true })
 const ChannelTypes = Webpack.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
 
 const findInReactTree = (tree, searchFilter) => Utils.findInTree(tree, searchFilter, { walkable: ['props', 'children', 'child', 'sibling'] })
@@ -57,10 +57,6 @@ const Selectors = {
   MessageDividers: Webpack.getByKeys('divider', 'unreadPill'),
   EmptyMessage: Webpack.getByKeys('emptyChannelIcon', 'locked'),
   Popout: Webpack.getByKeys('messagesPopoutWrap'),
-  ChannelItem: {
-    ...Webpack.getByKeys('containerDefault', 'channelInfo'),
-    ...Webpack.getByKeys('link', 'notInteractive')
-  },
   Channel: Webpack.getByKeys('channel', 'interactive'),
   Typing: Webpack.getByKeys('typing', 'ellipsis'),
   ChatLayout: Webpack.getByKeys('sidebar', 'guilds'),
@@ -80,19 +76,19 @@ const SUPPORTED_CHANNEL_TYPES = [
   ChannelTypes.GUILD_STAGE_VOICE
 ]
 
-const [PinToBottomScrollerAuto] = Object.values(Webpack.getBySource('disableScrollAnchor', 'ResizeObserver'))
+const [PinToBottomScrollerAuto] = Object.values(Webpack.getById(725027))
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
-const FieldSet = Webpack.getModule(Filters.byStrings('.fieldset', '"legend"'), { searchExports: true })
+const FieldSet = Webpack.getModule(Filters.byStrings('"fieldset"', '"legend"'), { searchExports: true })
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
   RadioGroup: Filters.byStrings('label', 'description')
 })
 const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
-const Switch = Webpack.getModule(Filters.byStrings('checkbox', 'animated.rect'), { searchExports: true })
-const Stack = Webpack.getModule(m => Filters.byStrings('stack', 'data-justify')(m?.render), { searchExports: true })
-const Divider = Webpack.getModule(Filters.byStrings('.divider', 'marginTop:'), { searchExports: true })
-const Field = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
+const Switch = Webpack.getByStrings('checked', '.controlId')
+const Stack = Webpack.getModule(m => Filters.byStrings('data-direction', 'data-justify')(m?.render), { searchExports: true })
+const [Divider] = Object.values(Webpack.getById(404778))
+const Field = Webpack.getModule(Filters.byStrings('helperTextId', 'errorMessage'), { searchExports: true })
 const { Checkbox, CheckboxTypes } = Webpack.getMangled(Filters.bySource('Checkbox:', 'is not a valid hex color'), {
-  Checkbox: Filters.byStrings('checkboxWrapper'),
+  Checkbox: Filters.byStrings('innerClassName'),
   CheckboxTypes: Filters.byKeys('INVERTED')
 })
 
@@ -100,20 +96,20 @@ const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewC
 const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('PrivateChannel', 'getTypingUsers'))]
 const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('PLAYING', 'MANAGE_CHANNELS'))]
 const StageVoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('getStageInstanceByChannel', 'MANAGE_CHANNELS'))]
-const ChannelLink = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))]
+const ChannelLink = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'isGuildVocal'))]
 const ThreadChannelItem = Webpack.getModule(m => Filters.byStrings('thread', 'getVoiceStatesForChannel')(m?.type))
 const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
 const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
 const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
-const EmptyMessage = Webpack.getByStrings('parseTopic', 'buttonContainer')
+const [EmptyMessage] = Object.values(Webpack.getById(391257))
 const FluxTypingUsers = Webpack.getByStrings('typingUsers', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
 const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'THREAD_STARTER_MESSAGE')
 const ReadStateStore = Webpack.getStore('ReadStateStore')
 const ChannelStreamItemTypes = Webpack.getModule(Filters.byKeys('MESSAGE', 'DIVIDER'), { searchExports: true })
-const MessageDivider = Webpack.getModule(m => Filters.byStrings('divider', 'isBeforeGroup')(m?.type?.render))
-const Attachment = [...Webpack.getWithKey(Filters.byStrings('getObscureReason', 'mosaicItemContent'))]
+const MessageDivider = Webpack.getModule(m => Filters.byStrings('"separator"', 'isBeforeGroup')(m?.type?.render))
+const Attachment = [...Webpack.getWithKey(Filters.byStrings('getObscureReason', 'obscurityControlClassName'))]
 const Embed = Webpack.getByPrototypeKeys('renderAuthor', 'renderMedia')
 const FocusRing = Webpack.getModule(m => Filters.byStrings('focusProps', '"li"')(m?.render), { searchExports: true })
 
@@ -627,10 +623,12 @@ module.exports = class ChannelsPreview {
 
         .CP__divider-cut {
             margin-top: 40px !important;
+        }
+        .CP__divider-cut.${Selectors.MessageDividers.divider},
+        .CP__divider-cut .${Selectors.MessageDividers.divider} {
             border-style: dashed;
         }
-
-        .CP__divider-cut > span {
+        .CP__divider-cut span {
             font-weight: 400;
         }
 
@@ -656,7 +654,7 @@ module.exports = class ChannelsPreview {
         }
 
         #${this.getSettingsPanelId()} {
-            color: var(--header-primary);
+            color: var(--text-strong);
             line-height: 1;
         }
 
