@@ -3,7 +3,7 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.2.2
+ * @version 1.2.3
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
@@ -14,7 +14,7 @@
 const config = {
   info: {
     name: 'BetterGuildTooltip',
-    version: '1.2.2',
+    version: '1.2.3',
     description: 'Displays an online and total member count in the guild tooltip.'
   },
   changelog: [
@@ -39,7 +39,7 @@ const {
 } = new BdApi(config.info.name)
 const { Filters } = Webpack
 
-const Dispatcher = Webpack.getByKeys('_subscriptions', '_waitQueue')
+const Dispatcher = Webpack.getModule(Filters.byKeys('dispatch', 'subscribe'), { searchExports: true })
 const GuildMemberCountStore = Webpack.getStore('GuildMemberCountStore')
 const GuildChannelStore = Webpack.getStore('GuildChannelStore')
 const Flux = Webpack.getByKeys('Store', 'connectStores')
@@ -60,7 +60,8 @@ const Selectors = {
 
 const GuildStore = Webpack.getStore('GuildStore')
 const GuildActions = Webpack.getByKeys('preload', 'closePrivateChannel')
-const GuildTooltip = [...Webpack.getWithKey(Filters.byStrings('guild:', 'guildTooltipWrapper'))]
+const GuildTooltipModule = Webpack.getById(647668)
+const GuildTooltip = [GuildTooltipModule, Object.keys(GuildTooltipModule ?? {})[0]]
 
 const memberCounts = new Map()
 const onlineMemberCounts = new Map()
@@ -235,7 +236,7 @@ module.exports = class BetterGuildTooltip {
 
       const node = Utils.findInTree(
         value,
-        m => Filters.byStrings('rowGuildName')(m?.type),
+        m => Filters.byStrings('isViewingRoles')(m?.type),
         { walkable: ['props', 'children', '__unsupportedReactNodeAsText'] }
       )
       if (!node || nodeRef.current === node) return
