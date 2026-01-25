@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.1
+ * @version 1.2.2
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'InMyVoice',
-    version: '1.2.1',
+    version: '1.2.2',
     description: 'Shows if a person in the text chat is also in a voice chat you\'re in.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the occasional errors in the console.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -47,7 +47,7 @@ const findInReactTree = (tree, searchFilter) => Utils.findInTree(tree, searchFil
 
 const Selectors = {
   BotTag: {
-    ...Webpack.getByKeys('botTagCozy'),
+    botTagCozy: Webpack.getByKeys('botTagCozy').botTagCozy,
     botTagVerified: Webpack.getByKeys('botTagVerified').botTagVerified
   }
 }
