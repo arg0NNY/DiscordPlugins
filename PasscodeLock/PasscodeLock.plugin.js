@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.6
+ * @version 1.5.7
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.6',
+    version: '1.5.7',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -50,7 +50,7 @@ const ModalActions = {
 const ConfirmationModal = Webpack.getByKeys('ConfirmModal').ConfirmModal
 const MediaEngineStore = Webpack.getStore('MediaEngineStore')
 const WindowStore = Webpack.getStore('WindowStore')
-const Dispatcher = Webpack.getByKeys('dispatch', 'subscribe')
+const Dispatcher = Webpack.getModule(Filters.byKeys('dispatch', 'subscribe'), { searchExports: true })
 
 const findInReactTree = (tree, searchFilter) => Utils.findInTree(tree, searchFilter, { walkable: ['props', 'children', 'child', 'sibling'] })
 
