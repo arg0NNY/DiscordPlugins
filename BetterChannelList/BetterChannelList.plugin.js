@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.13
+ * @version 1.2.14
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.13',
+    version: '1.2.14',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Minor style fixes.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -45,7 +45,7 @@ const {
 const { Filters } = Webpack
 const { ErrorBoundary } = Components
 
-const Dispatcher = Webpack.getByKeys('dispatch', 'subscribe')
+const Dispatcher = Webpack.getModule(Filters.byKeys('dispatch', 'subscribe'), { searchExports: true })
 const ChannelStore = Webpack.getStore('ChannelStore')
 const GuildChannelStore = Webpack.getStore('GuildChannelStore')
 const UserStore = Webpack.getStore('UserStore')
@@ -79,14 +79,14 @@ const Switch = Webpack.getModule(Filters.byStrings('checkbox', 'animated.rect'),
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
   RadioGroup: Filters.byStrings('label', 'description')
 })
-const Stack = Webpack.getModule(m => Filters.byStrings('stack', 'data-justify')(m?.render), { searchExports: true })
-const Divider = Webpack.getModule(Filters.byStrings('.divider', 'marginTop:'), { searchExports: true })
-const Field = Webpack.getModule(Filters.byStrings('labelContainer', 'errorMessage'), { searchExports: true })
+const Stack = Webpack.getModule(m => Filters.byStrings('data-direction', 'data-justify')(m?.render), { searchExports: true })
+const [Divider] = Object.values(Webpack.getById(404778))
+const Field = Webpack.getModule(Filters.byStrings('helperTextId', 'errorMessage'), { searchExports: true })
 
 const { getSocket } = Webpack.getByKeys('getSocket')
 const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
-const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'linkBottom'))]
-const ChannelItemIcon = Webpack.getModule(Filters.byStrings('channel', 'iconContainerWithGuildIcon'), { searchExports: true })
+const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'isGuildVocal'))]
+const ChannelItemIcon = Webpack.getModule(m => Filters.byStrings('channel', 'iconClassName')(m?.type), { searchExports: true })
 const ChannelTypes = Webpack.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
 const MessageTypes = Webpack.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
 const { intl, t } = Webpack.getByKeys('intl', 't')
@@ -108,8 +108,10 @@ const ActiveThreadsStore = Webpack.getStore('ActiveThreadsStore')
 const DevToolsDesignTogglesStore = Webpack.getStore('DevToolsDesignTogglesStore')
 const EmojiPicker = Webpack.getModule(m => Filters.byStrings('pickerIntention')(m?.type?.render))
 const EmojiPickerIntentions = Webpack.getModule(Filters.byKeys('GUILD_STICKER_RELATED_EMOJI', 'SOUNDBOARD'), { searchExports: true })
-const Alert = Webpack.getModule(Filters.byStrings('messageType', 'iconDiv'), { searchExports: true })
-const AlertMessageTypes = Webpack.getModule(Filters.byKeys('WARNING', 'POSITIVE'), { searchExports: true })
+const { Alert, AlertTypes } = Webpack.getMangled(Filters.bySource('messageType', '"warn"'), {
+  Alert: Filters.byStrings('messageType'),
+  AlertTypes: Filters.byKeys('WARNING', 'ERROR')
+})
 const ReplyMessageHeader = Webpack.getByStrings('replyReference', 'isReplySpineClickable', 'showReplySpine')?.({ replyReference: {} })?.type?.type
 const createMessage = Webpack.getByStrings('createMessage: author cannot be undefined')
 
@@ -117,10 +119,8 @@ const Selectors = {
   ChannelItem: Webpack.getByKeys('unread', 'link'),
   ForumPost: Webpack.getByKeys('message', 'typing'),
   Message: Webpack.getByKeys('repliedTextPreview', 'repliedTextContent'),
-  ForumPostMessage: {
-    ...Webpack.getByKeys('inlineFormat', 'markup'),
-    ...Webpack.getByKeys('author', 'hasUnreads')
-  },
+  ForumPostMessage: Webpack.getByKeys('inlineFormat', 'markup'),
+  ForumPostMessageAuthor: Webpack.getByKeys('author', 'hasUnreads'),
   App: Webpack.getByKeys('app', 'layers'),
   Base: Webpack.getByKeys('base', 'sidebar'),
   DirectMessages: Webpack.getByKeys('dm', 'channel'),
@@ -332,7 +332,7 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
         className: Selectors.ForumPost.blockedMessage,
         variant: 'text-sm/medium',
         color: 'text-muted',
-        children: intl.format(t['+FcYMz'], { count: 1 }) // LocaleStore.Messages.BLOCKED_MESSAGES.format({ count: 1 })
+        children: intl.format(t['+FcYM/'], { count: 1 }) // LocaleStore.Messages.BLOCKED_MESSAGES.format({ count: 1 })
       }
     )
   } else {
@@ -568,7 +568,7 @@ function ForumActivePostsCount ({ channel, unread }) {
       variant: 'text-sm/medium',
       color: unread ? 'text-default' : 'text-muted'
     },
-    intl.format(t['z0qMLy'], { count }) // LocaleStore.Messages.ACTIVE_FORUM_POST_COUNT.format({ count })
+    intl.format(t['z0qML2'], { count }) // LocaleStore.Messages.ACTIVE_FORUM_POST_COUNT.format({ count })
   ) : null
 }
 
@@ -610,12 +610,12 @@ module.exports = class BetterChannelList {
             contain: layout;
         }
 
-        .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessage.author} * {
+        .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessageAuthor.author} * {
             color: var(--text-muted) !important;
         }
 
-        .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessage.author}.${Selectors.ForumPostMessage.hasUnreads} * {
-            color: var(--header-primary) !important;
+        .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessageAuthor.author}.${Selectors.ForumPostMessageAuthor.hasUnreads} * {
+            color: var(--text-strong) !important;
         }
 
         .BCL--last-message * {
@@ -935,7 +935,7 @@ module.exports = class BetterChannelList {
           renderHeader: header => React.createElement(React.Fragment, {
             children: [
               React.createElement(Alert, {
-                messageType: AlertMessageTypes.WARNING,
+                messageType: AlertTypes.WARNING,
                 children: 'Icon changes locally. Only you will see this change.'
               }),
               React.createElement('div', {
@@ -1121,7 +1121,7 @@ module.exports = class BetterChannelList {
                   direction: 'horizontal',
                   children: [
                     React.createElement(Alert, {
-                      messageType: AlertMessageTypes.INFO,
+                      messageType: AlertTypes.INFO,
                       children: 'Edit the channel emoji icons using their context menu.',
                       className: !settings.redesign.enabled ? 'BCL--disabled' : null
                     }),
