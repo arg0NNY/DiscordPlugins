@@ -76,7 +76,7 @@ const SUPPORTED_CHANNEL_TYPES = [
   ChannelTypes.GUILD_STAGE_VOICE
 ]
 
-const [PinToBottomScrollerAuto] = Object.values(Webpack.getById(725027))
+const PinToBottomScrollerAuto = Webpack.getModule(m => Filters.byStrings('useImperativeHandle', 'getScrollerState', 'isScrolling')(m?.render), { searchExports: true })
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
 const FieldSet = Webpack.getModule(Filters.byStrings('"fieldset"', '"legend"'), { searchExports: true })
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
@@ -85,7 +85,7 @@ const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getF
 const Slider = Webpack.getModule(m => Filters.byKeys('stickToMarkers', 'initialValue')(m?.defaultProps), { searchExports: true })
 const Switch = Webpack.getByStrings('checked', '.controlId')
 const Stack = Webpack.getModule(m => Filters.byStrings('data-direction', 'data-justify')(m?.render), { searchExports: true })
-const [Divider] = Object.values(Webpack.getById(404778))
+const Divider = Webpack.getModule(Filters.byStrings('),style:{marginTop:'), { searchExports: true })
 const Field = Webpack.getModule(Filters.byStrings('helperTextId', 'errorMessage'), { searchExports: true })
 const { Checkbox, CheckboxTypes } = Webpack.getMangled(Filters.bySource('Checkbox:', 'is not a valid hex color'), {
   Checkbox: Filters.byStrings('innerClassName'),
@@ -101,7 +101,7 @@ const ThreadChannelItem = Webpack.getModule(m => Filters.byStrings('thread', 'ge
 const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
 const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
 const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
-const [EmptyMessage] = Object.values(Webpack.getById(391257))
+const EmptyMessage = Webpack.getModule(Filters.byStrings('"manage"', 'IS_JOIN_REQUEST_INTERVIEW_CHANNEL'))
 const FluxTypingUsers = Webpack.getByStrings('typingUsers', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
