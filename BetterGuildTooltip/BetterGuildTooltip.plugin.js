@@ -60,8 +60,7 @@ const Selectors = {
 
 const GuildStore = Webpack.getStore('GuildStore')
 const GuildActions = Webpack.getByKeys('preload', 'closePrivateChannel')
-const GuildTooltipModule = Webpack.getById(647668)
-const GuildTooltip = [GuildTooltipModule, Object.keys(GuildTooltipModule ?? {})[0]]
+const GuildTooltip = [...Webpack.getWithKey(Filters.byStrings('position'), { target: Webpack.getBySource('GuildTooltip') })]
 
 const memberCounts = new Map()
 const onlineMemberCounts = new Map()
