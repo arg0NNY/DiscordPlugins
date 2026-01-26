@@ -80,7 +80,7 @@ const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getF
   RadioGroup: Filters.byStrings('label', 'description')
 })
 const Stack = Webpack.getModule(m => Filters.byStrings('data-direction', 'data-justify')(m?.render), { searchExports: true })
-const [Divider] = Object.values(Webpack.getById(404778))
+const Divider = Webpack.getModule(Filters.byStrings('),style:{marginTop:'), { searchExports: true })
 const Field = Webpack.getModule(Filters.byStrings('helperTextId', 'errorMessage'), { searchExports: true })
 
 const { getSocket } = Webpack.getByKeys('getSocket')
