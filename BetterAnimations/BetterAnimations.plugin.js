@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.6
+ * @version 2.1.7
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.6",
+    "version": "2.1.7",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,8 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Updated to work in the latest release of Discord."
+        "Updated to work in the latest release of Discord.",
+        "General Settings: Removed \"Cache Legacy User Settings Sections\"."
       ]
     }
   ]
@@ -141,7 +142,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     return keyed(await modulePromise, filter);
   }
   function unkeyed(keyed2) {
-    return keyed2[0][keyed2[1]];
+    return keyed2?.[0]?.[keyed2?.[1]];
   }
   function unkeyedFn(keyedComponent) {
     return (...args) => unkeyed(keyedComponent)(...args);
@@ -426,7 +427,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // getThemeClass
     {
-      filter: Filters.byStrings('" theme-"'),
+      filter: Filters.byStrings("theme-", "images-"),
       searchExports: true
     },
     // CSSTransition
@@ -452,7 +453,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // GuildChannelRouteParams
     {
-      filter: (m) => Filters.byStrings('"|\\\\d+"')(m?.guildId),
+      filter: (m) => Filters.byStrings("|\\\\d+")(m?.guildId),
       searchExports: true
     },
     // handleClick
@@ -606,7 +607,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // ModalsModule
     {
-      filter: Filters.bySource("modalKey", '"layer-"')
+      filter: Filters.bySource("modalKey", '"instant"')
     },
     // LayersModule
     {
@@ -702,7 +703,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // ManaModalRootModule
     {
-      filter: Filters.bySource("MODAL", '"padding-size-"')
+      filter: Filters.bySource("MODAL", "padding-size-")
     },
     // BasePopoverModule
     {
@@ -767,12 +768,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
   const { Tooltip: Tooltip$1 } = mangled(TooltipModule, {
     Tooltip: Filters.byPrototypeKeys("renderTooltip")
   });
-  const ListThin = (() => {
-    const id = 475825;
-    const exports$1 = Webpack.getById(id);
-    const source = Webpack.modules[id].toString();
-    return exports$1[source.match(new RegExp(`(\\w+):\\(\\)=>${source.match(/let (\w+)=/)[1]}`))[1]];
-  })();
   const { showToast, useToastStore } = mangled(ToastStoreModule, {
     showToast: Filters.byStrings("currentToastMap.has"),
     useToastStore: Filters.byKeys("setState")
@@ -801,7 +796,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     AppLayer: Filters.byDisplayName("AppLayer"),
     appLayerContext: (m) => m?.Provider
   });
-  const ModalsKeyed = keyed(ModalsModule, Filters.byStrings("modalKey", '"layer-"'));
+  const ModalsKeyed = keyed(ModalsModule, Filters.byStrings("modalKey", '"instant"'));
   const LayersKeyed = keyed(LayersModule, Filters.byStrings("hasFullScreenLayer"));
   const GuildChannelListKeyed = keyed(GuildChannelListModule, Filters.byStrings("getGuild", "guildId"));
   const ChatSidebarKeyed = keyed(ChatSidebarModule, Filters.byStrings("postSidebarWidth"));
@@ -848,7 +843,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     FocusLock: Filters.byStrings("children", "containerRef")
   });
   const Mana = {
-    ModalRootKeyed: keyed(ManaModalRootModule, Filters.byStrings("MODAL", '"padding-size-"')),
+    ModalRootKeyed: keyed(ManaModalRootModule, Filters.byStrings("MODAL", "padding-size-")),
     get ModalRoot() {
       return unkeyed(this.ModalRootKeyed);
     },
@@ -857,15 +852,13 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     LayerModalKeyed: keyed(ManaLayerModalModule, Filters.byStrings("MODAL", "headingId", "theme"))
   };
   const BasePopoverKeyed = keyed(BasePopoverModule, Filters.byStrings("popoverGradientWrapper", "spacing"));
-  const useStateFromStores = Hooks.useStateFromStores;
+  const useStateFromStores = Webpack.getModule(Webpack.Filters.byStrings("useStateFromStores"), { searchExports: true });
   const StandardSidebarViewWrapper = Webpack.waitForModule(Filters.byPrototypeKeys("getPredicateSections", "renderSidebar"));
   const StandardSidebarViewModule = Webpack.waitForModule(Filters.bySource("standardSidebarView", "section"));
   const StandardSidebarViewKeyed = lazyKeyed(StandardSidebarViewModule, Filters.byStrings("standardSidebarView", "section"));
   const SettingsNotice = Webpack.waitForModule(Filters.byStrings("onSaveText", "EMPHASIZE_NOTICE"));
   const MembersModViewSidebarModule = Webpack.waitForModule(Filters.bySource("MEMBER_SAFETY_PAGE", "closeGuildSidebar"));
   const MembersModViewSidebarKeyed = lazyKeyed(MembersModViewSidebarModule, Filters.byStrings("MEMBER_SAFETY_PAGE", "closeGuildSidebar"));
-  const GenerateUserSettingsSectionsModule = Webpack.waitForModule(Filters.bySource("ACCOUNT_PROFILE", "CUSTOM", '"logout"'));
-  const generateUserSettingsSectionsKeyed = lazyKeyed(GenerateUserSettingsSectionsModule, Filters.byStrings("ACCOUNT_PROFILE", "CUSTOM", '"logout"'));
   const SettingsContent = Webpack.waitForModule((m) => Filters.byStrings("useTitle", '"showNavigationMobile"')(m?.type));
   const SettingsNodeType = { ROOT: 0, SECTION: 1, SIDEBAR_ITEM: 2, PANEL: 3, PANE: 4 };
   const DiscordModules = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
@@ -923,7 +916,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     FocusLock,
     FocusLockModule,
     GatewaySocket,
-    GenerateUserSettingsSectionsModule,
     GuildActionRow,
     GuildChannelListKeyed,
     GuildChannelListModule,
@@ -946,7 +938,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     ListNavigatorContainer,
     ListNavigatorModule,
     ListNavigatorProvider,
-    ListThin,
     Mana,
     ManaLayerModalModule,
     ManaModalRootModule,
@@ -1039,7 +1030,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
       return colors;
     },
     createToast,
-    generateUserSettingsSectionsKeyed,
     getThemeClass,
     handleClick,
     humanize,
@@ -1408,7 +1398,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.6";
+  const version$1 = "2.1.7";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -1504,8 +1494,7 @@ ${indent2}`);
     static Category = {
       GENERAL: 0,
       MODULE: 1,
-      PRIORITIZE_ANIMATION_SMOOTHNESS: 2,
-      CACHE_USER_SETTINGS_SECTIONS: 3
+      PRIORITIZE_ANIMATION_SMOOTHNESS: 2
     };
     constructor(message, { category, ...options } = {}) {
       const meta2 = [];
@@ -16233,7 +16222,6 @@ ${buildStyles(styles)}}
     IMPLEMENTED_BY_ANIMATION: (animationName) => `Implemented by selected animation: ${animationName}`,
     SHOULD_BE_VALID_URL: "Should be a valid URL",
     PRIORITIZE_ANIMATION_SMOOTHNESS: "Prioritize Animation Smoothness",
-    CACHE_USER_SETTINGS_SECTIONS: "Cache Legacy User Settings Sections",
     CATALOG_OUT_OF_DATE: "The last attempt to load the Catalog was unsuccessful. The information below may be out of date.",
     SETTINGS_MIGRATOR: "Settings Migrator"
   };
@@ -27305,21 +27293,10 @@ img.BAP__viewport {
       Switch$1,
       {
         label: "Preload Layers",
-        description: "Load full-screen pages (Legacy User Settings, Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
+        description: "Load full-screen pages (Server Settings, Channel Settings, etc.) in advance to prevent them from interrupting the animations when opened.",
         checked: config2.general.preloadLayers,
         onChange: (value) => {
           config2.general.preloadLayers = value;
-          onChange();
-        }
-      }
-    ), /* @__PURE__ */ BdApi.React.createElement(
-      Switch$1,
-      {
-        label: Messages.CACHE_USER_SETTINGS_SECTIONS,
-        description: "Significantly improves performance when opening Legacy User Settings.",
-        checked: config2.general.cacheUserSettingsSections,
-        onChange: (value) => {
-          config2.general.cacheUserSettingsSections = value;
           onChange();
         }
       }
@@ -28250,7 +28227,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between sections of the settings.")
     },
     [ModuleKey.Layers]: {
-      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen views of the Discord app, such as Legacy User Settings, Server Settings, ", meta$1.name, " Settings, etc.")
+      description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the transitions when switching between full-screen views of the Discord app, such as Server Settings, Channel Settings, ", meta$1.name, " Settings, etc.")
     },
     [ModuleKey.Tooltips]: {
       description: () => /* @__PURE__ */ BdApi.React.createElement(BdApi.React.Fragment, null, "Animates the appearance and disappearance of informative floating UI elements application-wide, such as various control descriptions, server titles in the server list and other non-interactive elements that provide clarity to Discord's interfaces.")
@@ -28386,15 +28363,6 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
           value: config2.general.prioritizeAnimationSmoothness,
           setValue: (value) => {
             config2.general.prioritizeAnimationSmoothness = value;
-            onChange();
-          }
-        };
-      case InternalError.Category.CACHE_USER_SETTINGS_SECTIONS:
-        return {
-          name: Messages.CACHE_USER_SETTINGS_SECTIONS,
-          value: config2.general.cacheUserSettingsSections,
-          setValue: (value) => {
-            config2.general.cacheUserSettingsSections = value;
             onChange();
           }
         };
@@ -28989,10 +28957,190 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
       )
     ].flat();
   }
+  function ensureOnce() {
+    let triggered = /* @__PURE__ */ new Map();
+    return (fn, key2 = "default") => {
+      if (triggered.get(key2)) return;
+      fn();
+      triggered.set(key2, true);
+    };
+  }
+  const channels = /* @__PURE__ */ new Set();
+  const guilds = /* @__PURE__ */ new Set();
+  function add(set, item, timeout = 10) {
+    set.add(item);
+    setTimeout(() => set.delete(item), timeout);
+  }
+  function handleCategoryCollapse({ id }) {
+    const channel2 = ChannelStore.getChannel(id);
+    add(guilds, channel2?.guild_id ?? id);
+  }
+  function handleCategoryCollapseAll({ guildId }) {
+    add(guilds, guildId);
+  }
+  function handleChannelCreate({ channel: channel2 }) {
+    add(channels, channel2.id);
+  }
+  const ChannelStackStore = new class ChannelStackStore extends Flux.Store {
+    getChannelsAwaitingTransition() {
+      return { channels, guilds };
+    }
+  }(Dispatcher, {
+    CATEGORY_COLLAPSE: handleCategoryCollapse,
+    CATEGORY_EXPAND: handleCategoryCollapse,
+    CATEGORY_COLLAPSE_ALL: handleCategoryCollapseAll,
+    CATEGORY_EXPAND_ALL: handleCategoryCollapseAll,
+    CHANNEL_CREATE: handleChannelCreate,
+    CHANNEL_DELETE: handleChannelCreate
+  });
+  function PassThrough({ children: children2, ...props }) {
+    return children2(props);
+  }
+  function patchChannelItem() {
+    const once = ensureOnce();
+    const callback = (key2) => (self2, args, value) => {
+      once(() => {
+        injectModule(value?.type?.DecoratedComponent, ModuleKey.ChannelList);
+        Patcher.after(ModuleKey.ChannelList, value?.type?.DecoratedComponent?.prototype, "render", (self3, args2, value2) => {
+          const module2 = Core.getModule(ModuleKey.ChannelList);
+          if (!module2.isEnabled()) return;
+          if (!self3.__containerRef) self3.__containerRef = require$$0$1.createRef();
+          const container = findInReactTree(value2, (m) => m?.type === "li");
+          if (!container) return;
+          switch (typeof container.props.ref) {
+            case "object":
+              self3.__containerRef = container.props.ref;
+              break;
+            case "function":
+              TinyPatcher.after(container.props, "ref", (_, [ref]) => self3.__containerRef.current = ref);
+              break;
+            default:
+              container.props.ref = self3.__containerRef;
+          }
+        });
+      }, key2);
+    };
+    Patcher.after(...ChannelItemKeyed, callback("channel"));
+    Patcher.after(...VoiceChannelItemKeyed, callback("voice"));
+    Patcher.after(...StageVoiceChannelItemKeyed, callback("stage"));
+  }
+  const mainWindow = window;
+  function useWindow() {
+    const { renderWindow } = require$$0$1.use(AppContext);
+    return {
+      window: renderWindow,
+      isMainWindow: renderWindow === mainWindow
+    };
+  }
+  function MainWindowOnly({ children: children2, fallback }) {
+    const { isMainWindow } = useWindow();
+    return isMainWindow ? typeof children2 === "function" ? children2() : children2 : fallback;
+  }
+  function patchChannelThreadList() {
+    Patcher.after(ModuleKey.ChannelList, ChannelThreadList, "type", (self2, [props], value) => {
+      const { isMainWindow } = useWindow();
+      const module2 = useModule(ModuleKey.ChannelList);
+      if (!isMainWindow || !module2.isEnabled()) return;
+      const container = findInReactTree(value, (m) => m?.type === "li");
+      if (!container) return;
+      container.props.ref = props.ref;
+    });
+  }
+  function ListItem({ children: children2, ...props }) {
+    const itemRef = require$$0$1.useRef();
+    children2.props.ref = itemRef;
+    const containerRef = require$$0$1.useMemo(() => ({
+      get current() {
+        if (itemRef.current instanceof HTMLElement) return itemRef.current;
+        return Utils.findInTree(
+          itemRef.current,
+          (m) => m?.__containerRef,
+          { walkable: ["decoratedRef", "current"] }
+        )?.__containerRef.current;
+      }
+    }), [itemRef]);
+    return /* @__PURE__ */ BdApi.React.createElement(
+      AnimeTransition,
+      {
+        containerRef,
+        ...props
+      },
+      children2
+    );
+  }
+  function patchListThin(ListThin) {
+    Patcher.after(ModuleKey.ChannelList, ListThin, "render", (self2, [props], value) => {
+      const isChannelList = props.id?.includes("channels");
+      const channelsToAnimate = isChannelList && useStateFromStores([ChannelStackStore], () => ChannelStackStore.getChannelsAwaitingTransition());
+      const { isMainWindow } = useWindow();
+      const module2 = useModule(ModuleKey.ChannelList);
+      if (!isMainWindow || !isChannelList || !module2.isEnabled()) return;
+      const focusRingScope = findInReactTree(value, (m) => m?.containerRef);
+      if (!focusRingScope || !Array.isArray(focusRingScope.children)) return;
+      const shouldAnimate = (item) => {
+        if (isChannelList) {
+          const { channel: channel2 } = findInReactTree(item, (m) => m?.channel) ?? {};
+          if (channel2) return channelsToAnimate.channels.has(channel2.id) || channelsToAnimate.guilds.has(channel2.guild_id);
+        }
+        return false;
+      };
+      const childFactory = (e) => require$$0$1.cloneElement(e, {
+        exit: e.props.items.some((i) => shouldAnimate(i))
+      });
+      focusRingScope.children = /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: focusRingScope.children }, /* @__PURE__ */ BdApi.React.createElement(
+        TransitionGroup,
+        {
+          component: null,
+          childFactory
+        },
+        focusRingScope.children.map((item) => {
+          if (!item) return item;
+          const items2 = [].concat(
+            item.type === require$$0$1.Fragment ? item.props.children : item
+          ).filter((i) => !!i);
+          return /* @__PURE__ */ BdApi.React.createElement(
+            PassThrough,
+            {
+              key: item.key,
+              enter: shouldAnimate(item),
+              exit: false,
+              module: module2,
+              items: items2
+            },
+            (props2) => props2.items.map((item2) => /* @__PURE__ */ BdApi.React.createElement(ListItem, { ...props2 }, item2))
+          );
+        })
+      ));
+    });
+    patchChannelItem();
+    patchChannelThreadList();
+  }
+  css`${DiscordSelectors.ChannelItem.containerDefault}, ${DiscordSelectors.ChannelItem.containerDragBefore},
+${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelItem.containerDragAfter} {
+    transition: none;
+}``ListThin (Channel List)`;
   let currentGuildChannels = null;
   function patchGuildChannelList() {
-    Patcher.after(...GuildChannelListKeyed, (self2, args, value) => {
+    const once = ensureOnce();
+    let patched = null;
+    Patcher.after(ModuleKey.ChannelList, ...GuildChannelListKeyed, (self2, args, value) => {
       currentGuildChannels = value.props.guildChannels;
+      if (patched) {
+        value.type = patched;
+        return;
+      }
+      TinyPatcher.after(ModuleKey.ChannelList, value, "type", (self3, args2, value2) => {
+        const channelList2 = findInReactTree(value2, (m) => m?.type?.prototype?.renderList);
+        if (!channelList2) return;
+        once(() => {
+          Patcher.after(ModuleKey.ChannelList, channelList2.type.prototype, "renderList", (self4, args3, value3) => {
+            TinyPatcher.after(ModuleKey.ChannelList, value3.props, "children", (self5, args4, value4) => {
+              once(() => patchListThin(value4.type), "scroller");
+            });
+          });
+        }, "channelList");
+      });
+      patched = value.type;
     });
   }
   function matchExact(pathname, path2) {
@@ -29058,18 +29206,6 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     if (prevChannel?.params.channelId) return 0;
     if (nextChannel?.params.channelId) return 1;
     return 0;
-  }
-  const mainWindow = window;
-  function useWindow() {
-    const { renderWindow } = require$$0$1.use(AppContext);
-    return {
-      window: renderWindow,
-      isMainWindow: renderWindow === mainWindow
-    };
-  }
-  function MainWindowOnly({ children: children2, fallback }) {
-    const { isMainWindow } = useWindow();
-    return isMainWindow ? typeof children2 === "function" ? children2() : children2 : fallback;
   }
   function getDismissibleKey(theme) {
     return `userPanelMisplacedAlert:${theme.id}`;
@@ -29366,14 +29502,6 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     };
     Patcher.instead(ModuleKey.ContextMenu, ...MenuSubmenuItemKeyed, callback);
     Patcher.instead(ModuleKey.ContextMenu, ...MenuSubmenuListItemKeyed, callback);
-  }
-  function ensureOnce() {
-    let triggered = /* @__PURE__ */ new Map();
-    return (fn, key2 = "default") => {
-      if (triggered.get(key2)) return;
-      fn();
-      triggered.set(key2, true);
-    };
   }
   function patchContextMenu() {
     const once = ensureOnce();
@@ -30427,148 +30555,6 @@ ${DiscordSelectors.Layers.layer} {
 .BA__layer--containNone {
     contain: none;
 }``Layers`;
-  const channels = /* @__PURE__ */ new Set();
-  const guilds = /* @__PURE__ */ new Set();
-  function add(set, item, timeout = 10) {
-    set.add(item);
-    setTimeout(() => set.delete(item), timeout);
-  }
-  function handleCategoryCollapse({ id }) {
-    const channel2 = ChannelStore.getChannel(id);
-    add(guilds, channel2?.guild_id ?? id);
-  }
-  function handleCategoryCollapseAll({ guildId }) {
-    add(guilds, guildId);
-  }
-  function handleChannelCreate({ channel: channel2 }) {
-    add(channels, channel2.id);
-  }
-  const ChannelStackStore = new class ChannelStackStore extends Flux.Store {
-    getChannelsAwaitingTransition() {
-      return { channels, guilds };
-    }
-  }(Dispatcher, {
-    CATEGORY_COLLAPSE: handleCategoryCollapse,
-    CATEGORY_EXPAND: handleCategoryCollapse,
-    CATEGORY_COLLAPSE_ALL: handleCategoryCollapseAll,
-    CATEGORY_EXPAND_ALL: handleCategoryCollapseAll,
-    CHANNEL_CREATE: handleChannelCreate,
-    CHANNEL_DELETE: handleChannelCreate
-  });
-  function PassThrough({ children: children2, ...props }) {
-    return children2(props);
-  }
-  function patchChannelItem() {
-    const once = ensureOnce();
-    const callback = (key2) => (self2, args, value) => {
-      once(() => {
-        injectModule(value?.type?.DecoratedComponent, ModuleKey.ChannelList);
-        Patcher.after(ModuleKey.ChannelList, value?.type?.DecoratedComponent?.prototype, "render", (self3, args2, value2) => {
-          const module2 = Core.getModule(ModuleKey.ChannelList);
-          if (!module2.isEnabled()) return;
-          if (!self3.__containerRef) self3.__containerRef = require$$0$1.createRef();
-          const container = findInReactTree(value2, (m) => m?.type === "li");
-          if (!container) return;
-          switch (typeof container.props.ref) {
-            case "object":
-              self3.__containerRef = container.props.ref;
-              break;
-            case "function":
-              TinyPatcher.after(container.props, "ref", (_, [ref]) => self3.__containerRef.current = ref);
-              break;
-            default:
-              container.props.ref = self3.__containerRef;
-          }
-        });
-      }, key2);
-    };
-    Patcher.after(...ChannelItemKeyed, callback("channel"));
-    Patcher.after(...VoiceChannelItemKeyed, callback("voice"));
-    Patcher.after(...StageVoiceChannelItemKeyed, callback("stage"));
-  }
-  function patchChannelThreadList() {
-    Patcher.after(ModuleKey.ChannelList, ChannelThreadList, "type", (self2, [props], value) => {
-      const { isMainWindow } = useWindow();
-      const module2 = useModule(ModuleKey.ChannelList);
-      if (!isMainWindow || !module2.isEnabled()) return;
-      const container = findInReactTree(value, (m) => m?.type === "li");
-      if (!container) return;
-      container.props.ref = props.ref;
-    });
-  }
-  function ListItem({ children: children2, ...props }) {
-    const itemRef = require$$0$1.useRef();
-    children2.props.ref = itemRef;
-    const containerRef = require$$0$1.useMemo(() => ({
-      get current() {
-        if (itemRef.current instanceof HTMLElement) return itemRef.current;
-        return Utils.findInTree(
-          itemRef.current,
-          (m) => m?.__containerRef,
-          { walkable: ["decoratedRef", "current"] }
-        )?.__containerRef.current;
-      }
-    }), [itemRef]);
-    return /* @__PURE__ */ BdApi.React.createElement(
-      AnimeTransition,
-      {
-        containerRef,
-        ...props
-      },
-      children2
-    );
-  }
-  function patchListThin() {
-    Patcher.after(ModuleKey.ChannelList, ListThin, "render", (self2, [props], value) => {
-      const isChannelList = props.id?.includes("channels");
-      const channelsToAnimate = isChannelList && useStateFromStores([ChannelStackStore], () => ChannelStackStore.getChannelsAwaitingTransition());
-      const { isMainWindow } = useWindow();
-      const module2 = useModule(ModuleKey.ChannelList);
-      if (!isMainWindow || !isChannelList || !module2.isEnabled()) return;
-      const focusRingScope = findInReactTree(value, (m) => m?.containerRef);
-      if (!focusRingScope || !Array.isArray(focusRingScope.children)) return;
-      const shouldAnimate = (item) => {
-        if (isChannelList) {
-          const { channel: channel2 } = findInReactTree(item, (m) => m?.channel) ?? {};
-          if (channel2) return channelsToAnimate.channels.has(channel2.id) || channelsToAnimate.guilds.has(channel2.guild_id);
-        }
-        return false;
-      };
-      const childFactory = (e) => require$$0$1.cloneElement(e, {
-        exit: e.props.items.some((i) => shouldAnimate(i))
-      });
-      focusRingScope.children = /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: focusRingScope.children }, /* @__PURE__ */ BdApi.React.createElement(
-        TransitionGroup,
-        {
-          component: null,
-          childFactory
-        },
-        focusRingScope.children.map((item) => {
-          if (!item) return item;
-          const items2 = [].concat(
-            item.type === require$$0$1.Fragment ? item.props.children : item
-          ).filter((i) => !!i);
-          return /* @__PURE__ */ BdApi.React.createElement(
-            PassThrough,
-            {
-              key: item.key,
-              enter: shouldAnimate(item),
-              exit: false,
-              module: module2,
-              items: items2
-            },
-            (props2) => props2.items.map((item2) => /* @__PURE__ */ BdApi.React.createElement(ListItem, { ...props2 }, item2))
-          );
-        })
-      ));
-    });
-    patchChannelItem();
-    patchChannelThreadList();
-  }
-  css`${DiscordSelectors.ChannelItem.containerDefault}, ${DiscordSelectors.ChannelItem.containerDragBefore},
-${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelItem.containerDragAfter} {
-    transition: none;
-}``ListThin (Channel List)`;
   const Prompt = new class Prompt {
     Types = Enum({
       HardwareAcceleration: "hardwareAcceleration"
@@ -30997,7 +30983,6 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     }
   }
   const LAYER_IDS = [
-    "USER_SETTINGS",
     "CHANNEL_SETTINGS",
     "GUILD_SETTINGS",
     "COLLECTIBLES_SHOP"
@@ -31113,20 +31098,6 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
       return original(isEnabled ? onUpdate : callback, ...args);
     }, { category: InternalError.Category.PRIORITIZE_ANIMATION_SMOOTHNESS });
   }
-  async function patchGenerateUserSettingsSections() {
-    const cached = {
-      params: null,
-      value: null
-    };
-    Patcher.instead(...await generateUserSettingsSectionsKeyed, (self2, [params], original) => {
-      if (!Config.current.general.cacheUserSettingsSections) return original(params);
-      if (!cached.params || Object.keys(params).some((k) => params[k] !== cached.params[k])) {
-        cached.params = params;
-        cached.value = original(params);
-      }
-      return cached.value;
-    }, { category: InternalError.Category.CACHE_USER_SETTINGS_SECTIONS });
-  }
   function patchEmitter() {
     Patcher.instead(Flux.Emitter, "emit", (self2, args, original) => {
       if (DispatchController$1.isEmitterPaused) return;
@@ -31137,7 +31108,6 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     patchEmoji();
     patchProfileEffects();
     patchUseIsVisible();
-    patchGenerateUserSettingsSections();
     patchEmitter();
   }
   function patchRootElementContext() {
@@ -31191,7 +31161,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.3": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Minor style fixes."] }] },
     "2.1.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers: Updated to work in the latest release of Discord.", "Minor style fixes."] }] },
     "2.1.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Tooltips: Updated to work in the latest release of Discord."] }] },
-    "2.1.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.1.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.1.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord.", 'General Settings: Removed "Cache Legacy User Settings Sections".'] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
@@ -31427,7 +31398,6 @@ ${DiscordSelectors.SettingsSidebar.sidebar} {
         patchSettingsContent();
         patchModals();
         patchLayers();
-        patchListThin();
         patchGuildChannelList();
         patchReferencePositionLayer();
         patchChannelTextArea();
