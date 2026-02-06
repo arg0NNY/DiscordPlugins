@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.7
+ * @version 2.1.8
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.7",
+    "version": "2.1.8",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,8 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Updated to work in the latest release of Discord.",
-        "General Settings: Removed \"Cache Legacy User Settings Sections\"."
+        "Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -539,7 +538,8 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // PrivateChannelSortStore
     {
-      filter: Filters.byStoreName("PrivateChannelSortStore")
+      filter: Filters.byStoreName("PrivateChannelSortStore"),
+      searchExports: true
     },
     // LayerStore
     {
@@ -1398,7 +1398,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.7";
+  const version$1 = "2.1.8";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -6588,8 +6588,8 @@ ${indent2}`);
   const formatValuesList = (arr, separator = ", ") => arr.map((i) => `'${i}'`).join(separator);
   const FunctionSchema = custom((v) => typeof v === "function", "Input is not a function");
   const DOMElementSchema = custom(isElement, "Input is not an Element");
-  const lazyInjectSymbol = Symbol("lazyInject");
-  const generatedLazyInjectSymbol = Symbol("generatedLazyInject");
+  const lazyInjectSymbol = /* @__PURE__ */ Symbol("lazyInject");
+  const generatedLazyInjectSymbol = /* @__PURE__ */ Symbol("generatedLazyInject");
   const LazyInjectSchema = objectType({
     symbol: literalType(lazyInjectSymbol),
     name: stringType(),
@@ -6634,7 +6634,7 @@ ${indent2}`);
   const IS_SOURCE_MAP_KEY = "__isSourceMap";
   const SELF_KEY = "__self";
   const reservedKeys$1 = [SOURCE_MAP_KEY, IS_SOURCE_MAP_KEY, SELF_KEY];
-  const sourceMapSymbol = Symbol("sourceMap");
+  const sourceMapSymbol = /* @__PURE__ */ Symbol("sourceMap");
   const SourceMapSchema = objectType({
     [IS_SOURCE_MAP_KEY]: literalType(sourceMapSymbol)
   }).passthrough();
@@ -6882,7 +6882,7 @@ OR`)
       }
     };
   }
-  const trustedFunctionSymbol = Symbol("trustedFunction");
+  const trustedFunctionSymbol = /* @__PURE__ */ Symbol("trustedFunction");
   function trust(fn) {
     fn[trustedFunctionSymbol] = true;
     return fn;
@@ -6924,7 +6924,7 @@ ${buildStyles(styles)}}
       context.instance.cancel(true);
     }
   }
-  const zodErrorBoundarySymbol = Symbol("zodErrorBoundary");
+  const zodErrorBoundarySymbol = /* @__PURE__ */ Symbol("zodErrorBoundary");
   function zodErrorBoundary(fn, context, options = {}) {
     const { name: name2 = "untitled", ...opts } = options;
     const boundary = (...args) => executeWithZod(args, (args2, ctx) => {
@@ -6967,12 +6967,12 @@ ${buildStyles(styles)}}
     none: 1,
     blend: 2
   };
-  const isRegisteredTargetSymbol = Symbol();
-  const isDomSymbol = Symbol();
-  const isSvgSymbol = Symbol();
-  const transformsSymbol = Symbol();
-  const morphPointsSymbol = Symbol();
-  const proxyTargetSymbol = Symbol();
+  const isRegisteredTargetSymbol = /* @__PURE__ */ Symbol();
+  const isDomSymbol = /* @__PURE__ */ Symbol();
+  const isSvgSymbol = /* @__PURE__ */ Symbol();
+  const transformsSymbol = /* @__PURE__ */ Symbol();
+  const morphPointsSymbol = /* @__PURE__ */ Symbol();
+  const proxyTargetSymbol = /* @__PURE__ */ Symbol();
   const minValue = 1e-11;
   const maxValue = 1e12;
   const K = 1e3;
@@ -10474,7 +10474,7 @@ ${buildStyles(styles)}}
       return output;
     };
   };
-  const injectableSymbol = Symbol("injectable");
+  const injectableSymbol = /* @__PURE__ */ Symbol("injectable");
   function storeInjectable(value, data2) {
     value[injectableSymbol] = data2;
     return value;
@@ -11523,7 +11523,7 @@ ${buildStyles(styles)}}
       formTarget: null,
       headers: spaceSeparated,
       height: number$1,
-      hidden: boolean,
+      hidden: overloadedBoolean,
       high: number$1,
       href: null,
       hrefLang: null,
@@ -12597,7 +12597,7 @@ ${buildStyles(styles)}}
       return stringValue === "[object RegExp]" || stringValue === "[object Date]" || isReactElement(value);
     }
     var canUseSymbol = typeof Symbol === "function" && Symbol.for;
-    var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for("react.element") : 60103;
+    var REACT_ELEMENT_TYPE = canUseSymbol ? /* @__PURE__ */ Symbol.for("react.element") : 60103;
     function isReactElement(value) {
       return value.$$typeof === REACT_ELEMENT_TYPE;
     }
@@ -18598,7 +18598,7 @@ ${buildStyles(styles)}}
     pointer-events: none;
     opacity: .4;
 }``Migrator Components`;
-  const AbortSymbol = Symbol("Abort");
+  const AbortSymbol = /* @__PURE__ */ Symbol("Abort");
   class Migrator {
     static IDLE = 0;
     static BUSY = 1;
@@ -28666,7 +28666,7 @@ ${DiscordSelectors.StandardSidebarView.contentColumnDefault}:has(> .BA__moduleSe
     align-items: center;
     padding: 0 16px;
 }``ErrorToast`;
-  const ErrorManagerToastSymbol = Symbol("ErrorManagerToast");
+  const ErrorManagerToastSymbol = /* @__PURE__ */ Symbol("ErrorManagerToast");
   const ErrorManager = new class ErrorManager extends ErrorManager$1 {
     get timeoutDuration() {
       return 1e4;
@@ -31162,7 +31162,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.4": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Servers: Updated to work in the latest release of Discord.", "Minor style fixes."] }] },
     "2.1.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Tooltips: Updated to work in the latest release of Discord."] }] },
     "2.1.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
-    "2.1.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord.", 'General Settings: Removed "Cache Legacy User Settings Sections".'] }] }
+    "2.1.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord.", 'General Settings: Removed "Cache Legacy User Settings Sections".'] }] },
+    "2.1.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
