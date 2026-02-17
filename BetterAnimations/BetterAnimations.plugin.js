@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.8
+ * @version 2.1.9
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.8",
+    "version": "2.1.9",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,7 +22,8 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Updated to work in the latest release of Discord."
+        "Settings: Updated to work in the latest release of Discord.",
+        "Channel List: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -615,7 +616,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // GuildChannelListModule
     {
-      filter: Filters.bySource("GUILD_CHANNEL_LIST", "favorites-channel-list")
+      filter: Filters.bySource("GUILD_CHANNEL_LIST", "selectedChannel")
     },
     // ChannelSectionStore
     {
@@ -859,7 +860,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
   const SettingsNotice = Webpack.waitForModule(Filters.byStrings("onSaveText", "EMPHASIZE_NOTICE"));
   const MembersModViewSidebarModule = Webpack.waitForModule(Filters.bySource("MEMBER_SAFETY_PAGE", "closeGuildSidebar"));
   const MembersModViewSidebarKeyed = lazyKeyed(MembersModViewSidebarModule, Filters.byStrings("MEMBER_SAFETY_PAGE", "closeGuildSidebar"));
-  const SettingsContent = Webpack.waitForModule((m) => Filters.byStrings("useTitle", '"showNavigationMobile"')(m?.type));
+  const SettingsContent = Webpack.waitForModule((m) => Filters.byStrings("onClose", '"showNavigationMobile"')(m?.type));
   const SettingsNodeType = { ROOT: 0, SECTION: 1, SIDEBAR_ITEM: 2, PANEL: 3, PANE: 4 };
   const DiscordModules = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,
@@ -1398,7 +1399,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.8";
+  const version$1 = "2.1.9";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -31163,7 +31164,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.5": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Tooltips: Updated to work in the latest release of Discord."] }] },
     "2.1.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.1.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord.", 'General Settings: Removed "Cache Legacy User Settings Sections".'] }] },
-    "2.1.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] }
+    "2.1.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
+    "2.1.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord.", "Channel List: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
