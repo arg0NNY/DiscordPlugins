@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.9
+ * @version 2.1.10
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.9",
+    "version": "2.1.10",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,8 +22,8 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Settings: Updated to work in the latest release of Discord.",
-        "Channel List: Updated to work in the latest release of Discord."
+        "Messages: Updated to work with BetterDiscord 1.13.8.",
+        "Modals: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -258,8 +258,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     SidebarActions,
     SidebarType,
     ManaTooltipLayer,
-    ManaUseTooltipTransitionModule,
-    ManaLayerModalModule
+    ManaUseTooltipTransitionModule
   ] = Webpack.getBulk(
     // Text
     {
@@ -742,10 +741,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     // ManaUseTooltipTransitionModule
     {
       filter: Filters.bySource("onExitComplete", '"tooltip"')
-    },
-    // ManaLayerModalModule
-    {
-      filter: Filters.bySource("MODAL", "headingId", "theme")
     }
   );
   const { RadioGroup } = mangled(RadioGroupModule, {
@@ -849,8 +844,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
       return unkeyed(this.ModalRootKeyed);
     },
     TooltipLayer: ManaTooltipLayer,
-    useTooltipTransitionKeyed: keyed(ManaUseTooltipTransitionModule, Filters.byStrings("onExitComplete", '"tooltip"')),
-    LayerModalKeyed: keyed(ManaLayerModalModule, Filters.byStrings("MODAL", "headingId", "theme"))
+    useTooltipTransitionKeyed: keyed(ManaUseTooltipTransitionModule, Filters.byStrings("onExitComplete", '"tooltip"'))
   };
   const BasePopoverKeyed = keyed(BasePopoverModule, Filters.byStrings("popoverGradientWrapper", "spacing"));
   const useStateFromStores = Webpack.getModule(Webpack.Filters.byStrings("useStateFromStores"), { searchExports: true });
@@ -862,6 +856,8 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
   const MembersModViewSidebarKeyed = lazyKeyed(MembersModViewSidebarModule, Filters.byStrings("MEMBER_SAFETY_PAGE", "closeGuildSidebar"));
   const SettingsContent = Webpack.waitForModule((m) => Filters.byStrings("onClose", '"showNavigationMobile"')(m?.type));
   const SettingsNodeType = { ROOT: 0, SECTION: 1, SIDEBAR_ITEM: 2, PANEL: 3, PANE: 4 };
+  const LayerModalModule = Webpack.waitForModule(Filters.bySource("MODAL", "headingId", "theme"));
+  const LayerModalKeyed = lazyKeyed(LayerModalModule, Filters.byStrings("MODAL", "headingId", "theme"));
   const DiscordModules = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
     __proto__: null,
     Alert,
@@ -933,6 +929,8 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     InviteStore,
     LayerActions,
     LayerActionsModule,
+    LayerModalKeyed,
+    LayerModalModule,
     LayerStore: LayerStore$1,
     LayersKeyed,
     LayersModule,
@@ -940,7 +938,6 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     ListNavigatorModule,
     ListNavigatorProvider,
     Mana,
-    ManaLayerModalModule,
     ManaModalRootModule,
     ManaTooltipLayer,
     ManaUseTooltipTransitionModule,
@@ -1399,7 +1396,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.9";
+  const version$1 = "2.1.10";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -29750,7 +29747,9 @@ ${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelIte
     });
     patchManaTooltip();
   }
+  const findMessageInReactTree = (tree) => findInReactTree(tree, (m) => m?.props?.message);
   function getMessageKey(message) {
+    message = require$$0$1.isValidElement(message) ? findMessageInReactTree(message)?.props?.message : message;
     return message?.nonce ?? message?.id;
   }
   const toEnter = /* @__PURE__ */ new Set();
@@ -29823,14 +29822,18 @@ ${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelIte
               childFactory
             },
             list.props.children[i].map((item, index2, arr) => {
-              const { message } = item.props;
-              if (message) item.key = getMessageKey(message);
+              const message = findMessageInReactTree(item);
+              if (message) item.key = getMessageKey(message.props.message);
               return /* @__PURE__ */ BdApi.React.createElement(
                 AnimeTransition,
                 {
                   key: item.key,
-                  injectContainerRef: true,
-                  enter: !hasLayers && toEnter2.has(message ? item.key : getMessageKey(arr[index2 + 1]?.props?.message)),
+                  injectContainerRef: (children2, ref) => {
+                    const message2 = findMessageInReactTree(children2);
+                    if (message2) message2.props.ref = ref;
+                    else children2.props.ref = ref;
+                  },
+                  enter: !hasLayers && toEnter2.has(message ? item.key : getMessageKey(arr[index2 + 1])),
                   exit: false,
                   module: module2
                 },
@@ -30278,14 +30281,14 @@ ${DiscordSelectors.StandardSidebarView.contentRegionScroller}:has(.BA__home) {
       require$$0$1.cloneElement(container)
     ));
   }
-  function patchManaModals() {
+  async function patchManaModals() {
     Patcher.after(ModuleKey.Modals, ...Mana.ModalRootKeyed, (self2, args, value) => {
       const { isMainWindow } = useWindow();
       const module2 = useModule(ModuleKey.Modals);
       if (!isMainWindow || !module2.isEnabled()) return;
       renderContainer(value);
     });
-    Patcher.after(ModuleKey.Modals, ...Mana.LayerModalKeyed, (self2, args, value) => {
+    Patcher.after(ModuleKey.Modals, ...await LayerModalKeyed, (self2, args, value) => {
       const { isMainWindow } = useWindow();
       const module2 = useModule(ModuleKey.Modals);
       if (!isMainWindow || !module2.isEnabled()) return;
@@ -31165,7 +31168,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.6": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.1.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord.", 'General Settings: Removed "Cache Legacy User Settings Sections".'] }] },
     "2.1.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
-    "2.1.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord.", "Channel List: Updated to work in the latest release of Discord."] }] }
+    "2.1.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord.", "Channel List: Updated to work in the latest release of Discord."] }] },
+    "2.1.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Messages: Updated to work with BetterDiscord 1.13.8.", "Modals: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
