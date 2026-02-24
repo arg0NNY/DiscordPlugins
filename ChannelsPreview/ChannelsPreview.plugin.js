@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.12
+ * @version 2.1.13
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.12',
+    version: '2.1.13',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -93,7 +93,7 @@ const { Checkbox, CheckboxTypes } = Webpack.getMangled(Filters.bySource('Checkbo
 })
 
 const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'))]
-const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('PrivateChannel', 'getTypingUsers'))]
+const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('getRecipientId', 'getTypingUsers'))]
 const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('PLAYING', 'MANAGE_CHANNELS'))]
 const StageVoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('getStageInstanceByChannel', 'MANAGE_CHANNELS'))]
 const ChannelLink = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'isGuildVocal'))]
