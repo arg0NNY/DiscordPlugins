@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.7
+ * @version 1.5.8
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.7',
+    version: '1.5.8',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -66,10 +66,9 @@ const Data = new Proxy({}, {
 
 const Selectors = {
   Chat: Webpack.getByKeys('title', 'chat'),
-  HeaderBar: Webpack.getByKeys('iconWrapper', 'clickable'),
+  HeaderBar: Webpack.getByKeys('clickable', 'withHighlight'),
   App: Webpack.getByKeys('mobileApp'),
-  Modals: Webpack.getByKeys('root', 'small'),
-  AppTitleBarButtons: Webpack.getByKeys('button', 'smallButton')
+  Modals: Webpack.getByKeys('root', 'small')
 }
 
 const Gifs = {
@@ -1001,9 +1000,8 @@ module.exports = class PasscodeLock {
       {
         xmlns: 'http://www.w3.org/2000/svg',
         viewBox: '0 0 24 24',
-        height: '24',
-        width: '24',
-        className: Selectors.HeaderBar.icon
+        height: '20',
+        width: '20'
       },
       React.createElement('path', { fill: 'currentColor', d: this.getIconPath() })
     )
@@ -1116,7 +1114,7 @@ module.exports = class PasscodeLock {
                   id: 'PCLButton',
                   size: Button.Sizes.NONE,
                   look: Button.Looks.BLANK,
-                  innerClassName: `${Selectors.AppTitleBarButtons.button} ${Selectors.HeaderBar.iconWrapper} ${Selectors.HeaderBar.clickable}`,
+                  innerClassName: `${Selectors.HeaderBar.clickable} ${Selectors.HeaderBar.withHighlight}`,
                   onClick: () => this.lock()
                 }),
                 this.buildStaticIcon()
