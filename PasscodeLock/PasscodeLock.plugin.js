@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.8
+ * @version 1.5.9
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.8',
+    version: '1.5.9',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -66,7 +66,6 @@ const Data = new Proxy({}, {
 
 const Selectors = {
   Chat: Webpack.getByKeys('title', 'chat'),
-  HeaderBar: Webpack.getByKeys('clickable', 'withHighlight'),
   App: Webpack.getByKeys('mobileApp'),
   Modals: Webpack.getByKeys('root', 'small')
 }
@@ -173,6 +172,7 @@ const Flux = Webpack.getByKeys('Store', 'connectStores')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const App = [...Webpack.getWithKey(Filters.byStrings('APP', 'data-app-not-dev-tools'))]
 const AppTitleBar = Webpack.waitForModule(m => Filters.byStrings('AppTitleBar')(m?.type))
+const HeaderBarButton = Webpack.getModule(Filters.byComponentType(Filters.byStrings('tooltip', 'HEADER_BAR_BADGE_BOTTOM')))
 
 const Locale = new class {
 
@@ -412,7 +412,7 @@ class PasscodeLocker extends React.Component {
 
   get bg () { return this.e.querySelector('.PCL--layout-bg') }
 
-  get button () { return this.props.button ?? document.getElementById('PCLButton') }
+  get button () { return this.props.button }
 
   get buttonPos () {
     return this.button && document.body.contains(this.button) ? this.button.getBoundingClientRect() : {
@@ -1095,31 +1095,20 @@ module.exports = class PasscodeLock {
 
   async patchAppTitleBar () {
     Patcher.after(await AppTitleBar, 'type', (self, args, value) => {
+      const buttonRef = React.useRef()
+
       Patcher.after(value.props, 'children', (self, args, value) => {
         Patcher.after(value.props, 'children', (self, args, value) => {
           const buttons = value?.props?.trailing?.props?.children
           if (!buttons) return
 
           buttons.unshift(
-            React.createElement(
-              Tooltip,
-              {
-                text: Locale.current.LOCK_DISCORD,
-                key: this.getName(),
-                position: 'bottom'
-              },
-              props => React.createElement(
-                Button,
-                Object.assign({}, props, {
-                  id: 'PCLButton',
-                  size: Button.Sizes.NONE,
-                  look: Button.Looks.BLANK,
-                  innerClassName: `${Selectors.HeaderBar.clickable} ${Selectors.HeaderBar.withHighlight}`,
-                  onClick: () => this.lock()
-                }),
-                this.buildStaticIcon()
-              )
-            )
+            React.createElement(HeaderBarButton, {
+              ref: buttonRef,
+              tooltip: Locale.current.LOCK_DISCORD,
+              icon: () => this.buildStaticIcon(),
+              onClick: () => this.lock({ button: buttonRef.current })
+            })
           )
         })
       })
