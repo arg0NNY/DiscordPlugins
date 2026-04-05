@@ -7,14 +7,14 @@
  * @donate https://boosty.to/arg0nny/donate
  * @website https://docs.betteranimations.net
  * @source https://github.com/arg0NNY/BetterAnimations
- * @version 2.1.10
+ * @version 2.1.11
  */
 
 /* ### CONFIG START ### */
 const config = {
   "info": {
     "name": "BetterAnimations",
-    "version": "2.1.10",
+    "version": "2.1.11",
     "description": "🌊 Discord Animations Client Mod & Framework"
   },
   "changelog": [
@@ -22,8 +22,7 @@ const config = {
       "type": "fixed",
       "title": "Fixes",
       "items": [
-        "Messages: Updated to work with BetterDiscord 1.13.8.",
-        "Modals: Updated to work in the latest release of Discord."
+        "Thread Sidebar: Updated to work in the latest release of Discord."
       ]
     }
   ]
@@ -627,7 +626,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // VoiceChannelViewModule
     {
-      filter: Filters.bySource("shouldUseVoiceEffectsActionBar")
+      filter: Filters.bySource("CHANNEL_CALL_POPOUT", "renderExternalHeader")
     },
     // CallChatSidebarModule
     {
@@ -647,7 +646,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
     },
     // UserSettings
     {
-      filter: Filters.byKeys("openUserSettings", "openUserSettingsFromParsedUrl")
+      filter: Filters.byKeys("openUserSettings")
     },
     // ModalModule
     {
@@ -796,7 +795,7 @@ var BetterAnimations = (function(require$$0$1, EventEmitter, classNames, fs, pat
   const LayersKeyed = keyed(LayersModule, Filters.byStrings("hasFullScreenLayer"));
   const GuildChannelListKeyed = keyed(GuildChannelListModule, Filters.byStrings("getGuild", "guildId"));
   const ChatSidebarKeyed = keyed(ChatSidebarModule, Filters.byStrings("postSidebarWidth"));
-  const VoiceChannelViewKeyed = keyed(VoiceChannelViewModule, Filters.byStrings("shouldUseVoiceEffectsActionBar"));
+  const VoiceChannelViewKeyed = keyed(VoiceChannelViewModule, () => true);
   const CallChatSidebarKeyed = keyed(CallChatSidebarModule, Filters.byStrings("CallChatSidebar", "chatInputType"));
   const { SingleSelect } = mangled(SelectModule, {
     SingleSelect: (m) => Filters.byStrings("value", "onChange")(m) && !Filters.byStrings("isSelected")(m)
@@ -1396,7 +1395,7 @@ ${indent2}`);
       ""
     ).replace(/\s+/g, " ").trim();
   }
-  const version$1 = "2.1.10";
+  const version$1 = "2.1.11";
   class BaseError extends Error {
     constructor(message, options = {}, additionalMeta = []) {
       const { module: module2, pack } = options;
@@ -1429,7 +1428,7 @@ ${indent2}`);
     ChannelItem: Webpack.getByKeys("containerDefault", "channelInfo"),
     MessageList: Webpack.getByKeys("message", "groupStart"),
     Layer: Webpack.getByKeys("layer", "layerContainer"),
-    Toast: Webpack.getByKeys("toast", "icon"),
+    Toast: Webpack.getByKeys("toast", "icon", "content"),
     Scroller: Webpack.getByKeys("thin", "disableScrollAnchor"),
     Select: Webpack.getByKeys("select", "measurement"),
     ManaModal: Webpack.getByKeys("actionBar", "headerTrailing"),
@@ -30076,21 +30075,16 @@ ${DiscordSelectors.ChannelItem.containerUserOver}, ${DiscordSelectors.ChannelIte
         Patcher.after(ModuleKey.ThreadSidebar, channelView.type?.prototype, "render", (self22, args2, value2) => {
           const module2 = Core.getModule(ModuleKey.ThreadSidebar);
           if (!module2.isEnabled()) return;
-          if (!self22.__containerRef) self22.__containerRef = require$$0$1.createRef();
           const chatWrapper = findInReactTree(value2, byClassName(DiscordClasses.VoiceChannelView.channelChatWrapper));
           if (!chatWrapper) return;
-          const fragment = findInReactTree(chatWrapper, (m) => m?.type === require$$0$1.Fragment);
-          if (!fragment) return;
-          const { children: children2 } = fragment.props;
-          const callChatSidebarIndex = 0;
           return /* @__PURE__ */ BdApi.React.createElement(ErrorBoundary, { module: module2, fallback: value2 }, /* @__PURE__ */ BdApi.React.createElement(MainWindowOnly, { fallback: value2 }, () => {
-            children2[callChatSidebarIndex] = /* @__PURE__ */ BdApi.React.createElement(TransitionGroup, { component: null }, children2[callChatSidebarIndex] && /* @__PURE__ */ BdApi.React.createElement(
+            chatWrapper.props.children = /* @__PURE__ */ BdApi.React.createElement(TransitionGroup, { component: null }, chatWrapper.props.children && /* @__PURE__ */ BdApi.React.createElement(
               AnimeTransition,
               {
                 injectContainerRef: true,
                 module: module2
               },
-              children2[callChatSidebarIndex]
+              chatWrapper.props.children
             ));
             return value2;
           }));
@@ -31169,7 +31163,8 @@ ${DiscordSelectors.Layer.clickTrapContainer}:has([data-baa-type="exit"]) {
     "2.1.7": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord.", 'General Settings: Removed "Cache Legacy User Settings Sections".'] }] },
     "2.1.8": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Updated to work in the latest release of Discord."] }] },
     "2.1.9": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Settings: Updated to work in the latest release of Discord.", "Channel List: Updated to work in the latest release of Discord."] }] },
-    "2.1.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Messages: Updated to work with BetterDiscord 1.13.8.", "Modals: Updated to work in the latest release of Discord."] }] }
+    "2.1.10": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Messages: Updated to work with BetterDiscord 1.13.8.", "Modals: Updated to work in the latest release of Discord."] }] },
+    "2.1.11": { "changes": [{ "type": "fixed", "title": "Fixes", "items": ["Thread Sidebar: Updated to work in the latest release of Discord."] }] }
   };
   function parseVersion(version2) {
     const data2 = version2.match(regex.semver);
