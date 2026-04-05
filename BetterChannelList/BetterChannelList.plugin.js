@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.14
+ * @version 1.2.15
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.14',
+    version: '1.2.15',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +23,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Fixed the channel emoji icon editor popout failing to open.'
       ]
     }
   ]
@@ -851,6 +851,7 @@ module.exports = class BetterChannelList {
     Patcher.instead(...ChannelItem, (self, [props, ...args], original) => {
       const { channel, guild, muted: _muted, selected: _selected, unread, locked, connected } = props
 
+      const elementRef = React.useRef(null)
       const { openedEmojiPickerChannelId, isEmojiPickerOpen } = useEmojiPickerState(channel)
 
       const muted = openedEmojiPickerChannelId ? !isEmojiPickerOpen : _muted
@@ -920,8 +921,14 @@ module.exports = class BetterChannelList {
 
       // Emoji picker
       const _children = value.props.children
+      const externalRef = _children.props.ref
+      _children.props.ref = el => {
+        elementRef.current = el
+        if (typeof externalRef === 'function') externalRef(el)
+        else if (typeof externalRef === 'object') externalRef.current = el
+      }
       value.props.children = React.createElement(Popout, {
-        targetElementRef: _children.props.ref,
+        targetElementRef: elementRef,
         renderPopout: ({ closePopout }) => React.createElement(EmojiPicker, {
           className: 'BCL--emoji-picker',
           headerClassName: 'BCL--emoji-picker-header',
