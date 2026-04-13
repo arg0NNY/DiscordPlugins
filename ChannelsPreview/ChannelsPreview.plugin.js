@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.13
+ * @version 2.1.14
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.13',
+    version: '2.1.14',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,7 +23,8 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.'
+        'Updated to work in the latest release of Discord.',
+        'Fixed the scrolling not being redirected to the preview for DMs.'
       ]
     }
   ]
@@ -101,7 +102,7 @@ const ThreadChannelItem = Webpack.getModule(m => Filters.byStrings('thread', 'ge
 const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
 const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
 const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
-const EmptyMessage = Webpack.getModule(Filters.byStrings('"manage"', 'IS_JOIN_REQUEST_INTERVIEW_CHANNEL'))
+const EmptyMessage = Webpack.getModule(Filters.byStrings('canManageRoles', 'IS_JOIN_REQUEST_INTERVIEW_CHANNEL'))
 const FluxTypingUsers = Webpack.getByStrings('typingUsers', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
 const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
@@ -429,8 +430,25 @@ module.exports = class ChannelsPreview {
       this.closePopout(channel.id)
     })
 
-    const ref = React.useRef(null)
-    if (!link.props.ref) link.props.ref = ref
+    let ref = React.useRef(null)
+    switch (typeof link.props.ref) {
+      case 'function': {
+        const original = link.props.ref
+        link.props.ref = el => {
+          ref.current = el
+          original(el)
+        }
+        break
+      }
+      case 'object': {
+        ref = link.props.ref
+        break
+      }
+      default: {
+        link.props.ref = ref
+        break
+      }
+    }
 
     React.useEffect(() => {
       const onWheel = e => {
@@ -442,8 +460,8 @@ module.exports = class ChannelsPreview {
         scroller.scrollTop += e.deltaY
         e.preventDefault()
       }
-      link.props.ref?.current?.addEventListener('wheel', onWheel, { passive: false })
-      return () => link.props.ref?.current?.removeEventListener('wheel', onWheel, { passive: false })
+      ref.current?.addEventListener('wheel', onWheel, { passive: false })
+      return () => ref.current?.removeEventListener('wheel', onWheel, { passive: false })
     }, [])
   }
 
