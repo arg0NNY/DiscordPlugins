@@ -4,18 +4,19 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.2
+ * @version 1.2.3
  * @description Shows if a person in the text chat is also in a voice chat you're in.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/InMyVoice
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/InMyVoice/InMyVoice.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/InMyVoice/InMyVoice.plugin.js
+ * @runAt idle
  */
 
 /* ### CONFIG START ### */
 const config = {
   info: {
     name: 'InMyVoice',
-    version: '1.2.2',
+    version: '1.2.3',
     description: 'Shows if a person in the text chat is also in a voice chat you\'re in.'
   },
   changelog: [
