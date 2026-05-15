@@ -3,18 +3,19 @@
  * @author arg0NNY
  * @authorId 633223783204782090
  * @invite M8DBtcZjXD
- * @version 1.2.3
+ * @version 1.2.4
  * @description Displays an online and total member count in the guild tooltip.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterGuildTooltip
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterGuildTooltip/BetterGuildTooltip.plugin.js
+ * @runAt idle
  */
 
 /* ### CONFIG START ### */
 const config = {
   info: {
     name: 'BetterGuildTooltip',
-    version: '1.2.3',
+    version: '1.2.4',
     description: 'Displays an online and total member count in the guild tooltip.'
   },
   changelog: [
@@ -60,7 +61,7 @@ const Selectors = {
 
 const GuildStore = Webpack.getStore('GuildStore')
 const GuildActions = Webpack.getByKeys('preload', 'closePrivateChannel')
-const GuildTooltip = [...Webpack.getWithKey(Filters.byStrings('position'), { target: Webpack.getBySource('GuildTooltip') })]
+const GuildTooltip = [...Webpack.getWithKey(Filters.byStrings('guild', '__unsupportedReactNodeAsText'), { target: Webpack.getBySource('GuildTooltip', { raw: true })?.declarations })]
 
 const memberCounts = new Map()
 const onlineMemberCounts = new Map()
