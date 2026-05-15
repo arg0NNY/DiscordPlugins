@@ -4,18 +4,19 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 2.1.14
+ * @version 2.1.15
  * @description Allows you to view recent messages in channels without switching to it.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/ChannelsPreview
  * @source https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/ChannelsPreview/ChannelsPreview.plugin.js
+ * @runAt idle
  */
 
 /* ### CONFIG START ### */
 const config = {
   info: {
     name: 'ChannelsPreview',
-    version: '2.1.14',
+    version: '2.1.15',
     description: 'Allows you to view recent messages in channels without switching to it.'
   },
   changelog: [
@@ -23,8 +24,7 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Updated to work in the latest release of Discord.',
-        'Fixed the scrolling not being redirected to the preview for DMs.'
+        'Updated to work in the latest release of Discord.'
       ]
     }
   ]
@@ -56,7 +56,6 @@ const findInReactTree = (tree, searchFilter) => Utils.findInTree(tree, searchFil
 const Selectors = {
   Messages: Webpack.getByKeys('message', 'cozyMessage'),
   MessageDividers: Webpack.getByKeys('divider', 'unreadPill'),
-  EmptyMessage: Webpack.getByKeys('emptyChannelIcon', 'locked'),
   Popout: Webpack.getByKeys('messagesPopoutWrap'),
   Channel: Webpack.getByKeys('channel', 'interactive'),
   Typing: Webpack.getByKeys('typing', 'ellipsis'),
@@ -77,7 +76,9 @@ const SUPPORTED_CHANNEL_TYPES = [
   ChannelTypes.GUILD_STAGE_VOICE
 ]
 
-const PinToBottomScrollerAuto = Webpack.getModule(m => Filters.byStrings('useImperativeHandle', 'getScrollerState', 'isScrolling')(m?.render), { searchExports: true })
+const PinToBottomScrollerAuto = Webpack.getModule(Filters.bySource('useImperativeHandle', 'getScrollerState', 'isScrolling'), {
+  declarationFilter: m => Filters.byStrings('useImperativeHandle', 'getScrollerState', 'isScrolling')(m?.render)
+})
 const Popout = Webpack.getModule(m => Filters.byKeys('Animation')(m) && Filters.byStrings('renderPopout')(m?.prototype?.render), { searchExports: true })
 const FieldSet = Webpack.getModule(Filters.byStrings('"fieldset"', '"legend"'), { searchExports: true })
 const { RadioGroup } = Webpack.getMangled(Filters.bySource('"radiogroup"', 'getFocusableElements'), {
@@ -93,26 +94,36 @@ const { Checkbox, CheckboxTypes } = Webpack.getMangled(Filters.bySource('Checkbo
   CheckboxTypes: Filters.byKeys('INVERTED')
 })
 
-const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'))]
+const ChannelItemModule = Webpack.getModule(Filters.bySource('shouldIndicateNewChannel', 'MANAGE_CHANNELS'), { raw: true })
+const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'), { target: ChannelItemModule?.declarations })]
+const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('PLAYING', 'MANAGE_CHANNELS'), { target: ChannelItemModule?.declarations })]
+const StageVoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('getStageInstanceByChannel', 'MANAGE_CHANNELS'), { target: ChannelItemModule?.declarations })]
 const DMChannelItem = [...Webpack.getWithKey(Filters.byStrings('getRecipientId', 'getTypingUsers'))]
-const VoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('PLAYING', 'MANAGE_CHANNELS'))]
-const StageVoiceChannelItem = [...Webpack.getWithKey(Filters.byStrings('getStageInstanceByChannel', 'MANAGE_CHANNELS'))]
 const ChannelLink = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'isGuildVocal'))]
-const ThreadChannelItem = Webpack.getModule(m => Filters.byStrings('thread', 'getVoiceStatesForChannel')(m?.type))
+const ThreadChannelItem = Webpack.getModule(Filters.bySource('thread', 'getVoiceStatesForChannel'), {
+  declarationFilter: m => Filters.byStrings('thread', 'getVoiceStatesForChannel')(m?.type)
+})
 const AppearanceSettingsStore = Webpack.getByKeys('fontSize', 'fontScale')
-const MessageComponent = Webpack.getModule(m => Filters.byStrings('must not be a thread starter message')(m?.type), { searchExports: true })
-const ThreadStarterMessage = Webpack.getModule(Filters.byStrings('must be a thread starter message'), { searchExports: true })
-const EmptyMessage = Webpack.getModule(Filters.byStrings('canManageRoles', 'IS_JOIN_REQUEST_INTERVIEW_CHANNEL'))
+const MessageComponent = Webpack.getModule(Filters.bySource('must not be a thread starter message'), {
+  declarationFilter: m => Filters.byStrings('must not be a thread starter message')(m?.type)
+})
+const ThreadStarterMessage = Webpack.getModule(Filters.bySource('must be a thread starter message'), {
+  declarationFilter: Filters.byStrings('must be a thread starter message')
+})
+const EmptyMessage = Webpack.getModule(Filters.bySource('canManageRoles', 'IS_JOIN_REQUEST_INTERVIEW_CHANNEL'), {
+  declarationFilter: Filters.byStrings('canManageRoles', 'IS_JOIN_REQUEST_INTERVIEW_CHANNEL')
+})
 const FluxTypingUsers = Webpack.getByStrings('typingUsers', 'isThreadCreation')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
-const AppView = [...Webpack.getWithKey(Filters.byStrings('sidebarTheme', 'GUILD_DISCOVERY'))]
-const generateChannelStream = Webpack.getByStrings('oldestUnreadMessageId', 'THREAD_STARTER_MESSAGE')
-const ReadStateStore = Webpack.getStore('ReadStateStore')
+const AppView = [...Webpack.getWithKey(Filters.byStrings('CHANNEL_THREAD_VIEW', 'GUILD_DISCOVERY'), {
+  target: Webpack.getModule(Filters.bySource('CHANNEL_THREAD_VIEW', 'GUILD_DISCOVERY', 'data-fullscreen'), { raw: true })?.declarations
+})]
+const ChannelChat = Webpack.getModule(m => Filters.byStrings('channelStream', 'oldestUnreadMessageId')(m?.type))
 const ChannelStreamItemTypes = Webpack.getModule(Filters.byKeys('MESSAGE', 'DIVIDER'), { searchExports: true })
 const MessageDivider = Webpack.getModule(m => Filters.byStrings('"separator"', 'isBeforeGroup')(m?.type?.render))
 const Attachment = [...Webpack.getWithKey(Filters.byStrings('getObscureReason', 'obscurityControlClassName'))]
 const Embed = Webpack.getByPrototypeKeys('renderAuthor', 'renderMedia')
-const FocusRing = Webpack.getModule(m => Filters.byStrings('focusProps', '"li"')(m?.render), { searchExports: true })
+const FocusRing = Webpack.getModule(Filters.bySource('focusProps', '"li"'), { declarationFilter: m => Filters.byStrings('focusProps', '"li"')(m?.render) })
 
 function forceAppUpdate () {
   Dispatcher.dispatch({ type: 'DOMAIN_MIGRATION_START' })
@@ -219,6 +230,30 @@ function isGroupStarter (channelStreamItem) {
 const DMChannelContext = React.createContext({ channel: null, selected: false })
 const PreviewContext = React.createContext({ channel: null })
 
+function useGenerateChannelStream({ channel, messageCountLimit }) {
+  const value = ChannelChat.type({ channel })
+  const { channelStream } = findInReactTree(value, m => m?.channelStream)
+  if (messageCountLimit == null) return channelStream
+
+  // Limit the message stream by message count while keeping the dividers
+  const slicedStream = []
+  let count = 0
+  for (const item of channelStream.toReversed()) {
+    if (count >= messageCountLimit) {
+      if (item.type !== ChannelStreamItemTypes.DIVIDER)
+        continue
+
+      slicedStream.unshift(item)
+      break
+    }
+
+    slicedStream.unshift(item)
+    count += [ChannelStreamItemTypes.MESSAGE, ChannelStreamItemTypes.THREAD_STARTER_MESSAGE].includes(item.type)
+  }
+
+  return slicedStream
+}
+
 function PreviewDialog ({ channel, messages }) {
   const scrollerRef = React.useRef(null)
 
@@ -232,16 +267,16 @@ function PreviewDialog ({ channel, messages }) {
     ? (AppearanceSettingsStore.messageGroupSpacing ?? 16)
     : settings.appearance.groupSpacing
 
-  const oldestUnreadMessageId = useStateFromStores([ReadStateStore], () => ReadStateStore.getOldestUnreadMessageId(channel.id))
   const channelStream = [
     !messages.hasMoreBefore && messages.length <= messageCountLimit
       ? { type: 'EMPTY_MESSAGE' }
       : { type: ChannelStreamItemTypes.DIVIDER, content: `Displaying last ${messageCountLimit} messages`, cut: true }
-  ].concat(generateChannelStream({
-    channel,
-    messages: messages.toArray().slice(-messageCountLimit),
-    oldestUnreadMessageId
-  }))
+  ].concat(
+    useGenerateChannelStream({
+      channel,
+      messageCountLimit
+    })
+  )
 
   const channelStreamMarkup = channelStream
     .map((item, index) => {
