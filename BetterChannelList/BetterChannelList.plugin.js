@@ -4,18 +4,19 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.2.15
+ * @version 1.2.16
  * @description 2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/BetterChannelList
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/BetterChannelList/BetterChannelList.plugin.js
  * @updateUrl https://raw.githubusercontent.com/arg0NNY/DiscordPlugins/master/BetterChannelList/BetterChannelList.plugin.js
+ * @runAt idle
  */
 
 /* ### CONFIG START ### */
 const config = {
   info: {
     name: 'BetterChannelList',
-    version: '1.2.15',
+    version: '1.2.16',
     description: '2 in 1: Shows the most recent message for each channel and brings channel list redesign from the new mobile UI.'
   },
   changelog: [
@@ -23,7 +24,8 @@ const config = {
       type: 'fixed',
       title: 'Fixes',
       items: [
-        'Fixed the channel emoji icon editor popout failing to open.'
+        'Updated to work in the latest release of Discord.',
+        'Fixed the reactions disappearing for last messages in channels.'
       ]
     }
   ]
@@ -84,14 +86,16 @@ const Divider = Webpack.getModule(Filters.byStrings('),style:{marginTop:'), { se
 const Field = Webpack.getModule(Filters.byStrings('helperTextId', 'errorMessage'), { searchExports: true })
 
 const { getSocket } = Webpack.getByKeys('getSocket')
-const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('MANAGE_CHANNELS', 'shouldIndicateNewChannel'))]
+const ChannelItemParent = [...Webpack.getWithKey(Filters.byStrings('shouldIndicateNewChannel', 'MANAGE_CHANNELS'), {
+  target: Webpack.getModule(Filters.bySource('shouldIndicateNewChannel', 'MANAGE_CHANNELS'), { raw: true })?.declarations
+})]
 const ChannelItem = [...Webpack.getWithKey(Filters.byStrings('hasActiveThreads', 'isGuildVocal'))]
-const ChannelItemIcon = Webpack.getModule(m => Filters.byStrings('channel', 'iconClassName')(m?.type), { searchExports: true })
+const ChannelItemIcon = Webpack.getModule(m => Filters.byStrings('role:"img"', 'icon`')(m?.type), { searchExports: true })
 const ChannelTypes = Webpack.getModule(Filters.byKeys('GUILD_TEXT'), { searchExports: true })
 const MessageTypes = Webpack.getModule(Filters.byKeys('REPLY', 'USER_JOIN'), { searchExports: true })
 const { intl, t } = Webpack.getByKeys('intl', 't')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
-const ForumPostAuthor = Webpack.getByStrings('renderColon', 'author')
+const MessageAuthor = Webpack.getByStrings('isRepliedMessage', 'userOverride', 'decorations')
 const buildMessageReplyContent = Webpack.getModule(Filters.byStrings('trailingIconClass', 'CHANNEL_PINNED_MESSAGE'), { searchExports: true })
 const ListNavigatorProvider = [...Webpack.getWithKey(Filters.byStrings('containerProps', 'tabIndex', 'Provider', 'orientation'))]
 const Emoji = Webpack.getModule(Filters.byStrings('emojiId', 'emojiName', 'animated', 'shouldAnimate'), { searchExports: true })
@@ -112,21 +116,20 @@ const { Alert, AlertTypes } = Webpack.getMangled(Filters.bySource('messageType',
   Alert: Filters.byStrings('messageType'),
   AlertTypes: Filters.byKeys('WARNING', 'ERROR')
 })
-const ReplyMessageHeader = Webpack.getByStrings('replyReference', 'isReplySpineClickable', 'showReplySpine')?.({ replyReference: {} })?.type?.type
+const ReplyMessageHeader = Webpack.getModule(Filters.bySource('replyReference', 'isReplySpineClickable', 'showReplySpine'), {
+  declarationFilter: m => Filters.byStrings('referencedMessage', 'USER_JOIN')(m?.type)
+})?.type
 const createMessage = Webpack.getByStrings('createMessage: author cannot be undefined')
 
 const Selectors = {
   ChannelItem: Webpack.getByKeys('unread', 'link'),
-  ForumPost: Webpack.getByKeys('message', 'typing'),
   Message: Webpack.getByKeys('repliedTextPreview', 'repliedTextContent'),
-  ForumPostMessage: Webpack.getByKeys('inlineFormat', 'markup'),
-  ForumPostMessageAuthor: Webpack.getByKeys('author', 'hasUnreads'),
   App: Webpack.getByKeys('app', 'layers'),
   Base: Webpack.getByKeys('base', 'sidebar'),
   DirectMessages: Webpack.getByKeys('dm', 'channel'),
   GuildHeader: Webpack.getByKeys('bannerImage', 'bannerImg'),
   SidebarFooter: Webpack.getByKeys('nameTag', 'avatarWrapper'),
-  Diversity: Webpack.getByKeys('diversitySelectorOptions')
+  Diversity: Webpack.getByKeys('diversitySelectorOptions'),
 }
 
 function deepEqual (x, y) {
@@ -194,6 +197,9 @@ function updateChannel ({ channelId }) {
 
 function handleMessagePreviewsLoaded ({ messages }) {
   for (const message of messages) {
+    if (MessageStore.getMessage(message.channel_id, message.id))
+      continue
+
     Dispatcher.dispatch({
       type: 'LOAD_MESSAGES_SUCCESS',
       channelId: message.channel_id,
@@ -314,22 +320,23 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
     messageContent,
     isAuthorBlocked,
     isAuthorIgnored,
-    `${Selectors.ForumPost.messageContent} ${Selectors.ForumPostMessage.inlineFormat}`,
+    `${Selectors.Message.repliedTextContent}`,
     {
-      leadingIconClass: Selectors.ForumPost.messageContentLeadingIcon,
-      trailingIconClass: Selectors.ForumPost.messageContentTrailingIcon,
+      leadingIconClass: Selectors.Message.repliedTextContentLeadingIcon,
+      trailingIconClass: Selectors.Message.repliedTextContentTrailingIcon,
       iconSize: 16
     }
   )
 
   const color = unread ? 'text-default' : 'text-muted'
+  const style = { '--custom-message-content-color': `var(--${color})` }
 
   let content
   if (isAuthorBlocked) {
     content = React.createElement(
       Text,
       {
-        className: Selectors.ForumPost.blockedMessage,
+        className: Selectors.Message.repliedTextPlaceholder,
         variant: 'text-sm/medium',
         color: 'text-muted',
         children: intl.format(t['+FcYM/'], { count: 1 }) // LocaleStore.Messages.BLOCKED_MESSAGES.format({ count: 1 })
@@ -340,9 +347,9 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
       ? React.createElement(
         Text,
         {
-          variant: 'text-sm/semibold',
           color,
-          className: Selectors.ForumPost.messageFocusBlock,
+          style,
+          className: Selectors.Message.repliedTextPreview,
           children: renderedContent
         }
       )
@@ -352,7 +359,8 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
           tag: 'span',
           variant: 'text-sm/medium',
           color,
-          className: `${Selectors.ForumPost.messageContent} ${Selectors.Message.repliedTextPlaceholder} ${Selectors.ForumPostMessage.inlineFormat}`,
+          style,
+          className: `${Selectors.Message.repliedTextPreview} ${Selectors.Message.repliedTextPlaceholder}`,
           children: contentPlaceholder
         }
       )
@@ -361,7 +369,13 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
   return React.createElement(
     Text,
     {
-      className: `${Selectors.ForumPost.message} BCL--last-message ${muted ? 'BCL--last-message--muted' : ''} ${noColor ? 'BCL--last-message--no-color' : ''}`,
+      className: Utils.className({
+        [Selectors.Message.repliedMessage]: true,
+        'BCL--last-message': true,
+        'BCL--last-message--muted': muted,
+        'BCL--last-message--no-color': noColor,
+        'BCL--last-message--unread': unread,
+      }),
       variant: 'text-sm/semibold',
       color
     },
@@ -370,12 +384,14 @@ function ChannelLastMessage ({ channel, unread, muted, noColor }) {
       && !['USER_JOIN', 'ROLE_SUBSCRIPTION_PURCHASE', 'GUILD_APPLICATION_PREMIUM_SUBSCRIPTION', 'GUILD_DEADCHAT_REVIVE_PROMPT', 'GUILD_GAMING_STATS_PROMPT']
         .some(t => message.type === MessageTypes[t])
       && React.createElement(
-        ForumPostAuthor,
+        MessageAuthor,
         {
           message,
-          channel: Object.assign(channel, { ownerId: message.author.id }),
-          hasUnreads: unread && !muted,
-          renderColon: true
+          channel: channel,
+          compact: true,
+          hideGuildTag: true,
+          hideSystemTag: true,
+          className: 'BCL--last-message-author'
         }
       ),
       [leadingIcon, content, trailingIcon]
@@ -564,7 +580,7 @@ function ForumActivePostsCount ({ channel, unread }) {
   return count > 0 ? React.createElement(
     Text,
     {
-      className: `${Selectors.ForumPost.message} BCL--last-message`,
+      className: `BCL--last-message`,
       variant: 'text-sm/medium',
       color: unread ? 'text-default' : 'text-muted'
     },
@@ -608,13 +624,26 @@ module.exports = class BetterChannelList {
         .BCL--last-message {
             pointer-events: none;
             contain: layout;
+            align-items: center;
+            display: flex;
+            max-height: 18px;
+            overflow: hidden;
         }
 
-        .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessageAuthor.author} * {
+        .BCL--last-message-author {
+            font-size: inherit !important;
+            opacity: .85;
+            color: inherit;
+        }
+        
+        .BCL--last-message.BCL--last-message--no-color .BCL--last-message-author {
             color: var(--text-muted) !important;
+            text-decoration-color: unset !important;
+            background: unset !important;
+            -webkit-text-fill-color: unset !important;
         }
 
-        .BCL--last-message.BCL--last-message--no-color .${Selectors.ForumPostMessageAuthor.author}.${Selectors.ForumPostMessageAuthor.hasUnreads} * {
+        .BCL--last-message.BCL--last-message--no-color.BCL--last-message--unread .BCL--last-message-author {
             color: var(--text-strong) !important;
         }
 
@@ -624,10 +653,6 @@ module.exports = class BetterChannelList {
 
         .${Selectors.ChannelItem.wrapper}.${Selectors.ChannelItem.modeMuted}:not(:hover) :is(.BCL--last-message, .BCL--last-message *) {
             color: var(--interactive-muted) !important;
-        }
-
-        .BCL--last-message .${Selectors.ForumPost.messageFocusBlock}:first-child > * {
-            margin-left: 0 !important;
         }
 
         .BCL--channel-wrapper {
@@ -752,10 +777,6 @@ module.exports = class BetterChannelList {
             align-items: stretch;
             flex-direction: column;
             gap: 12px;
-        }
-
-        .BCL--emoji-picker-header .${Selectors.Diversity.diversitySelectorOptions} {
-            top: 69px;
         }
 
         .BCL--emoji-picker-header-content {
