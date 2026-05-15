@@ -93,35 +93,35 @@ SOFTWARE.
 [passcodelock-download-link]: https://arg0nny.github.io/bd/download/?id=PasscodeLock
 [passcodelock-view-link]: https://betterdiscord.app/plugin/PasscodeLock
 [passcodelock-version-badge]: https://img.shields.io/badge/version-1.5.10-blue
-[passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/PasscodeLock
-[passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/PasscodeLock
+[passcodelock-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v3/store/PasscodeLock
+[passcodelock-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v3/store/PasscodeLock
 
 [betteranimations-download-link]: https://arg0nny.github.io/bd/download/?id=BetterAnimations
 [betteranimations-view-link]: https://betterdiscord.app/plugin/BetterAnimations
 [betteranimations-version-badge]: https://img.shields.io/badge/version-2.1.12-blue
-[betteranimations-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterAnimations
-[betteranimations-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterAnimations
+[betteranimations-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v3/store/BetterAnimations
+[betteranimations-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v3/store/BetterAnimations
 
 [inmyvoice-download-link]: https://arg0nny.github.io/bd/download/?id=InMyVoice
 [inmyvoice-view-link]: https://betterdiscord.app/plugin/InMyVoice
 [inmyvoice-version-badge]: https://img.shields.io/badge/version-1.2.3-blue
-[inmyvoice-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/InMyVoice
-[inmyvoice-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/InMyVoice
+[inmyvoice-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v3/store/InMyVoice
+[inmyvoice-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v3/store/InMyVoice
 
 [channelspreview-download-link]: https://arg0nny.github.io/bd/download/?id=ChannelsPreview
 [channelspreview-view-link]: https://betterdiscord.app/plugin/ChannelsPreview
 [channelspreview-version-badge]: https://img.shields.io/badge/version-2.1.15-blue
-[channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/ChannelsPreview
-[channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/ChannelsPreview
+[channelspreview-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v3/store/ChannelsPreview
+[channelspreview-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v3/store/ChannelsPreview
 
 [betterguildtooltip-download-link]: https://arg0nny.github.io/bd/download/?id=BetterGuildTooltip
 [betterguildtooltip-view-link]: https://betterdiscord.app/plugin/BetterGuildTooltip
 [betterguildtooltip-version-badge]: https://img.shields.io/badge/version-1.2.4-blue
-[betterguildtooltip-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterGuildTooltip
-[betterguildtooltip-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterGuildTooltip
+[betterguildtooltip-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v3/store/BetterGuildTooltip
+[betterguildtooltip-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v3/store/BetterGuildTooltip
 
 [betterchannellist-download-link]: https://arg0nny.github.io/bd/download/?id=BetterChannelList
 [betterchannellist-view-link]: https://betterdiscord.app/plugin/BetterChannelList
 [betterchannellist-version-badge]: https://img.shields.io/badge/version-1.2.16-blue
-[betterchannellist-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v2/store/BetterChannelList
-[betterchannellist-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v2/store/BetterChannelList
+[betterchannellist-downloads-badge]: https://img.shields.io/badge/dynamic/json?color=brightgreen&label=downloads&query=downloads&url=https://api.betterdiscord.app/v3/store/BetterChannelList
+[betterchannellist-likes-badge]: https://img.shields.io/badge/dynamic/json?color=green&label=likes&query=likes&url=https://api.betterdiscord.app/v3/store/BetterChannelList
