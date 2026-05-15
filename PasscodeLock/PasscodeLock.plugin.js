@@ -4,7 +4,7 @@
  * @authorLink https://github.com/arg0NNY/DiscordPlugins
  * @invite M8DBtcZjXD
  * @donate https://donationalerts.com/r/arg0nny
- * @version 1.5.9
+ * @version 1.5.10
  * @description Protect your Discord with a passcode.
  * @website https://github.com/arg0NNY/DiscordPlugins/tree/master/PasscodeLock
  * @source https://github.com/arg0NNY/DiscordPlugins/blob/master/PasscodeLock/PasscodeLock.plugin.js
@@ -15,7 +15,7 @@
 const config = {
   info: {
     name: 'PasscodeLock',
-    version: '1.5.9',
+    version: '1.5.10',
     description: 'Protect your Discord with a passcode.'
   },
   changelog: [
@@ -170,8 +170,10 @@ const KeybindStore = {
 const NotificationModule = Webpack.getByKeys('showNotification', 'hasPermission')
 const Flux = Webpack.getByKeys('Store', 'connectStores')
 const useStateFromStores = Webpack.getModule(Filters.byStrings('useStateFromStores'), { searchExports: true })
-const App = [...Webpack.getWithKey(Filters.byStrings('APP', 'data-app-not-dev-tools'))]
-const AppTitleBar = Webpack.waitForModule(m => Filters.byStrings('AppTitleBar')(m?.type))
+const App = [...Webpack.getWithKey(Filters.byStrings('APP', 'data-app-not-dev-tools'), {
+  target: Webpack.getModule(Filters.bySource('APP', 'data-app-not-dev-tools'), { raw: true })?.declarations
+})]
+const AppTitleBar = Webpack.getModule(Filters.bySource('AppTitleBar'), { declarationFilter: m => Filters.byStrings('AppTitleBar')(m?.type) })
 const HeaderBarButton = Webpack.getModule(Filters.byComponentType(Filters.byStrings('tooltip', 'HEADER_BAR_BADGE_BOTTOM')))
 
 const Locale = new class {
